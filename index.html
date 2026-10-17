@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treino · Etapa 19</title>
+<meta name="description" content="Ficha de treino com acompanhamento da sequência">
+<meta name="theme-color" content="#E8EBEE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12161B" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#E8EBEE; --surface:#FFFFFF; --surface-2:#F3F5F7; --ink:#17212B; --muted:#5B6672; --line:#D3D8DE;
+  --ok:#1F8A4C; --warn:#B4541A;
+  --pA:#D6343B; --pB:#2F6FDB; --pC:#E3B21C; --pD:#2E9E5B; --pE:#4F5B69;
+  --onA:#fff; --onB:#fff; --onC:#1A1A1A; --onD:#fff; --onE:#fff;
+  --shadow:0 1px 0 rgba(23,33,43,.06), 0 8px 24px -16px rgba(23,33,43,.35);
+  --display:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --body:"Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tab-h:64px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#12161B; --surface:#1B2128; --surface-2:#232A33; --ink:#E9EDF1; --muted:#9AA5B1; --line:#2E3741;
+    --ok:#43C27A; --warn:#E58A4E; --pE:#7D8A99;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#12161B; --surface:#1B2128; --surface-2:#232A33; --ink:#E9EDF1; --muted:#9AA5B1; --line:#2E3741;
+  --ok:#43C27A; --warn:#E58A4E; --pE:#7D8A99;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body);min-height:100vh;
+  padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 16px);}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--pB);outline-offset:2px;border-radius:6px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);}
+.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
+.brand{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.2px;margin:0}
+.brand small{font-family:var(--body);font-weight:500;font-size:14px;color:var(--muted);margin-left:6px}
+.spacer{flex:1}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.icon-btn svg{width:22px;height:22px}
+
+/* Tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);height:var(--tab-h);padding:0 4px}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--muted);font-size:12px;font-weight:600;border-radius:12px;margin:6px 2px}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
+
+/* Plate (signature element) */
+.plate{--c:var(--pA);--on:var(--onA);width:var(--size,176px);aspect-ratio:1;border-radius:50%;background:var(--c);color:var(--on);
+  display:grid;place-items:center;position:relative;flex:none;
+  box-shadow:inset 0 0 0 calc(var(--size,176px)*.05) rgba(0,0,0,.14), inset 0 0 0 calc(var(--size,176px)*.075) rgba(255,255,255,.18), var(--shadow)}
+.plate::after{content:"";position:absolute;width:22%;aspect-ratio:1;border-radius:50%;background:var(--bg);
+  box-shadow:0 0 0 calc(var(--size,176px)*.03) rgba(0,0,0,.18);top:50%;left:50%;transform:translate(-50%,-50%)}
+.plate b{font-family:var(--display);font-weight:700;font-size:calc(var(--size,176px)*.27);line-height:1;position:absolute;
+  top:10%;left:50%;transform:translateX(-50%)}
+.plate i{font-style:normal;font-family:var(--display);font-weight:600;font-size:calc(var(--size,176px)*.085);position:absolute;bottom:11%;left:50%;
+  transform:translateX(-50%);opacity:.85;letter-spacing:.5px;white-space:nowrap}
+.plate.sm{--size:52px}
+.plate.sm b{font-size:24px;top:auto;position:static;transform:none;z-index:1}
+.plate.sm::after,.plate.xs::after{display:none}
+.plate.xs{--size:30px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
+.plate.xs b{font-size:16px;position:static;transform:none}
+.L-A{--c:var(--pA);--on:var(--onA)}.L-B{--c:var(--pB);--on:var(--onB)}.L-C{--c:var(--pC);--on:var(--onC)}
+.L-D{--c:var(--pD);--on:var(--onD)}.L-E{--c:var(--pE);--on:var(--onE)}
+
+/* Hoje */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 0 8px}
+.hero h2{font-family:var(--display);font-weight:700;font-size:32px;line-height:1.1;margin:18px 0 6px}
+.meta{color:var(--muted);font-size:15px;margin:0}
+.done-today{margin:10px 0 0;font-weight:600;color:var(--ok)}
+.btn{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);padding:0 18px;font-weight:600;font-size:16px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.block{width:100%}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--warn)}
+.stack{display:grid;gap:10px;margin-top:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px}
+.panel h3{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.week .d{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.week .slot{width:30px;height:30px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center}
+.week .today .slot{border-color:var(--ink)}
+.week .today{color:var(--ink);font-weight:600}
+.pick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pick button{border:0;background:none;padding:2px;border-radius:50%}
+.pick button[aria-pressed="true"] .plate{outline:3px solid var(--ink);outline-offset:2px}
+.row{display:flex;align-items:center;gap:12px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:15px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600;text-align:right}
+
+/* Sessão */
+.session-head{display:flex;align-items:center;gap:14px;padding:8px 0 4px}
+.session-head h2{font-family:var(--display);font-size:26px;line-height:1.1;margin:0}
+.progress{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin:12px 0 4px}
+.progress span{display:block;height:100%;background:var(--c,var(--ink));transition:width .3s}
+.items{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:44px 1fr;gap:4px 12px}
+.item.done{opacity:.62}
+.item.done .name{text-decoration:line-through;text-decoration-thickness:2px}
+.check{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--surface-2);display:grid;place-items:center;grid-row:span 2}
+.check svg{width:22px;height:22px;opacity:0}
+.item.done .check{background:var(--ok);border-color:var(--ok);color:#fff}
+.item.done .check svg{opacity:1}
+.name{font-weight:600;font-size:17px;line-height:1.25;margin:0;align-self:center}
+.presc{margin:0;font-size:15px}
+.chips{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted);font-weight:500}
+.obs{grid-column:2;font-size:13px;color:var(--muted);margin:4px 0 0}
+.tools{grid-column:2;display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.tools .btn{min-height:44px;padding:0 14px;font-size:15px}
+.load{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:0 10px;min-height:44px;background:var(--surface-2)}
+.load input{width:64px;border:0;background:none;font-weight:600;font-size:16px;text-align:right;padding:0}
+.load input:focus{outline:none}
+.load:focus-within{outline:3px solid var(--pB);outline-offset:2px}
+.load span{font-size:14px;color:var(--muted)}
+.last{font-size:13px;color:var(--muted)}
+.sticky-foot{position:sticky;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 8px);margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:10px;
+  background:linear-gradient(to top,var(--bg) 70%,transparent);padding-top:12px}
+
+/* Ficha */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{border:0;background:none;min-height:42px;border-radius:10px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.letters{display:flex;gap:10px;margin:14px 0 4px;overflow-x:auto;padding:4px 2px}
+.letters button{border:0;background:none;padding:3px;border-radius:50%}
+.letters button[aria-pressed="true"] .plate{outline:3px solid var(--ink);outline-offset:2px}
+.table{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:12px}
+.trow{padding:12px 14px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 12px}
+.trow:first-child{border-top:0}
+.trow .t{font-weight:600}
+.trow .m{grid-column:1/-1;font-size:14px;color:var(--muted)}
+.trow .min{font-family:var(--display);font-weight:600;font-size:18px;white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;background:var(--surface-2);font-weight:600}
+.total .min{font-family:var(--display);font-size:22px}
+
+/* Histórico */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+.stat b{display:block;font-family:var(--display);font-size:30px;line-height:1}
+.stat span{font-size:13px;color:var(--muted)}
+.hist{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px}
+.hist li{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:12px;align-items:center}
+.hist .info{flex:1;min-width:0}
+.hist .info strong{display:block;font-weight:600}
+.hist .info span{font-size:14px;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:32px 12px}
+
+/* Guia */
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-top:10px}
+summary{list-style:none;padding:16px;font-weight:600;font-size:17px;display:flex;justify-content:space-between;align-items:center;min-height:52px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details[open] summary::after{transform:rotate(-135deg)}
+.dbody{padding:0 16px 16px}
+.dbody dl{margin:0}
+.dbody dt{font-weight:600;margin-top:12px}
+.dbody dd{margin:2px 0 0;color:var(--muted);font-size:15px}
+.zones{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+.zones th,.zones td{text-align:left;padding:8px 6px;border-top:1px solid var(--line)}
+.zones th{color:var(--muted);font-weight:500}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.field label{font-size:14px;color:var(--muted);font-weight:500}
+.field input,.field select{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:16px}
+
+/* Timer */
+.timer{position:fixed;left:0;right:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px));z-index:24;}
+.timer .wrap{padding-bottom:10px}
+.timer-card{background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.timer-card .clock{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;min-width:84px;font-variant-numeric:tabular-nums}
+.timer-card .lbl{flex:1;font-size:14px;opacity:.8;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timer-card button{min-height:44px;min-width:44px;border-radius:12px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);background:transparent;color:var(--bg);font-weight:600;padding:0 10px}
+body.timer-on{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 100px)}
+body.timer-on .sticky-foot{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 84px)}
+body.timer-on .toast{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 96px)}
+.timer.finished .timer-card{background:var(--ok);color:#fff}
+.timer.finished .timer-card button{color:#fff;border-color:rgba(255,255,255,.5)}
+
+/* Sheet */
+dialog{border:0;padding:0;background:transparent;max-width:640px;width:100%;margin:auto auto 0;color:var(--ink)}
+dialog::backdrop{background:rgba(10,14,18,.5)}
+.sheet{background:var(--surface);border-radius:22px 22px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto}
+.sheet h2{font-family:var(--display);font-size:26px;margin:4px 0 4px}
+.grab{width:44px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 8px}
+.toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 16px);transform:translate(-50%,20px);opacity:0;
+  background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-weight:600;z-index:40;transition:.25s;width:max-content;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
+.sub{color:var(--muted);margin:0 0 8px}
+@media (min-width:720px){ .plate:not(.sm):not(.xs){--size:208px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="brand" id="brand">Etapa 19 <small id="weekLbl"></small></p>
+    <span class="spacer"></span>
+    <button class="icon-btn" id="openSettings" aria-label="Ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="view" tabindex="-1"></main>
+
+<div class="timer" id="timer" hidden>
+  <div class="wrap"><div class="timer-card" role="timer" aria-live="polite">
+    <span class="clock" id="tClock">0:00</span><span class="lbl" id="tLbl"></span>
+    <button id="tPlus" aria-label="Mais 15 segundos">+15</button>
+    <button id="tStop" aria-label="Fechar cronômetro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div></div>
+</div>
+
+<nav class="tabs" aria-label="Navegação principal">
+  <div class="wrap">
+    <button class="tab" data-tab="hoje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>Hoje</button>
+    <button class="tab" data-tab="ficha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Ficha</button>
+    <button class="tab" data-tab="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Histórico</button>
+    <button class="tab" data-tab="guia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg>Guia</button>
+  </div>
+</nav>
+
+<dialog id="settings" aria-labelledby="setTitle">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2 id="setTitle">Ajustes</h2>
+    <div class="field">
+      <label>Tema</label>
+      <div class="seg" id="themeSeg">
+        <button data-theme-opt="auto">Automático</button><button data-theme-opt="light">Claro</button><button data-theme-opt="dark">Escuro</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="startDate">Início da etapa (define semana e fase)</label>
+      <input type="date" id="startDate">
+    </div>
+    <div class="field">
+      <label for="phaseMode">Fase</label>
+      <select id="phaseMode">
+        <option value="auto">Automática pela semana</option>
+        <option value="1">Sempre fase 1</option>
+        <option value="2">Sempre fase 2</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Backup dos dados deste aparelho</label>
+      <div class="row">
+        <button class="btn" id="exportBtn" style="flex:1">Exportar</button>
+        <label class="btn" style="flex:1;font-weight:600" for="importFile">Importar</label>
+        <input type="file" id="importFile" accept="application/json" class="sr">
+      </div>
+    </div>
+    <div class="stack">
+      <button class="btn block danger" id="resetBtn">Apagar histórico desta etapa</button>
+      <button class="btn block primary" id="closeSettings">Fechar</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===================== FICHA ATUAL =====================
+   Para uma nova etapa, substitua o objeto FICHA abaixo.
+   O histórico e as cargas ficam salvos por etapa.        */
+const FICHA = {
+ "etapa": 19,
+ "semanas": 6,
+ "fases_semanas": {
+  "1": [
+   1,
+   2
+  ],
+  "2": [
+   3,
+   4,
+   5,
+   6
+  ]
+ },
+ "fases": {
+  "1": {
+   "A": {
+    "foco": "Peito + Tríceps + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "2x15 + 2x10 (só a última perto da falha)",
+      "series": 4,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Crossover cruzando à frente",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "3x até 2 reps antes da falha",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo (bike ou esteira inclinada)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 10,
+      "obs": "Ver aba Cardio e Abdômen"
+     }
+    ]
+   },
+   "B": {
+    "foco": "Costas + Bíceps + posterior de ombro + abdômen",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "3x10",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Ponto fraco identificado no histórico"
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "2x12",
+      "series": 2,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "3 voltas: 12 reps + 30s de prancha",
+      "series": 3,
+      "exec": 75,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ]
+   },
+   "C": {
+    "foco": "Pernas + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Pré-ativação"
+     },
+     {
+      "nome": "Agachamento livre (sem. 1) / Hack machine (sem. 2)",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "3x15+15",
+      "series": 3,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 na bike (baixo impacto)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ]
+   },
+   "D": {
+    "foco": "Ombros + Trapézio + abdômen + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "2x15 + 2x10",
+      "series": 4,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação frontal com anilha",
+      "prescricao": "2x12",
+      "series": 2,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "3x12",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + prancha lateral",
+      "prescricao": "3 voltas: 15 reps + 30s por lado",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 15,
+      "obs": ""
+     }
+    ]
+   },
+   "E": {
+    "foco": "Cardio longo + core",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo: esteira inclinada, bike ou elíptico",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 38,
+      "obs": "FC na Zona 2 (ver aba Cardio e Abdômen)"
+     },
+     {
+      "nome": "Core: abdominal remador + elevação de pernas + prancha",
+      "prescricao": "3 voltas: 15 + 12 reps + 40s",
+      "series": 3,
+      "exec": 120,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ]
+   }
+  },
+  "2": {
+   "A": {
+    "foco": "Peito + Tríceps + cardio HIIT",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "3x8 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Crossover cruzando à frente + crossover soco para baixo",
+      "prescricao": "Bi-set 2x12+12",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "3x até próximo da falha",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "HIIT: 6x (30s forte / 30s leve) + 2 min de desaquecimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 10,
+      "obs": "Bike ou esteira; PSE 8–9 nos tiros"
+     }
+    ]
+   },
+   "B": {
+    "foco": "Costas + Bíceps + posterior de ombro + abdômen",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "3x8 (carga alta)",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "Drop 2x (10 reps / −20% até a falha)",
+      "series": 2,
+      "exec": 55,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "3 voltas: 15 reps + 45s de prancha",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ]
+   },
+   "C": {
+    "foco": "Pernas + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Pré-exaustão"
+     },
+     {
+      "nome": "Agachamento livre (sem. 3 e 5) / Hack machine (sem. 4 e 6)",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado"
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "Pirâmide: 1x30 / 1x20 / 1x10 / 1x6",
+      "series": 4,
+      "exec": 55,
+      "descanso": 90,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "3x10",
+      "series": 3,
+      "exec": 40,
+      "descanso": 90,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "3x12+15",
+      "series": 3,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 na bike (baixo impacto)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ]
+   },
+   "D": {
+    "foco": "Ombros + Trapézio + abdômen + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10 / 10s / 1x6 / falha)",
+      "series": 2,
+      "exec": 120,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Mesma carga do início ao fim"
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação frontal com anilha + remada alta com halteres",
+      "prescricao": "Bi-set 2x10+10",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "3x12 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + pallof press",
+      "prescricao": "3 voltas: 15 reps + 12 por lado",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo (ou HIIT de 10 min, se o tempo apertar)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 15,
+      "obs": ""
+     }
+    ]
+   },
+   "E": {
+    "foco": "Cardio intervalado + core",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Intervalado: 4x (4 min forte / 3 min leve)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 28,
+      "obs": "Forte: 85–90% FCmáx / PSE 8. Esteira inclinada, bike ou remo"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 12,
+      "obs": ""
+     },
+     {
+      "nome": "Core: roda abdominal + abdominal remador + prancha lateral",
+      "prescricao": "3 voltas: 10 + 15 reps + 30s por lado",
+      "series": 3,
+      "exec": 150,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ]
+   }
+  }
+ },
+ "orientacoes": [
+  [
+   "Sequência",
+   "Siga A, B, C, D, E e volte ao A, sem ligar ao dia da semana. Treinando 4x, a próxima semana começa de onde parou."
+  ],
+  [
+   "Fase 1, semanas 1 e 2",
+   "Readaptação: séries por faixa 15/10, só a última série perto da falha, 60s de descanso e cardio em Zona 2."
+  ],
+  [
+   "Fase 2, semanas 3 a 6",
+   "Intensificação: contraste, rest-pause, drop, micro-pausas e bi-sets, com 75s de descanso (90–100s nos compostos de perna). Entram o HIIT no A e o intervalado no E."
+  ],
+  [
+   "Critério de falha",
+   "Use uma carga em que a primeira falha aconteça entre 10 e 14 repetições."
+  ],
+  [
+   "Progressão",
+   "Completou todas as repetições da faixa com boa execução em 2 treinos seguidos: suba 2–5% (2–5 kg em compostos, 1–2 kg em isolados)."
+  ],
+  [
+   "Aquecimento",
+   "4–5 min de cardio leve e 2 séries de aproximação no primeiro exercício (12 reps com ~40% e 6 reps com ~70% da carga)."
+  ],
+  [
+   "Se o tempo apertar",
+   "Tire uma série do último exercício de musculação ou troque o Zona 2 final por 10 min de HIIT. Não corte o aquecimento."
+  ]
+ ],
+ "metodos": [
+  [
+   "Contraste de cargas",
+   "1x6 pesado, descanso, 1x20 leve, descanso, 1x6 pesado… Quanto menos repetições, mais carga."
+  ],
+  [
+   "Rest-pause",
+   "Vá até a falha, descanse 10s, falhe de novo, descanse 10s e falhe pela terceira vez. Conta uma série. Não mexa na carga."
+  ],
+  [
+   "Drop-set",
+   "Faça as repetições indicadas, reduza a carga no percentual pedido e continue até a falha sem descanso. No drop duplo, reduza uma segunda vez."
+  ],
+  [
+   "Micro-pausas",
+   "1x30, 20s, 1x20, 15s, 1x10, 10s, 1x6 e falha, com a mesma carga do começo ao fim. Conta uma série."
+  ],
+  [
+   "Bi-set",
+   "Dois exercícios seguidos, sem descanso entre eles. O par conta uma série."
+  ],
+  [
+   "Pirâmide",
+   "1x30, 1x20, 1x10, 1x6, aumentando a carga a cada série."
+  ],
+  [
+   "Séries por faixa",
+   "Ex.: 2x15 + 2x10. Só a última série de cada faixa vai perto da falha."
+  ]
+ ]
+};
+/* ======================================================= */
+
+const LETRAS = Object.keys(FICHA.fases["1"]);
+const KEY = "treino-app-v1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- Estado persistido ---------- */
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return {};
+}
+let S = load();
+S.theme ??= "auto"; S.etapas ??= {}; S.idade ??= "";
+const E = (S.etapas[FICHA.etapa] ??= { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null });
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Não foi possível salvar neste navegador"); } }
+
+/* ---------- Datas ---------- */
+const DIA = 864e5;
+const hojeISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const parseISO = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const fmtData = s => parseISO(s).toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"short"}).replace(".","");
+function relDia(s){
+  const diff = Math.round((parseISO(hojeISO()) - parseISO(s))/DIA);
+  if(diff===0) return "hoje"; if(diff===1) return "ontem"; return `há ${diff} dias`;
+}
+function semanaAtual(){
+  if(!E.inicio) return 1;
+  const d = Math.floor((parseISO(hojeISO()) - parseISO(E.inicio))/DIA);
+  return Math.max(1, Math.floor(d/7)+1);
+}
+function faseAtual(){
+  if(E.faseModo==="1"||E.faseModo==="2") return E.faseModo;
+  return FICHA.fases_semanas["1"].includes(Math.min(semanaAtual(),FICHA.semanas)) ? "1" : "2";
+}
+const treino = (letra, fase=faseAtual()) => FICHA.fases[fase][letra];
+const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
+const totalMin = t => t.itens.reduce((a,it)=>a+minutos(it),0);
+
+/* ---------- Sequência ---------- */
+function ultimo(){ return E.historico[E.historico.length-1] || null; }
+function proxima(){
+  const u = ultimo(); if(!u) return LETRAS[0];
+  return LETRAS[(LETRAS.indexOf(u.letra)+1) % LETRAS.length];
+}
+function feitoHoje(){ const u=ultimo(); return u && u.data===hojeISO() ? u : null; }
+
+/* ---------- Tema ---------- */
+function applyTheme(){
+  const r=document.documentElement;
+  if(S.theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",S.theme);
+  document.querySelectorAll("[data-theme-opt]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.themeOpt===S.theme)));
+  const dark = S.theme==="dark" || (S.theme==="auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content = dark ? "#12161B" : "#E8EBEE");
+}
+
+/* ---------- UI helpers ---------- */
+const plate = (l, cls="", sub="") => `<div class="plate L-${l} ${cls}" aria-hidden="true"><b>${l}</b>${sub?`<i>${esc(sub)}</i>`:""}</div>`;
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+const ico = {
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>'
+};
+function fmtSeg(s){ s=Math.max(0,Math.ceil(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
+function fmtMin(m){ return `${Math.round(m)} min`; }
+function header(){
+  const sem = semanaAtual();
+  $("#weekLbl").textContent = sem>FICHA.semanas ? `semana ${sem} de ${FICHA.semanas}` : `semana ${sem} de ${FICHA.semanas}, fase ${faseAtual()}`;
+}
+
+/* ---------- Views ---------- */
+let tab = "hoje", fichaFase = null, fichaLetra = null, escolha = null;
+
+function viewHoje(){
+  if(E.atual) return viewSessao();
+  const feito = feitoHoje();
+  const letra = escolha || proxima();
+  const t = treino(letra);
+  const u = ultimo();
+  const sem = semanaAtual();
+  const passou = sem > FICHA.semanas;
+  let html = `<section class="hero">${plate(letra,"",fmtMin(totalMin(t)))}
+    <h2>${feito && !escolha ? "Próximo treino" : (escolha && escolha!==proxima() ? "Treino escolhido" : "Treino de hoje")}: ${letra}</h2>
+    <p class="meta">${esc(t.foco)}</p>
+    ${feito ? `<p class="done-today">Treino ${feito.letra} concluído hoje. Este é o próximo da sequência.</p>` : ""}
+    ${u && !feito ? `<p class="meta" style="margin-top:6px">Último: treino ${u.letra}, ${relDia(u.data)}</p>` : ""}
+    ${passou ? `<p class="done-today" style="color:var(--warn)">As 6 semanas da etapa ${FICHA.etapa} terminaram. Hora de planejar a próxima ficha.</p>` : ""}
+  </section>
+  <div class="stack">
+    <button class="btn primary block" id="startBtn">Começar treino ${letra}</button>
+    <button class="btn ghost block" id="pickToggle" aria-expanded="false">Fazer outro treino hoje</button>
+    <div class="pick" id="pick" hidden>${LETRAS.map(l=>`<button aria-pressed="${l===letra}" aria-label="Treino ${l}" data-pick="${l}">${plate(l,"sm")}</button>`).join("")}</div>
+  </div>
+  ${semanaPanel()}`;
+  $("#view").innerHTML = html;
+  $("#startBtn").onclick = () => iniciar(letra);
+  $("#pickToggle").onclick = e => { const p=$("#pick"); p.hidden=!p.hidden; e.currentTarget.setAttribute("aria-expanded",String(!p.hidden)); };
+  document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ escolha = b.dataset.pick===proxima()?null:b.dataset.pick; render(); $("#pick").hidden=false; });
+}
+
+function semanaPanel(){
+  const hoje = parseISO(hojeISO());
+  const dow = (hoje.getDay()+6)%7; // segunda=0
+  const seg = new Date(hoje - dow*DIA);
+  const nomes = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+  let feitos = 0;
+  const dias = nomes.map((n,i)=>{
+    const d = new Date(seg.getTime()+i*DIA); d.setHours(0,0,0,0);
+    const iso = new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+    const h = E.historico.filter(x=>x.data===iso).pop();
+    if(h) feitos++;
+    return `<div class="d ${i===dow?"today":""}">${h?plate(h.letra,"xs"):`<span class="slot"></span>`}<span>${n}</span></div>`;
+  }).join("");
+  return `<section class="panel" aria-label="Semana atual"><h3>Esta semana: ${feitos} de 5 treinos</h3><div class="week">${dias}</div></section>`;
+}
+
+function iniciar(letra){
+  E.atual = { letra, fase: faseAtual(), inicio: Date.now(), feitos: [] };
+  escolha = null; save(); render(); scrollTo(0,0);
+}
+
+function viewSessao(){
+  const a = E.atual, t = treino(a.letra, a.fase);
+  const n = t.itens.length, f = a.feitos.length;
+  const items = t.itens.map((it,i)=>{
+    const done = a.feitos.includes(i);
+    const forca = it.series>0;
+    const chips = forca
+      ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`]
+      : [`${it.bloco} min`];
+    const kg = E.cargas[it.nome];
+    const timerSeg = forca ? it.descanso : it.bloco*60;
+    const timerLbl = forca ? `Descanso ${it.descanso}s` : `Cronômetro ${it.bloco} min`;
+    return `<li class="item ${done?"done":""}">
+      <button class="check" data-check="${i}" aria-pressed="${done}" aria-label="${done?"Desmarcar":"Marcar"} ${esc(it.nome)}">${ico.check}</button>
+      <p class="name">${esc(it.nome)}</p>
+      <p class="presc">${esc(it.prescricao)}</p>
+      <div class="chips">${chips.map(c=>`<span class="chip">${c}</span>`).join("")}</div>
+      ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
+      <div class="tools">
+        <button class="btn" data-timer="${timerSeg}" data-lbl="${esc(it.nome)}">${ico.clock}${timerLbl}</button>
+        ${forca && !/abdômen|core/i.test(it.nome) ? `<label class="load"><span class="sr">Carga de ${esc(it.nome)}</span>
+          <input inputmode="decimal" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—"><span>kg</span></label>
+          ${kg?`<span class="last">${relDia(kg.d)}</span>`:""}` : ""}
+      </div>
+    </li>`;
+  }).join("");
+  $("#view").innerHTML = `
+  <section class="session-head L-${a.letra}">${plate(a.letra,"sm")}
+    <div><h2>Treino ${a.letra}</h2><p class="meta">${esc(t.foco)}. Fase ${a.fase}, cerca de ${fmtMin(totalMin(t))}</p></div>
+  </section>
+  <div class="progress L-${a.letra}" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${f}" aria-label="Progresso"><span style="width:${f/n*100}%;background:var(--c)"></span></div>
+  <p class="meta">${f} de ${n} concluídos</p>
+  <ul class="items">${items}</ul>
+  <div class="sticky-foot">
+    <button class="btn" id="cancelBtn">Cancelar</button>
+    <button class="btn primary" id="finishBtn">Concluir treino ${a.letra}</button>
+  </div>`;
+  document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.check, k=a.feitos.indexOf(i);
+    if(k>=0) a.feitos.splice(k,1); else { a.feitos.push(i); navigator.vibrate?.(15); }
+    save(); const y=scrollY; render(); scrollTo(0,y);
+  });
+  document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>startTimer(+b.dataset.timer, b.dataset.lbl));
+  document.querySelectorAll("[data-kg]").forEach(inp=>inp.onchange=()=>{
+    const v=inp.value.trim().replace(",",".");
+    if(v===""){ delete E.cargas[inp.dataset.kg]; } else { E.cargas[inp.dataset.kg]={v, d:hojeISO()}; }
+    save();
+  });
+  $("#cancelBtn").onclick = ()=>{ if(confirm("Cancelar este treino? Ele não será registrado.")){ E.atual=null; save(); render(); } };
+  $("#finishBtn").onclick = concluir;
+}
+
+function concluir(){
+  const a=E.atual, t=treino(a.letra,a.fase), falt=t.itens.length-a.feitos.length;
+  if(falt>0 && !confirm(`Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir assim mesmo?`)) return;
+  if(!E.inicio) E.inicio = hojeISO();
+  E.historico.push({ letra:a.letra, fase:a.fase, semana:semanaAtual(), data:hojeISO(),
+    duracao: Math.round((Date.now()-a.inicio)/6e4), feitos:a.feitos.length, total:t.itens.length });
+  E.atual=null; save(); stopTimer();
+  toast(`Treino ${a.letra} concluído. Próximo: ${proxima()}`);
+  render(); scrollTo(0,0);
+}
+
+function viewFicha(){
+  fichaFase ??= faseAtual(); fichaLetra ??= (E.atual?.letra || proxima());
+  const t = treino(fichaLetra, fichaFase);
+  const sem = FICHA.fases_semanas;
+  $("#view").innerHTML = `
+  <h1 class="page">Ficha completa</h1>
+  <p class="sub">Sequência ${LETRAS.join(", ")}. Treino corrido, sem ligação com o dia da semana.</p>
+  <div class="seg" role="group" aria-label="Fase">
+    ${Object.keys(FICHA.fases).map(f=>`<button data-fase="${f}" aria-pressed="${f===fichaFase}">Fase ${f} (sem. ${sem[f][0]}–${sem[f][sem[f].length-1]})</button>`).join("")}
+  </div>
+  <div class="letters" role="group" aria-label="Treino">${LETRAS.map(l=>`<button data-l="${l}" aria-pressed="${l===fichaLetra}" aria-label="Treino ${l}">${plate(l,"sm")}</button>`).join("")}</div>
+  <p class="meta" style="margin-top:8px"><strong style="color:var(--ink)">Treino ${fichaLetra}:</strong> ${esc(t.foco)}</p>
+  <div class="table">
+    ${t.itens.map(it=>`<div class="trow"><span class="t">${esc(it.nome)}</span><span class="min">${fmtMin(minutos(it))}</span>
+      <span class="m">${esc(it.prescricao)}${it.series?`. Descanso ${it.descanso}s`:""}${it.obs?`. ${esc(it.obs)}`:""}</span></div>`).join("")}
+    <div class="total"><span>Tempo estimado da sessão</span><span class="min">${fmtMin(totalMin(t))}</span></div>
+  </div>`;
+  document.querySelectorAll("[data-fase]").forEach(b=>b.onclick=()=>{fichaFase=b.dataset.fase;render();});
+  document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{fichaLetra=b.dataset.l;render();});
+}
+
+function viewHistorico(){
+  const h=[...E.historico].reverse();
+  const durs=E.historico.filter(x=>x.duracao>0).map(x=>x.duracao);
+  const media = durs.length? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : null;
+  $("#view").innerHTML = `
+  <h1 class="page">Histórico</h1>
+  <p class="sub">Etapa ${FICHA.etapa}${E.inicio?`, iniciada em ${fmtData(E.inicio)}`:""}</p>
+  <div class="stats">
+    <div class="stat"><b>${E.historico.length}</b><span>treinos</span></div>
+    <div class="stat"><b>${Math.min(semanaAtual(),FICHA.semanas)}/${FICHA.semanas}</b><span>semana</span></div>
+    <div class="stat"><b>${media??"—"}</b><span>min em média</span></div>
+  </div>
+  ${h.length ? `<ul class="hist">${h.map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}, ${fmtData(x.data)}</strong>
+    <span>Fase ${x.fase}, semana ${x.semana}${x.duracao?`, ${x.duracao} min`:""}, ${x.feitos} de ${x.total} itens</span></div>
+    ${i===0?`<button class="btn" id="undoBtn" style="min-height:44px">Desfazer</button>`:""}</li>`).join("")}</ul>`
+  : `<p class="empty">Nenhum treino registrado nesta etapa. Conclua o primeiro na aba Hoje.</p>`}`;
+  $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ E.historico.pop(); save(); toast("Registro removido"); render(); }});
+}
+
+function viewGuia(){
+  const fc = S.idade ? Math.round(208-0.7*S.idade) : null;
+  const z = (a,b)=> fc ? `${Math.round(fc*a)}–${Math.round(fc*b)} bpm` : "Informe a idade";
+  $("#view").innerHTML = `
+  <h1 class="page">Guia</h1>
+  <p class="sub">Como executar cada método e como conduzir o cardio.</p>
+  <details open><summary>Orientações da etapa</summary><div class="dbody"><dl>
+    ${FICHA.orientacoes.map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
+  <details><summary>Métodos</summary><div class="dbody"><dl>
+    ${FICHA.metodos.map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
+  <details><summary>Zonas de cardio</summary><div class="dbody">
+    <div class="field"><label for="idade">Sua idade</label><input id="idade" type="number" inputmode="numeric" min="14" max="90" value="${esc(S.idade)}" placeholder="Ex.: 38"></div>
+    <p class="meta" style="margin-top:8px">${fc?`FC máxima estimada: <strong style="color:var(--ink)">${fc} bpm</strong> (208 − 0,7 × idade).`:"A FC máxima é estimada pela idade."} Um teste de esforço dá o valor real.</p>
+    <table class="zones"><thead><tr><th>Zona</th><th>Faixa</th><th>Esforço</th></tr></thead><tbody>
+      <tr><td>Zona 2</td><td>${z(.6,.7)}</td><td>4–5, dá para conversar</td></tr>
+      <tr><td>Intervalado longo</td><td>${z(.85,.9)}</td><td>7–8</td></tr>
+      <tr><td>HIIT curto</td><td>${z(.9,.95)}</td><td>8–9</td></tr>
+    </tbody></table>
+    <p class="meta" style="margin-top:10px">Depois de pernas, prefira bike ou esteira inclinada. Não faça o intervalado do treino E na véspera do treino C.</p>
+  </div></details>`;
+  const inp=$("#idade");
+  inp.onchange=()=>{ S.idade = inp.value ? +inp.value : ""; save(); const o=document.querySelectorAll("details"); const st=[...o].map(d=>d.open); render(); document.querySelectorAll("details").forEach((d,i)=>d.open=st[i]); };
+}
+
+function render(){
+  header();
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===tab ? "page" : "false"));
+  ({hoje:viewHoje, ficha:viewFicha, historico:viewHistorico, guia:viewGuia})[tab]();
+}
+
+/* ---------- Timer ---------- */
+let tEnd=0, tInt=null, tLabel="";
+function startTimer(seg,lbl){
+  tEnd=Date.now()+seg*1000; tLabel=lbl; $("#timer").hidden=false; document.body.classList.add("timer-on"); $("#timer").classList.remove("finished");
+  $("#tLbl").textContent=lbl; clearInterval(tInt); tick(); tInt=setInterval(tick,250);
+  try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){}
+}
+let actx=null;
+function beep(){
+  try{ if(!actx) return; [0,.25,.5].forEach(o=>{ const g=actx.createGain(), os=actx.createOscillator(); os.frequency.value=880;
+    os.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(.2,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+o+.2);
+    os.start(actx.currentTime+o); os.stop(actx.currentTime+o+.2); }); }catch(e){}
+}
+function tick(){
+  const r=(tEnd-Date.now())/1000;
+  if(r<=0){ $("#tClock").textContent="0:00"; $("#tLbl").textContent="Tempo encerrado. Próxima série!";
+    $("#timer").classList.add("finished"); clearInterval(tInt); navigator.vibrate?.([200,100,200]); beep(); return; }
+  $("#tClock").textContent=fmtSeg(r);
+}
+function stopTimer(){ clearInterval(tInt); $("#timer").hidden=true; document.body.classList.remove("timer-on"); }
+$("#tPlus").onclick=()=>{ if($("#timer").classList.contains("finished")){ startTimer(15,tLabel); } else tEnd+=15000; tick(); };
+$("#tStop").onclick=stopTimer;
+
+/* ---------- Navegação ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; if(tab!=="ficha"){fichaFase=null;fichaLetra=null;} render(); scrollTo(0,0); });
+
+/* ---------- Ajustes ---------- */
+const dlg=$("#settings");
+$("#openSettings").onclick=()=>{ $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; applyTheme(); dlg.showModal(); };
+$("#closeSettings").onclick=()=>dlg.close();
+dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
+document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>{ S.theme=b.dataset.themeOpt; save(); applyTheme(); });
+$("#startDate").onchange=e=>{ E.inicio=e.target.value; save(); render(); };
+$("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; save(); render(); };
+$("#resetBtn").onclick=()=>{ if(confirm(`Apagar histórico, cargas e data de início da etapa ${FICHA.etapa}?`)){
+  S.etapas[FICHA.etapa]={inicio:"",faseModo:"auto",historico:[],cargas:{},atual:null}; save(); location.reload(); } };
+$("#exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`treino-backup-${hojeISO()}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("#importFile").onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const d=JSON.parse(await f.text()); if(!d.etapas) throw 0; localStorage.setItem(KEY,JSON.stringify(d)); location.reload(); }
+  catch(err){ toast("Arquivo inválido. Use um backup exportado por este app."); }
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyTheme);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ render(); if(!$("#timer").hidden) tick(); } });
+
+applyTheme(); render();
+</script>
+</body>
+</html>
