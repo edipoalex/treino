@@ -1232,7 +1232,7 @@ function applyTheme(){
 /* ---------- UI helpers ---------- */
 const plate = (l, cls="", sub="") => `<div class="plate L-${l} ${cls}" aria-hidden="true"><b>${l}</b>${sub?`<i>${esc(sub)}</i>`:""}</div>`;
 let toastT;
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+function toast(msg){ const t=$("#toast"); const dl=document.getElementById("settings"); const host=dl&&dl.open?dl:document.body; if(t.parentNode!==host) host.appendChild(t); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 const ico = {
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>'
@@ -1576,6 +1576,8 @@ $("#tPlus").onclick=()=>{ if($("#timer").classList.contains("finished")){ startT
 $("#tStop").onclick=stopTimer;
 
 /* ---------- Sincronização com a planilha ---------- */
+const SCRIPT_PADRAO="https://script.google.com/macros/s/AKfycbxwTnJ-NgKNXqWs5DKNwUwjG6dw0hC1vETohzrDlxh5x-7ijcNBh_oLuQ8YiGh5QB_M/exec";
+let syncMsg="";
 let syncTimer=null, sincronizando=false, renderPendente=false, fichaEnviada=false;
 function enfileirar(op){ S.fila.push(op); save(); agendarSync(); }
 function agendarSync(ms=600){ clearTimeout(syncTimer); if(S.sync.url) syncTimer=setTimeout(sincronizar, ms); atualizarSyncUI(); }
@@ -1638,13 +1640,15 @@ async function sincronizar(){
     }
     if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return sincronizar(); }
     aplicarRemoto(j.estado);
+    if(!S.sync.ultimo) toast("Conectado à planilha");
     S.sync.ultimo=Date.now(); S.sync.erro="";
     save();
     if(S.fila.length) agendarSync(300);
     const ativo=document.activeElement;
     if(ativo && /INPUT|SELECT|TEXTAREA/.test(ativo.tagName)) renderPendente=true; else { const y=scrollY; render(); scrollTo(0,y); }
   }catch(err){
-    S.sync.erro = /chave/.test(err.message) ? "Chave inválida" : "Sem conexão com a planilha";
+    if(/chave/.test(err.message) && !S.sync.ultimo){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; syncMsg="Chave inválida. Confira e tente de novo."; }
+    else S.sync.erro = /chave/.test(err.message) ? "Chave inválida" : "Sem conexão com a planilha";
     save();
   }finally{ sincronizando=false; atualizarSyncUI(); }
 }
@@ -1669,18 +1673,26 @@ function atualizarSyncUI(){
     <p class="meta">${S.sync.ultimo?`Última sincronização às ${hora(S.sync.ultimo)}.`:""} ${pend?`${pend} ${pend>1?"alterações pendentes":"alteração pendente"}, enviadas quando a conexão voltar.`:"Tudo salvo."}</p>
     <div class="row"><button class="btn" id="syncNow" style="flex:1">Sincronizar agora</button><button class="btn" id="syncLink" style="flex:1">Copiar link</button></div>
     <button class="btn ghost danger" id="syncOff">Desconectar este aparelho</button>`
-  : `<p class="meta">Abra o link de configuração neste aparelho ou cole o endereço do script e a chave.</p>
-    <input id="syncUrl" placeholder="https://script.google.com/macros/s/…/exec" inputmode="url" autocomplete="off">
-    <input id="syncKey" placeholder="Chave" autocomplete="off">
+  : `<p class="meta">Digite a chave de acesso à planilha (ou cole o link de configuração completo).</p>
+    <input id="syncKey" placeholder="Chave ou link" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <details style="border:0;margin:0;background:none"><summary style="padding:4px 0;min-height:0;font-size:14px;font-weight:500;color:var(--muted)">Endereço do script</summary>
+    <input id="syncUrl" value="${esc(SCRIPT_PADRAO)}" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:6px"></details>
+    ${syncMsg?`<p class="meta" style="color:var(--warn);font-weight:600">${esc(syncMsg)}</p>`:""}
     <button class="btn primary" id="syncCon">Conectar</button>`;
   $("#syncNow") && ($("#syncNow").onclick=()=>sincronizar());
   $("#syncLink") && ($("#syncLink").onclick=async()=>{ try{ await navigator.clipboard.writeText(linkConfig()); toast("Link copiado. Abra-o no outro navegador."); }catch(e){ prompt("Copie o link:", linkConfig()); } });
   $("#syncOff") && ($("#syncOff").onclick=()=>{ if(confirm("Desconectar este aparelho da planilha? Os dados continuam na planilha.")){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
-  $("#syncCon") && ($("#syncCon").onclick=()=>conectar($("#syncUrl").value.trim(), $("#syncKey").value.trim()));
+  $("#syncCon") && ($("#syncCon").onclick=()=>{
+    const limpa=v=>String(v||"").replace(/[\s\u200B-\u200D\uFEFF]/g,"");
+    let k=limpa($("#syncKey").value), url=limpa($("#syncUrl").value)||SCRIPT_PADRAO;
+    if(/#?sync=|[?&#]k=/.test(k)){ try{ const h=new URLSearchParams(k.slice(k.indexOf("#")+1).replace(/^[^?]*\?/,"")); url=h.get("sync")||url; k=h.get("k")||""; }catch(e){} }
+    conectar(url,k);
+  });
 }
 function conectar(url,k){
-  if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(url) || !k){ toast("Endereço ou chave inválidos"); return; }
-  S.sync={url, k, migrado:false, ultimo:0, erro:""}; save(); toast("Conectando à planilha…"); sincronizar();
+  if(!/^https:\/\/script\.google(usercontent)?\.com\//i.test(url)){ syncMsg="Endereço do script inválido."; atualizarSyncUI(); return; }
+  if(!k){ syncMsg="Informe a chave."; atualizarSyncUI(); return; }
+  syncMsg=""; S.sync={url, k, migrado:false, ultimo:0, erro:""}; save(); toast("Conectando à planilha…"); sincronizar();
 }
 (function lerLinkConfig(){
   const h=new URLSearchParams(location.hash.slice(1));
