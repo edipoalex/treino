@@ -176,6 +176,38 @@ button{cursor:pointer}
 .hist .info span{font-size:14px;color:var(--muted)}
 .empty{text-align:center;color:var(--muted);padding:32px 12px}
 
+/* Dashboard */
+.chart{width:100%;height:auto;display:block;margin-top:6px;overflow:visible}
+.chart text{font:12px var(--body);fill:var(--muted)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .goal{stroke:var(--ok);stroke-width:1.5;stroke-dasharray:5 4;fill:none}
+.chart .proj{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 4;fill:none}
+.chart .line{stroke:var(--ink);stroke-width:2.5;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--surface);stroke:var(--ink);stroke-width:2.5}
+.chart .cur{fill:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:16px;height:0;border-top:2px dashed var(--ok);vertical-align:middle;margin-right:6px}
+.legend i.p{border-top-color:var(--muted)} .legend i.l{border-top:2.5px solid var(--ink)}
+.big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big b{font-family:var(--display);font-size:40px;line-height:1}
+.big span{color:var(--muted);font-size:15px}
+.delta{font-weight:600}.delta.down{color:var(--ok)}.delta.up{color:var(--warn)}
+.inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:14px}
+.inline-form input{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:16px;min-width:0}
+.inline-form .btn{min-height:48px}
+.weigh-list{list-style:none;padding:0;margin:12px 0 0;font-size:15px}
+.weigh-list li{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);min-height:48px}
+.weigh-list li span:first-child{flex:1;color:var(--muted)}
+.weigh-list button{width:44px;height:44px;border:0;background:none;color:var(--muted);border-radius:10px}
+.panel h3 .sub2{float:right;font-weight:500}
+.kgfield{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:0 12px;min-height:48px;flex:1}
+.kgfield input{border:0;background:none;width:100%;font-size:20px;font-weight:600;padding:0}
+.kgfield input:focus{outline:none}
+.kgfield:focus-within{outline:3px solid var(--pB);outline-offset:2px}
+.kgfield span{color:var(--muted)}
+.field .kgfield input{border:0;background:none;min-height:44px;padding:0;border-radius:0}
+.field label.btn{color:var(--ink);font-size:16px;font-weight:600}
+
 /* Guia */
 details{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-top:10px}
 summary{list-style:none;padding:16px;font-weight:600;font-size:17px;display:flex;justify-content:space-between;align-items:center;min-height:52px}
@@ -277,6 +309,13 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
       </select>
     </div>
     <div class="field">
+      <label>Meta de peso</label>
+      <div class="row">
+        <div class="kgfield" style="flex:1"><input id="metaKg" inputmode="decimal" placeholder="—" aria-label="Meta em kg"><span>kg</span></div>
+        <input type="date" id="metaData" aria-label="Data da meta" style="flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:16px;min-width:0">
+      </div>
+    </div>
+    <div class="field">
       <label>Backup dos dados deste aparelho</label>
       <div class="row">
         <button class="btn" id="exportBtn" style="flex:1">Exportar</button>
@@ -300,6 +339,7 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 const FICHA = {
  "etapa": 19,
  "semanas": 6,
+ "frequencia": "4–5x por semana",
  "fases_semanas": {
   "1": [
    1
@@ -1108,7 +1148,7 @@ function load(){
   return {};
 }
 let S = load();
-S.theme ??= "auto"; S.etapas ??= {}; S.idade ??= "";
+S.theme ??= "auto"; S.etapas ??= {}; S.idade ??= ""; S.peso ??= []; S.meta ??= { kg:"", data:"" };
 const E = (S.etapas[FICHA.etapa] ??= { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Não foi possível salvar neste navegador"); } }
 
@@ -1133,6 +1173,23 @@ function faseAtual(){
 const treino = (letra, fase=faseAtual()) => FICHA.fases[fase][letra];
 const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
 const totalMin = t => t.itens.reduce((a,it)=>a+minutos(it),0);
+
+/* ---------- Frequência e peso ---------- */
+function freqAlvo(){
+  const n = String(FICHA.frequencia||"").match(/\d+/g);
+  return n ? { min:+n[0], max:+n[n.length-1] } : { min:LETRAS.length, max:LETRAS.length };
+}
+const isoDe = d => new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+function segundaDe(iso){ const d=parseISO(iso); d.setDate(d.getDate()-((d.getDay()+6)%7)); return isoDe(d); }
+function semanaDaEtapa(iso){ return E.inicio ? Math.max(1, Math.floor((parseISO(iso)-parseISO(E.inicio))/DIA/7)+1) : null; }
+function pesoSemanal(){
+  const g={};
+  for(const p of S.peso){ (g[segundaDe(p.d)] ??= []).push(p.kg); }
+  return Object.keys(g).sort().map(k=>({ semana:k, kg: g[k].reduce((a,b)=>a+b,0)/g[k].length }));
+}
+const fmtKg = v => v.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+function parseKg(v){ const n=parseFloat(String(v).trim().replace(",",".")); return n>=30 && n<=300 ? Math.round(n*10)/10 : null; }
+function addPeso(iso, kg){ S.peso = S.peso.filter(p=>p.d!==iso); S.peso.push({d:iso, kg}); S.peso.sort((a,b)=>a.d<b.d?-1:1); save(); }
 
 /* ---------- Sequência ---------- */
 function ultimo(){ return E.historico[E.historico.length-1] || null; }
@@ -1182,18 +1239,47 @@ function viewHoje(){
     <p class="meta">${esc(t.foco)}</p>
     ${feito ? `<p class="done-today">Treino ${feito.letra} concluído hoje. Este é o próximo da sequência.</p>` : ""}
     ${u && !feito ? `<p class="meta" style="margin-top:6px">Último: treino ${u.letra}, ${relDia(u.data)}</p>` : ""}
-    ${passou ? `<p class="done-today" style="color:var(--warn)">As 6 semanas da etapa ${FICHA.etapa} terminaram. Hora de planejar a próxima ficha.</p>` : ""}
+    ${passou ? `<p class="done-today" style="color:var(--warn)">As ${FICHA.semanas} semanas da etapa ${FICHA.etapa} terminaram. Hora de planejar a próxima ficha.</p>` : ""}
   </section>
   <div class="stack">
     <button class="btn primary block" id="startBtn">Começar treino ${letra}</button>
     <button class="btn ghost block" id="pickToggle" aria-expanded="false">Fazer outro treino hoje</button>
     <div class="pick" id="pick" hidden>${LETRAS.map(l=>`<button aria-pressed="${l===letra}" aria-label="Treino ${l}" data-pick="${l}">${plate(l,"sm")}</button>`).join("")}</div>
   </div>
-  ${semanaPanel()}`;
+  ${semanaPanel()}
+  ${pesoPanel()}`;
   $("#view").innerHTML = html;
+  bindPeso();
   $("#startBtn").onclick = () => iniciar(letra);
   $("#pickToggle").onclick = e => { const p=$("#pick"); p.hidden=!p.hidden; e.currentTarget.setAttribute("aria-expanded",String(!p.hidden)); };
   document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ escolha = b.dataset.pick===proxima()?null:b.dataset.pick; render(); $("#pick").hidden=false; });
+}
+
+function pesoPanel(){
+  const seg = segundaDe(hojeISO());
+  const sem = pesoSemanal(); const atual = sem.find(x=>x.semana===seg); const ant = sem.filter(x=>x.semana<seg).pop();
+  const meta = parseKg(S.meta.kg);
+  if(!atual || pesoEditando){
+    return `<section class="panel" aria-label="Peso da semana"><h3>Peso da semana</h3>
+      <div class="row"><div class="kgfield"><input id="pesoHoje" inputmode="decimal" placeholder="${ant?fmtKg(ant.kg):"Ex.: 84,0"}" aria-label="Peso em kg"><span>kg</span></div>
+      <button class="btn primary" id="pesoSalvar">Salvar</button></div>
+      <p class="meta" style="margin-top:8px;font-size:14px">De manhã, em jejum, depois de ir ao banheiro.</p></section>`;
+  }
+  const d = ant ? atual.kg-ant.kg : null;
+  return `<section class="panel" aria-label="Peso da semana"><h3>Peso da semana <button class="btn ghost" id="pesoEditar" style="min-height:36px;padding:0 10px;float:right;font-size:14px;margin-top:-8px">Adicionar</button></h3>
+    <div class="big"><b>${fmtKg(atual.kg)} kg</b>
+    ${d!==null?`<span class="delta ${d<=0?"down":"up"}">${d>0?"+":""}${fmtKg(d)} kg na semana</span>`:""}</div>
+    ${meta?`<p class="meta" style="margin-top:6px">${atual.kg>meta?`Faltam ${fmtKg(atual.kg-meta)} kg para a meta de ${fmtKg(meta)} kg`:`Meta de ${fmtKg(meta)} kg atingida`}</p>`:""}</section>`;
+}
+let pesoEditando=false;
+function bindPeso(){
+  const inp=$("#pesoHoje"), bt=$("#pesoSalvar"), ed=$("#pesoEditar");
+  if(ed) ed.onclick=()=>{ pesoEditando=true; render(); $("#pesoHoje")?.focus(); };
+  if(bt) bt.onclick=()=>{
+    const kg=parseKg(inp.value); if(!kg){ toast("Informe um peso válido, ex.: 83,4"); inp.focus(); return; }
+    addPeso(hojeISO(), kg); pesoEditando=false; toast(`Peso registrado: ${fmtKg(kg)} kg`); render();
+  };
+  if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") bt.click(); };
 }
 
 function semanaPanel(){
@@ -1209,7 +1295,7 @@ function semanaPanel(){
     if(h) feitos++;
     return `<div class="d ${i===dow?"today":""}">${h?plate(h.letra,"xs"):`<span class="slot"></span>`}<span>${n}</span></div>`;
   }).join("");
-  return `<section class="panel" aria-label="Semana atual"><h3>Esta semana: ${feitos} de 5 treinos</h3><div class="week">${dias}</div></section>`;
+  return `<section class="panel" aria-label="Semana atual"><h3>Esta semana: ${feitos} de ${freqAlvo().max} treinos</h3><div class="week">${dias}</div></section>`;
 }
 
 function iniciar(letra){
@@ -1301,23 +1387,114 @@ function viewFicha(){
   document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{fichaLetra=b.dataset.l;render();});
 }
 
+function chartFreq(){
+  const alvo=freqAlvo(), atual=semanaAtual();
+  const n=Math.max(FICHA.semanas, Math.min(atual, FICHA.semanas+2));
+  const porSem=Array.from({length:n},()=>[]);
+  for(const x of E.historico){ const w=(semanaDaEtapa(x.data) ?? x.semana)-1; if(w>=0&&w<n) porSem[w].push(x.letra); }
+  const maxY=Math.max(alvo.max+1, ...porSem.map(a=>a.length));
+  const W=340,H=150,L=22,R=6,T=8,B=24, cw=(W-L-R)/n, bw=Math.min(30,cw*.62), bh=(H-T-B)/maxY;
+  const y=v=>H-B-v*bh;
+  let g=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}"/>`;
+  for(const v of [alvo.min,alvo.max]) g+=`<line class="goal" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  porSem.forEach((ls,i)=>{
+    const x=L+i*cw+(cw-bw)/2;
+    ls.forEach((l,j)=>{ g+=`<rect x="${x}" y="${y(j+1)+1.5}" width="${bw}" height="${bh-3}" rx="4" fill="var(--p${l})"><title>Treino ${l}</title></rect>`; });
+    if(!ls.length && i+1<atual) g+=`<rect x="${x}" y="${y(.12)}" width="${bw}" height="${bh*.12}" rx="2" fill="var(--line)"/>`;
+    g+=`<text x="${x+bw/2}" y="${H-6}" text-anchor="middle" ${i+1===atual?'class="cur"':''}>S${i+1}</text>`;
+  });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Treinos por semana da etapa">${g}</svg>`;
+}
+
+function chartPeso(){
+  const sem=pesoSemanal(); if(!sem.length) return "";
+  const meta=parseKg(S.meta.kg), mData=S.meta.data;
+  const pts=sem.map(p=>({t:parseISO(p.semana).getTime(), kg:p.kg}));
+  let t0=pts[0].t, t1=pts[pts.length-1].t;
+  if(meta && mData) t1=Math.max(t1, parseISO(segundaDe(mData)).getTime());
+  if(t1===t0) t1=t0+7*DIA;
+  const vals=pts.map(p=>p.kg).concat(meta?[meta]:[]);
+  let lo=Math.floor(Math.min(...vals)-.5), hi=Math.ceil(Math.max(...vals)+.5);
+  const W=340,H=180,L=34,R=12,T=10,B=26;
+  const x=t=>L+(t-t0)/(t1-t0)*(W-L-R), y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const step=(hi-lo)>6?2:1;
+  let g="";
+  for(let v=lo; v<=hi; v+=step) g+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  if(meta) g+=`<line class="goal" x1="${L}" x2="${W-R}" y1="${y(meta)}" y2="${y(meta)}"/>`;
+  if(meta && mData) g+=`<line class="proj" x1="${x(t0)}" y1="${y(pts[0].kg)}" x2="${x(parseISO(segundaDe(mData)).getTime())}" y2="${y(meta)}"/>`;
+  g+=`<polyline class="line" points="${pts.map(p=>`${x(p.t)},${y(p.kg)}`).join(" ")}"/>`;
+  g+=pts.map(p=>`<circle class="dot" cx="${x(p.t)}" cy="${y(p.kg)}" r="4"><title>${fmtKg(p.kg)} kg</title></circle>`).join("");
+  const lab=t=>new Date(t).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+  g+=`<text x="${L}" y="${H-6}">${lab(t0)}</text><text x="${W-R}" y="${H-6}" text-anchor="end">${lab(t1)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do peso semanal">${g}</svg>
+  <div class="legend"><span><i class="l"></i>Média semanal</span>${meta?`<span><i></i>Meta ${fmtKg(meta)} kg</span>`:""}${meta&&mData?`<span><i class="p"></i>Ritmo necessário</span>`:""}</div>`;
+}
+
+function resumoPeso(){
+  const sem=pesoSemanal(); if(!sem.length) return `<p class="meta">Registre o peso uma vez por semana para ver a evolução.</p>`;
+  const ult=sem[sem.length-1], pri=sem[0], meta=parseKg(S.meta.kg);
+  const semanas=(parseISO(ult.semana)-parseISO(pri.semana))/DIA/7;
+  const ritmo= semanas>0 ? (ult.kg-pri.kg)/semanas : null;
+  let falta="";
+  if(meta && ult.kg>meta){
+    falta = `Faltam ${fmtKg(ult.kg-meta)} kg`;
+    if(S.meta.data){ const rest=(parseISO(S.meta.data)-parseISO(hojeISO()))/DIA/7; if(rest>0) falta+=`. Ritmo necessário: ${fmtKg((ult.kg-meta)/rest)} kg/semana`; }
+  } else if(meta) falta=`Meta atingida`;
+  return `<div class="big"><b>${fmtKg(ult.kg)} kg</b>${sem.length>1?`<span class="delta ${ult.kg<=pri.kg?"down":"up"}">${ult.kg>pri.kg?"+":""}${fmtKg(ult.kg-pri.kg)} kg no total</span>`:""}</div>
+    <p class="meta" style="margin-top:6px">${ritmo!==null?`Média de ${ritmo>0?"+":""}${fmtKg(ritmo)} kg/semana. `:""}${falta}</p>`;
+}
+
+let verTodas=false;
 function viewHistorico(){
   const h=[...E.historico].reverse();
   const durs=E.historico.filter(x=>x.duracao>0).map(x=>x.duracao);
   const media = durs.length? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : null;
+  const semFeitas=Math.max(1, Math.min(semanaAtual(), FICHA.semanas));
+  const porSemana = E.historico.length ? (E.historico.length/semFeitas) : 0;
+  const alvo=freqAlvo();
+  const ultimos=[...S.peso].reverse().slice(0,8);
   $("#view").innerHTML = `
   <h1 class="page">Histórico</h1>
   <p class="sub">Etapa ${FICHA.etapa}${E.inicio?`, iniciada em ${fmtData(E.inicio)}`:""}</p>
   <div class="stats">
     <div class="stat"><b>${E.historico.length}</b><span>treinos</span></div>
-    <div class="stat"><b>${Math.min(semanaAtual(),FICHA.semanas)}/${FICHA.semanas}</b><span>semana</span></div>
+    <div class="stat"><b>${porSemana?fmtKg(porSemana):"—"}</b><span>por semana</span></div>
     <div class="stat"><b>${media??"—"}</b><span>min em média</span></div>
   </div>
-  ${h.length ? `<ul class="hist">${h.map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}, ${fmtData(x.data)}</strong>
-    <span>Fase ${x.fase}, semana ${x.semana}${x.duracao?`, ${x.duracao} min`:""}, ${x.feitos} de ${x.total} itens</span></div>
+
+  <section class="panel" aria-labelledby="hFreq"><h3 id="hFreq">Frequência por semana <span class="sub2">meta ${alvo.min}–${alvo.max}</span></h3>
+    ${E.historico.length||E.inicio ? chartFreq() : `<p class="meta">Conclua treinos na aba Hoje para ver a frequência.</p>`}
+  </section>
+
+  <section class="panel" aria-labelledby="hPeso"><h3 id="hPeso">Peso</h3>
+    ${resumoPeso()}
+    ${chartPeso()}
+    <div class="inline-form">
+      <input type="date" id="pData" value="${hojeISO()}" aria-label="Data da pesagem">
+      <input id="pKg" inputmode="decimal" placeholder="kg" aria-label="Peso em kg">
+      <button class="btn primary" id="pAdd">Registrar</button>
+    </div>
+    ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${p.d}" aria-label="Apagar registro de ${fmtData(p.d)}">✕</button></li>`).join("")}</ul>`:""}
+    ${!parseKg(S.meta.kg)?`<p class="meta" style="margin-top:10px;font-size:14px">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
+  </section>
+
+  <section class="panel" aria-labelledby="hSes" style="padding-bottom:8px"><h3 id="hSes">Sessões</h3>
+  ${h.length ? `<ul class="hist" style="margin-top:0">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}, ${fmtData(x.data)}</strong>
+    <span>Fase ${x.fase}, semana ${semanaDaEtapa(x.data) ?? x.semana}${x.duracao?`, ${x.duracao} min`:""}, ${x.feitos} de ${x.total} itens</span></div>
     ${i===0?`<button class="btn" id="undoBtn" style="min-height:44px">Desfazer</button>`:""}</li>`).join("")}</ul>`
-  : `<p class="empty">Nenhum treino registrado nesta etapa. Conclua o primeiro na aba Hoje.</p>`}`;
+  : `<p class="empty" style="padding:16px 8px">Nenhum treino registrado nesta etapa.</p>`}
+  ${h.length>8?`<button class="btn ghost block" id="verTodas" style="margin-top:8px">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
+  </section>`;
+  $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
   $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ E.historico.pop(); save(); toast("Registro removido"); render(); }});
+  $("#pAdd").onclick=()=>{
+    const kg=parseKg($("#pKg").value), d=$("#pData").value || hojeISO();
+    if(!kg){ toast("Informe um peso válido, ex.: 83,4"); $("#pKg").focus(); return; }
+    addPeso(d,kg); toast(`Peso registrado: ${fmtKg(kg)} kg`); const y=scrollY; render(); scrollTo(0,y);
+  };
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(confirm(`Apagar o peso de ${fmtData(b.dataset.del)}?`)){ S.peso=S.peso.filter(p=>p.d!==b.dataset.del); save(); const y=scrollY; render(); scrollTo(0,y); }
+  });
 }
 
 function viewGuia(){
@@ -1378,12 +1555,14 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; 
 
 /* ---------- Ajustes ---------- */
 const dlg=$("#settings");
-$("#openSettings").onclick=()=>{ $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; applyTheme(); dlg.showModal(); };
+$("#openSettings").onclick=()=>{ $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; $("#metaKg").value=S.meta.kg?fmtKg(+S.meta.kg):""; $("#metaData").value=S.meta.data||""; applyTheme(); dlg.showModal(); };
 $("#closeSettings").onclick=()=>dlg.close();
 dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
 document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>{ S.theme=b.dataset.themeOpt; save(); applyTheme(); });
 $("#startDate").onchange=e=>{ E.inicio=e.target.value; save(); render(); };
 $("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; save(); render(); };
+$("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; save(); render(); };
+$("#metaData").onchange=e=>{ S.meta.data=e.target.value; save(); render(); };
 $("#resetBtn").onclick=()=>{ if(confirm(`Apagar histórico, cargas e data de início da etapa ${FICHA.etapa}?`)){
   S.etapas[FICHA.etapa]={inicio:"",faseModo:"auto",historico:[],cargas:{},atual:null}; save(); location.reload(); } };
 $("#exportBtn").onclick=()=>{
