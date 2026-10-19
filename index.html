@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Treino · Etapa 19</title>
+<title>Treino</title>
 <meta name="description" content="Ficha de treino com acompanhamento da sequência">
 <meta name="theme-color" content="#E8EBEE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12161B" media="(prefers-color-scheme: dark)">
@@ -176,6 +176,16 @@ button{cursor:pointer}
 .hist .info span{font-size:14px;color:var(--muted)}
 .empty{text-align:center;color:var(--muted);padding:32px 12px}
 
+/* Sync */
+.sync-dot{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--surface)}
+.sync-dot.ok{background:var(--ok)}
+.sync-box{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface-2);display:grid;gap:10px}
+.sync-st{display:flex;align-items:center;gap:8px;font-weight:600}
+.sync-st i{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
+.sync-st.ok i{background:var(--ok)} .sync-st.err i{background:var(--warn)}
+.sync-box .meta{font-size:14px;margin:0}
+.sync-box input{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 12px;font-size:15px;min-width:0;width:100%}
+
 /* Dashboard */
 .chart{width:100%;height:auto;display:block;margin-top:6px;overflow:visible}
 .chart text{font:12px var(--body);fill:var(--muted)}
@@ -257,9 +267,9 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 <body>
 <header class="top">
   <div class="wrap">
-    <p class="brand" id="brand">Etapa 19 <small id="weekLbl"></small></p>
+    <p class="brand"><span id="brandTxt">Treino</span> <small id="weekLbl"></small></p>
     <span class="spacer"></span>
-    <button class="icon-btn" id="openSettings" aria-label="Ajustes">
+    <button class="icon-btn" id="openSettings" aria-label="Ajustes" style="position:relative"><span class="sync-dot" id="syncDot" hidden></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
   </div>
@@ -316,6 +326,10 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
       </div>
     </div>
     <div class="field">
+      <label>Planilha Google (fonte dos dados)</label>
+      <div class="sync-box" id="syncBox"></div>
+    </div>
+    <div class="field">
       <label>Backup dos dados deste aparelho</label>
       <div class="row">
         <button class="btn" id="exportBtn" style="flex:1">Exportar</button>
@@ -336,7 +350,7 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const FICHA = {
+const FICHA_EMBUTIDA = {
  "etapa": 19,
  "semanas": 6,
  "frequencia": "4–5x por semana",
@@ -1137,7 +1151,7 @@ const FICHA = {
 };
 /* ======================================================= */
 
-const LETRAS = Object.keys(FICHA.fases["1"]);
+let FICHA, LETRAS, E;
 const KEY = "treino-app-v1";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1149,7 +1163,14 @@ function load(){
 }
 let S = load();
 S.theme ??= "auto"; S.etapas ??= {}; S.idade ??= ""; S.peso ??= []; S.meta ??= { kg:"", data:"" };
-const E = (S.etapas[FICHA.etapa] ??= { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null });
+S.fila ??= []; S.sync ??= { url:"", k:"", migrado:false, ultimo:0, erro:"" };
+function novaEtapa(){ return { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null }; }
+function usarFicha(f){
+  FICHA = f; LETRAS = Object.keys(f.fases["1"]);
+  E = (S.etapas[f.etapa] ??= novaEtapa());
+  document.title = `Treino · Etapa ${f.etapa}`;
+}
+usarFicha(S.fichaRemota && S.fichaRemota.etapa >= FICHA_EMBUTIDA.etapa ? S.fichaRemota : FICHA_EMBUTIDA);
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Não foi possível salvar neste navegador"); } }
 
 /* ---------- Datas ---------- */
@@ -1189,7 +1210,7 @@ function pesoSemanal(){
 }
 const fmtKg = v => v.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
 function parseKg(v){ const n=parseFloat(String(v).trim().replace(",",".")); return n>=30 && n<=300 ? Math.round(n*10)/10 : null; }
-function addPeso(iso, kg){ S.peso = S.peso.filter(p=>p.d!==iso); S.peso.push({d:iso, kg}); S.peso.sort((a,b)=>a.d<b.d?-1:1); save(); }
+function addPeso(iso, kg){ S.peso = S.peso.filter(p=>p.d!==iso); S.peso.push({d:iso, kg}); S.peso.sort((a,b)=>a.d<b.d?-1:1); enfileirar({tipo:"setPeso", data:iso, kg}); }
 
 /* ---------- Sequência ---------- */
 function ultimo(){ return E.historico[E.historico.length-1] || null; }
@@ -1219,6 +1240,7 @@ const ico = {
 function fmtSeg(s){ s=Math.max(0,Math.ceil(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
 function fmtMin(m){ return `${Math.round(m)} min`; }
 function header(){
+  $("#brandTxt").textContent = `Etapa ${FICHA.etapa}`;
   const sem = semanaAtual();
   $("#weekLbl").textContent = sem>FICHA.semanas ? `semana ${sem} de ${FICHA.semanas}` : `semana ${sem} de ${FICHA.semanas}, fase ${faseAtual()}`;
 }
@@ -1348,8 +1370,9 @@ function viewSessao(){
   document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>startTimer(+b.dataset.timer, b.dataset.lbl));
   document.querySelectorAll("[data-kg]").forEach(inp=>inp.onchange=()=>{
     const v=inp.value.trim().replace(",",".");
-    if(v===""){ delete E.cargas[inp.dataset.kg]; } else { E.cargas[inp.dataset.kg]={v, d:hojeISO()}; }
-    save();
+    const nome=inp.dataset.kg;
+    if(v===""){ delete E.cargas[nome]; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:null, data:hojeISO()}); }
+    else { const n=parseFloat(v); if(!(n>=0)){ toast("Carga inválida"); return; } E.cargas[nome]={v:String(n), d:hojeISO()}; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:n, data:hojeISO()}); }
   });
   $("#cancelBtn").onclick = ()=>{ if(confirm("Cancelar este treino? Ele não será registrado.")){ E.atual=null; save(); render(); } };
   $("#finishBtn").onclick = concluir;
@@ -1358,9 +1381,11 @@ function viewSessao(){
 function concluir(){
   const a=E.atual, t=treino(a.letra,a.fase), falt=t.itens.length-a.feitos.length;
   if(falt>0 && !confirm(`Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir assim mesmo?`)) return;
-  if(!E.inicio) E.inicio = hojeISO();
-  E.historico.push({ letra:a.letra, fase:a.fase, semana:semanaAtual(), data:hojeISO(),
+  if(!E.inicio){ E.inicio = hojeISO(); enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); }
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  E.historico.push({ id, letra:a.letra, fase:a.fase, semana:semanaAtual(), data:hojeISO(),
     duracao: Math.round((Date.now()-a.inicio)/6e4), feitos:a.feitos.length, total:t.itens.length });
+  { const x=E.historico[E.historico.length-1]; enfileirar({tipo:"addSessao", etapa:FICHA.etapa, ...x}); }
   E.atual=null; save(); stopTimer();
   toast(`Treino ${a.letra} concluído. Próximo: ${proxima()}`);
   render(); scrollTo(0,0);
@@ -1486,14 +1511,14 @@ function viewHistorico(){
   ${h.length>8?`<button class="btn ghost block" id="verTodas" style="margin-top:8px">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
   </section>`;
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
-  $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ E.historico.pop(); save(); toast("Registro removido"); render(); }});
+  $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});
   $("#pAdd").onclick=()=>{
     const kg=parseKg($("#pKg").value), d=$("#pData").value || hojeISO();
     if(!kg){ toast("Informe um peso válido, ex.: 83,4"); $("#pKg").focus(); return; }
     addPeso(d,kg); toast(`Peso registrado: ${fmtKg(kg)} kg`); const y=scrollY; render(); scrollTo(0,y);
   };
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(confirm(`Apagar o peso de ${fmtData(b.dataset.del)}?`)){ S.peso=S.peso.filter(p=>p.d!==b.dataset.del); save(); const y=scrollY; render(); scrollTo(0,y); }
+    if(confirm(`Apagar o peso de ${fmtData(b.dataset.del)}?`)){ S.peso=S.peso.filter(p=>p.d!==b.dataset.del); enfileirar({tipo:"delPeso", data:b.dataset.del}); const y=scrollY; render(); scrollTo(0,y); }
   });
 }
 
@@ -1518,7 +1543,7 @@ function viewGuia(){
     <p class="meta" style="margin-top:10px">Depois de pernas, prefira bike ou esteira inclinada. Não faça o intervalado do treino E na véspera do treino C.</p>
   </div></details>`;
   const inp=$("#idade");
-  inp.onchange=()=>{ S.idade = inp.value ? +inp.value : ""; save(); const o=document.querySelectorAll("details"); const st=[...o].map(d=>d.open); render(); document.querySelectorAll("details").forEach((d,i)=>d.open=st[i]); };
+  inp.onchange=()=>{ S.idade = inp.value ? +inp.value : ""; enfileirar({tipo:"setConfig", chave:"idade", valor:S.idade}); const o=document.querySelectorAll("details"); const st=[...o].map(d=>d.open); render(); document.querySelectorAll("details").forEach((d,i)=>d.open=st[i]); };
 }
 
 function render(){
@@ -1550,21 +1575,138 @@ function stopTimer(){ clearInterval(tInt); $("#timer").hidden=true; document.bod
 $("#tPlus").onclick=()=>{ if($("#timer").classList.contains("finished")){ startTimer(15,tLabel); } else tEnd+=15000; tick(); };
 $("#tStop").onclick=stopTimer;
 
+/* ---------- Sincronização com a planilha ---------- */
+let syncTimer=null, sincronizando=false, renderPendente=false, fichaEnviada=false;
+function enfileirar(op){ S.fila.push(op); save(); agendarSync(); }
+function agendarSync(ms=600){ clearTimeout(syncTimer); if(S.sync.url) syncTimer=setTimeout(sincronizar, ms); atualizarSyncUI(); }
+
+function migrar(rem){
+  // Primeira conexão deste aparelho: envia o que só existe aqui.
+  const ops=[]; const ids=new Set(rem.sessoes.map(x=>x.id));
+  for(const [et, st] of Object.entries(S.etapas)){
+    (st.historico||[]).forEach((x,i)=>{
+      x.id ??= `${x.data}-${x.letra}-${i}`;
+      if(!ids.has(x.id)) ops.push({tipo:"addSessao", etapa:+et, ...x});
+    });
+    for(const [nome,c] of Object.entries(st.cargas||{})){
+      const r=rem.cargas.find(y=>y.etapa==et && y.nome===nome);
+      if(!r || r.data < c.d) ops.push({tipo:"setCarga", etapa:+et, nome, kg:parseFloat(c.v), data:c.d});
+    }
+    if(st.inicio && !rem.config[`etapa.${et}.inicio`]) ops.push({tipo:"setConfig", chave:`etapa.${et}.inicio`, valor:st.inicio});
+    if(st.faseModo && st.faseModo!=="auto" && !rem.config[`etapa.${et}.faseModo`]) ops.push({tipo:"setConfig", chave:`etapa.${et}.faseModo`, valor:st.faseModo});
+  }
+  const pesos=new Set(rem.peso.map(p=>p.d));
+  S.peso.forEach(p=>{ if(!pesos.has(p.d)) ops.push({tipo:"setPeso", data:p.d, kg:p.kg}); });
+  if(S.meta.kg && !rem.config["meta.kg"]) ops.push({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg});
+  if(S.meta.data && !rem.config["meta.data"]) ops.push({tipo:"setConfig", chave:"meta.data", valor:S.meta.data});
+  if(S.idade && !rem.config["idade"]) ops.push({tipo:"setConfig", chave:"idade", valor:S.idade});
+  return ops;
+}
+
+function aplicarRemoto(rem){
+  const cfg=rem.config||{};
+  const etapas=new Set([...Object.keys(S.etapas), ...rem.sessoes.map(x=>String(x.etapa)), ...rem.cargas.map(x=>String(x.etapa))]);
+  etapas.forEach(et=>{
+    const st = (S.etapas[et] ??= novaEtapa());
+    st.historico = rem.sessoes.filter(x=>String(x.etapa)===et).map(({etapa,...x})=>x);
+    st.cargas = {}; rem.cargas.filter(x=>String(x.etapa)===et).forEach(c=>st.cargas[c.nome]={v:String(c.kg), d:c.data});
+    st.inicio = cfg[`etapa.${et}.inicio`] || "";
+    st.faseModo = cfg[`etapa.${et}.faseModo`] || "auto";
+  });
+  S.peso = rem.peso.slice().sort((a,b)=>a.d<b.d?-1:1);
+  S.meta = { kg: cfg["meta.kg"] ? +cfg["meta.kg"] : "", data: cfg["meta.data"] || "" };
+  S.idade = cfg["idade"] ? +cfg["idade"] : "";
+  if(rem.ficha && rem.ficha.etapa >= FICHA_EMBUTIDA.etapa){ S.fichaRemota = rem.ficha; if(rem.ficha.etapa!==FICHA.etapa){ usarFicha(rem.ficha); toast(`Ficha da etapa ${rem.ficha.etapa} carregada da planilha`); } else usarFicha(rem.ficha); }
+  else { S.fichaRemota = null; usarFicha(FICHA_EMBUTIDA); }
+}
+
+async function sincronizar(){
+  if(!S.sync.url || !S.sync.k || sincronizando) return;
+  if(!navigator.onLine){ S.sync.erro="offline"; atualizarSyncUI(); return; }
+  sincronizando=true; atualizarSyncUI();
+  try{
+    const ops=S.fila.slice();
+    const res=await fetch(S.sync.url,{method:"POST", body:JSON.stringify({k:S.sync.k, ops})});
+    const j=await res.json();
+    if(!j.ok) throw new Error(j.erro||"falha");
+    S.fila.splice(0, ops.length);
+    let extra=[];
+    if(!S.sync.migrado){ extra=migrar(j.estado); S.sync.migrado=true; }
+    const etapasRem=j.estado.etapas||[];
+    if(!fichaEnviada && !etapasRem.includes(FICHA_EMBUTIDA.etapa) && !(j.estado.ficha && j.estado.ficha.etapa>FICHA_EMBUTIDA.etapa)){
+      extra.push({tipo:"setFicha", ficha:FICHA_EMBUTIDA, ativar:true}); fichaEnviada=true;
+    }
+    if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return sincronizar(); }
+    aplicarRemoto(j.estado);
+    S.sync.ultimo=Date.now(); S.sync.erro="";
+    save();
+    if(S.fila.length) agendarSync(300);
+    const ativo=document.activeElement;
+    if(ativo && /INPUT|SELECT|TEXTAREA/.test(ativo.tagName)) renderPendente=true; else { const y=scrollY; render(); scrollTo(0,y); }
+  }catch(err){
+    S.sync.erro = /chave/.test(err.message) ? "Chave inválida" : "Sem conexão com a planilha";
+    save();
+  }finally{ sincronizando=false; atualizarSyncUI(); }
+}
+document.addEventListener("focusout",()=>{ if(renderPendente){ renderPendente=false; setTimeout(()=>{ if(!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||"")){ const y=scrollY; render(); scrollTo(0,y); } },150); } });
+addEventListener("online",()=>agendarSync(100));
+
+function linkConfig(){ return `${location.origin}${location.pathname}#sync=${encodeURIComponent(S.sync.url)}&k=${encodeURIComponent(S.sync.k)}`; }
+function hora(t){ return new Date(t).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}); }
+function atualizarSyncUI(){
+  const dot=$("#syncDot"), box=$("#syncBox");
+  const con=!!S.sync.url, pend=S.fila.length;
+  dot.hidden = !con ? true : !(pend || S.sync.erro);
+  dot.classList.toggle("ok", false);
+  if(!box || !document.getElementById("settings").open) return;
+  let st, cls="";
+  if(!con){ st="Não conectado"; }
+  else if(sincronizando){ st="Sincronizando…"; }
+  else if(S.sync.erro){ st=S.sync.erro==="offline"?"Sem internet":S.sync.erro; cls="err"; }
+  else { st="Conectado à planilha"; cls="ok"; }
+  box.innerHTML = con ? `
+    <div class="sync-st ${cls}"><i></i>${esc(st)}</div>
+    <p class="meta">${S.sync.ultimo?`Última sincronização às ${hora(S.sync.ultimo)}.`:""} ${pend?`${pend} ${pend>1?"alterações pendentes":"alteração pendente"}, enviadas quando a conexão voltar.`:"Tudo salvo."}</p>
+    <div class="row"><button class="btn" id="syncNow" style="flex:1">Sincronizar agora</button><button class="btn" id="syncLink" style="flex:1">Copiar link</button></div>
+    <button class="btn ghost danger" id="syncOff">Desconectar este aparelho</button>`
+  : `<p class="meta">Abra o link de configuração neste aparelho ou cole o endereço do script e a chave.</p>
+    <input id="syncUrl" placeholder="https://script.google.com/macros/s/…/exec" inputmode="url" autocomplete="off">
+    <input id="syncKey" placeholder="Chave" autocomplete="off">
+    <button class="btn primary" id="syncCon">Conectar</button>`;
+  $("#syncNow") && ($("#syncNow").onclick=()=>sincronizar());
+  $("#syncLink") && ($("#syncLink").onclick=async()=>{ try{ await navigator.clipboard.writeText(linkConfig()); toast("Link copiado. Abra-o no outro navegador."); }catch(e){ prompt("Copie o link:", linkConfig()); } });
+  $("#syncOff") && ($("#syncOff").onclick=()=>{ if(confirm("Desconectar este aparelho da planilha? Os dados continuam na planilha.")){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
+  $("#syncCon") && ($("#syncCon").onclick=()=>conectar($("#syncUrl").value.trim(), $("#syncKey").value.trim()));
+}
+function conectar(url,k){
+  if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(url) || !k){ toast("Endereço ou chave inválidos"); return; }
+  S.sync={url, k, migrado:false, ultimo:0, erro:""}; save(); toast("Conectando à planilha…"); sincronizar();
+}
+(function lerLinkConfig(){
+  const h=new URLSearchParams(location.hash.slice(1));
+  if(h.get("sync") && h.get("k")){
+    history.replaceState(null,"",location.pathname+location.search);
+    if(S.sync.url!==h.get("sync") || S.sync.k!==h.get("k")) conectar(h.get("sync"), h.get("k"));
+  }
+})();
+
 /* ---------- Navegação ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; if(tab!=="ficha"){fichaFase=null;fichaLetra=null;} render(); scrollTo(0,0); });
 
 /* ---------- Ajustes ---------- */
 const dlg=$("#settings");
-$("#openSettings").onclick=()=>{ $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; $("#metaKg").value=S.meta.kg?fmtKg(+S.meta.kg):""; $("#metaData").value=S.meta.data||""; applyTheme(); dlg.showModal(); };
+$("#openSettings").onclick=()=>{ setTimeout(atualizarSyncUI); $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; $("#metaKg").value=S.meta.kg?fmtKg(+S.meta.kg):""; $("#metaData").value=S.meta.data||""; applyTheme(); dlg.showModal(); };
 $("#closeSettings").onclick=()=>dlg.close();
 dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
 document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>{ S.theme=b.dataset.themeOpt; save(); applyTheme(); });
-$("#startDate").onchange=e=>{ E.inicio=e.target.value; save(); render(); };
-$("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; save(); render(); };
-$("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; save(); render(); };
-$("#metaData").onchange=e=>{ S.meta.data=e.target.value; save(); render(); };
-$("#resetBtn").onclick=()=>{ if(confirm(`Apagar histórico, cargas e data de início da etapa ${FICHA.etapa}?`)){
-  S.etapas[FICHA.etapa]={inicio:"",faseModo:"auto",historico:[],cargas:{},atual:null}; save(); location.reload(); } };
+$("#startDate").onchange=e=>{ E.inicio=e.target.value; enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); render(); };
+$("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.faseModo`, valor:E.faseModo}); render(); };
+$("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; enfileirar({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg}); render(); };
+$("#metaData").onchange=e=>{ S.meta.data=e.target.value; enfileirar({tipo:"setConfig", chave:"meta.data", valor:S.meta.data}); render(); };
+$("#resetBtn").onclick=()=>{ if(confirm(`Apagar as sessões e a data de início da etapa ${FICHA.etapa}${S.sync.url?" também na planilha":""}? As cargas registradas na planilha continuam como histórico.`)){
+  E.historico.forEach(x=>{ if(x.id) S.fila.push({tipo:"delSessao", id:x.id}); });
+  S.fila.push({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:""});
+  S.etapas[FICHA.etapa]=novaEtapa(); save(); location.reload(); } };
 $("#exportBtn").onclick=()=>{
   const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`treino-backup-${hojeISO()}.json`; a.click();
@@ -1572,13 +1714,13 @@ $("#exportBtn").onclick=()=>{
 };
 $("#importFile").onchange=async e=>{
   const f=e.target.files[0]; if(!f) return;
-  try{ const d=JSON.parse(await f.text()); if(!d.etapas) throw 0; localStorage.setItem(KEY,JSON.stringify(d)); location.reload(); }
+  try{ const d=JSON.parse(await f.text()); if(!d.etapas) throw 0; d.sync = S.sync; d.sync.migrado=false; d.fila=S.fila; localStorage.setItem(KEY,JSON.stringify(d)); location.reload(); }
   catch(err){ toast("Arquivo inválido. Use um backup exportado por este app."); }
 };
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyTheme);
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ render(); if(!$("#timer").hidden) tick(); } });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ render(); if(!$("#timer").hidden) tick(); agendarSync(200); } });
 
-applyTheme(); render();
+applyTheme(); render(); atualizarSyncUI(); agendarSync(100);
 </script>
 </body>
 </html>
