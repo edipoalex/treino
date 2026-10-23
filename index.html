@@ -128,6 +128,11 @@ button{cursor:pointer}
 .item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:44px 1fr;gap:4px 12px}
 .item{transition:background-color .25s,border-color .25s}
 .item.done{background:var(--ok-bg);border-color:var(--ok-line)}
+.item.ativo:not(.done){border:2px solid #22E36B;padding:13px;box-shadow:0 0 0 3px rgba(34,227,107,.22),0 0 18px rgba(34,227,107,.35)}
+:root[data-theme="dark"] .item.ativo:not(.done){border-color:#39FF88}
+.item{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ativo-tag{display:none;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#14A84F;margin-left:6px}
+.item.ativo:not(.done) .ativo-tag{display:inline}
 .item.done .presc,.item.done .obs{opacity:.75}
 .item.done .chip{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
 .done-at{font-size:13px;font-weight:600;color:var(--ok);display:inline-flex;align-items:center;gap:4px}
@@ -241,20 +246,18 @@ details[open] summary::after{transform:rotate(-135deg)}
 /* Timer */
 .timer{position:fixed;left:0;right:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px));z-index:24;}
 .timer .wrap{padding-bottom:10px}
-.timer-card{background:var(--ink);color:var(--bg);border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
-.timer-card .clock{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;min-width:84px;font-variant-numeric:tabular-nums}
-.timer-card .lbl{flex:1;font-size:14px;opacity:.8;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.timer-card button{min-height:44px;min-width:44px;border-radius:12px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);background:transparent;color:var(--bg);font-weight:600;padding:0 10px}
+.timer-card{position:relative;overflow:hidden;isolation:isolate;background:#1B2128;color:#fff;border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px -12px rgba(0,0,0,.55);border:2px solid transparent}
+.tfill{position:absolute;inset:0;z-index:-1;background:#2E9E5B;transform-origin:left center;transition:transform .25s linear,background-color .3s}
+.timer.low .tfill{background:#E08A1E}
+.timer.finished .tfill{transform:scaleX(0)!important}
+.timer.finished .timer-card{border-color:#E08A1E;animation:pulso 1s ease-in-out 3}
+@keyframes pulso{50%{box-shadow:0 0 0 6px rgba(224,138,30,.45)}}
+.timer-card .clock{font-family:var(--display);font-weight:700;font-size:40px;line-height:1;min-width:92px;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.timer-card .lbl{flex:1;font-size:14px;opacity:.9;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timer-card button{min-height:44px;min-width:44px;border-radius:12px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.18);color:#fff;font-weight:600;padding:0 10px}
 body.timer-on{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 120px)}
-body.timer-on .sticky-foot{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 104px)}
+
 body.timer-on .toast{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 116px)}
-.timer-card{flex-wrap:wrap;row-gap:10px}
-.tbar{flex:0 0 100%;height:8px;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--bg) 22%,transparent)}
-.tbar span{display:block;height:100%;width:100%;border-radius:999px;background:#43C27A;transform-origin:left center;transition:transform .25s linear,background-color .3s}
-.timer.low .tbar span{background:#F2A33A}
-.timer.finished .tbar span{transform:scaleX(0)!important}
-.timer.finished .timer-card{background:var(--ok);color:#fff}
-.timer.finished .timer-card button{color:#fff;border-color:rgba(255,255,255,.5)}
 
 /* Sheet */
 dialog{border:0;padding:0;background:transparent;max-width:640px;width:100%;margin:auto auto 0;color:var(--ink)}
@@ -286,14 +289,13 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 <main class="wrap" id="view" tabindex="-1"></main>
 
 <div class="timer" id="timer" hidden>
-  <div class="wrap"><div class="timer-card" role="timer" aria-live="polite">
+  <div class="wrap"><div class="timer-card" role="timer" aria-live="polite"><span class="tfill" id="tBar" aria-hidden="true"></span>
     <span class="clock" id="tClock">0:00</span><span class="lbl" id="tLbl"></span>
     <button id="tReset" aria-label="Reiniciar cronômetro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
     <button id="tPlus" aria-label="Mais 15 segundos">+15</button>
     <button id="tStop" aria-label="Fechar cronômetro">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
-    <div class="tbar" aria-hidden="true"><span id="tBar"></span></div>
   </div></div>
 </div>
 
@@ -1347,9 +1349,9 @@ function viewSessao(){
     const kg = E.cargas[it.nome];
     const timerSeg = forca ? it.descanso : it.bloco*60;
     const timerLbl = forca ? `Descanso ${it.descanso}s` : `Cronômetro ${it.bloco} min`;
-    return `<li class="item ${done?"done":""}">
+    return `<li class="item ${done?"done":""} ${a.ativo===i&&!done?"ativo":""}" data-item="${i}">
       <button class="check" data-check="${i}" aria-pressed="${done}" aria-label="${done?"Desmarcar":"Marcar"} ${esc(it.nome)}">${ico.check}</button>
-      <p class="name">${esc(it.nome)}</p>
+      <p class="name">${esc(it.nome)}<span class="ativo-tag">em execução</span></p>
       <p class="presc">${esc(it.prescricao)}</p>
       <div class="chips">${chips.map(c=>`<span class="chip">${c}</span>`).join("")}</div>
       ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
@@ -1364,35 +1366,44 @@ function viewSessao(){
   }).join("");
   $("#view").innerHTML = `
   <section class="session-head L-${a.letra}">${plate(a.letra,"sm")}
-    <div><h2>Treino ${a.letra}</h2><p class="meta">${esc(t.foco)}. Fase ${a.fase}, cerca de ${fmtMin(totalMin(t))}. Início às ${hora(a.inicio)}</p></div>
+    <div style="flex:1;min-width:0"><h2>Treino ${a.letra}</h2><p class="meta">${esc(t.foco)}. Fase ${a.fase}, cerca de ${fmtMin(totalMin(t))}. Início às ${hora(a.inicio)}</p></div>
+    <button class="btn ghost danger" id="cancelBtn" style="min-height:40px;padding:0 12px;font-size:14px;align-self:flex-start">Cancelar</button>
   </section>
   <div class="progress L-${a.letra}" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${f}" aria-label="Progresso"><span style="width:${f/n*100}%;background:var(--c)"></span></div>
   <p class="meta">${f} de ${n} concluídos</p>
   <ul class="items">${items}</ul>
-  <div class="sticky-foot">
-    <button class="btn" id="cancelBtn">Cancelar</button>
-    <button class="btn primary" id="finishBtn">Concluir treino ${a.letra}</button>
-  </div>`;
+  <section class="panel fim-treino" style="text-align:center;margin-top:20px">
+    <p class="meta" style="margin:0 0 12px">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
+    <button class="btn primary block" id="finishBtn">Concluir treino ${a.letra}</button>
+  </section>`;
+  const marcarAtivo=i=>{ if(a.ativo===i) return; a.ativo=i; save();
+    document.querySelectorAll(".item.ativo").forEach(el=>el.classList.remove("ativo"));
+    const el=document.querySelector(`[data-item="${i}"]`); if(el && !el.classList.contains("done")) el.classList.add("ativo"); };
+  document.querySelectorAll("[data-item]").forEach(li=>li.addEventListener("click",e=>{
+    if(e.target.closest("button,input,label,a")) return;
+    marcarAtivo(+li.dataset.item);
+  }));
   document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{
     const i=+b.dataset.check, k=a.feitos.indexOf(i);
     a.marcas ??= {};
-    if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; } else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); }
+    if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; } else { a.feitos.push(i); a.marcas[i]=Date.now(); if(a.ativo===i) a.ativo=null; navigator.vibrate?.(15); }
     save(); const y=scrollY; render(); scrollTo(0,y);
+    if(a.feitos.length===t.itens.length) toast("Tudo feito. Conclua o treino no fim da lista.");
   });
-  document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>startTimer(+b.dataset.timer, b.dataset.lbl));
+  document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>{ const li=b.closest("[data-item]"); if(li) marcarAtivo(+li.dataset.item); startTimer(+b.dataset.timer, b.dataset.lbl); });
   document.querySelectorAll("[data-kg]").forEach(inp=>inp.onchange=()=>{
     const v=inp.value.trim().replace(",",".");
     const nome=inp.dataset.kg;
     if(v===""){ delete E.cargas[nome]; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:null, data:hojeISO()}); }
     else { const n=parseFloat(v); if(!(n>=0)){ toast("Carga inválida"); return; } E.cargas[nome]={v:String(n), d:hojeISO()}; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:n, data:hojeISO()}); }
   });
-  $("#cancelBtn").onclick = ()=>{ if(confirm("Cancelar este treino? Ele não será registrado.")){ E.atual=null; save(); render(); } };
+  $("#cancelBtn").onclick = ()=>{ if(confirm(`Cancelar o treino ${a.letra}? Nada será registrado e as marcações serão perdidas.`)){ E.atual=null; save(); stopTimer(); render(); } };
   $("#finishBtn").onclick = concluir;
 }
 
 function concluir(){
   const a=E.atual, t=treino(a.letra,a.fase), falt=t.itens.length-a.feitos.length;
-  if(falt>0 && !confirm(`Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir assim mesmo?`)) return;
+  if(!confirm(falt>0 ? `Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir o treino ${a.letra} assim mesmo?` : `Concluir o treino ${a.letra} e registrar ${Math.round((Date.now()-a.inicio)/6e4)} min?`)) return;
   if(!E.inicio){ E.inicio = hojeISO(); enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
   const fim=Date.now();
