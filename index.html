@@ -148,10 +148,11 @@ button{cursor:pointer}
 .tools{grid-column:2;display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .tools .btn{min-height:44px;padding:0 14px;font-size:15px}
 .load{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:0 10px;min-height:44px;background:var(--surface-2)}
-.load input{width:64px;border:0;background:none;font-weight:600;font-size:16px;text-align:right;padding:0}
+.load input{width:92px;border:0;background:none;font-weight:600;font-size:16px;text-align:right;padding:0}
 .load input:focus{outline:none}
 .load:focus-within{outline:3px solid var(--pB);outline-offset:2px}
 .load span{font-size:14px;color:var(--muted)}
+.unit{min-height:32px;min-width:44px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;color:var(--muted);padding:0 8px}
 .last{font-size:13px;color:var(--muted)}
 .sticky-foot{position:sticky;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 8px);margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:10px;
   background:linear-gradient(to top,var(--bg) 70%,transparent);padding-top:12px}
@@ -565,13 +566,16 @@ const FICHA_EMBUTIDA = {
       "obs": "Semana de calibração: pare 1–2 reps antes da falha nas técnicas. Pré-exaustão"
      },
      {
-      "nome": "Agachamento livre (sem. 3 e 5) / Hack machine (sem. 4 e 6)",
+      "nome": "Agachamento livre",
       "prescricao": "4x6 (carga alta)",
       "series": 4,
       "exec": 40,
       "descanso": 100,
       "bloco": 1,
-      "obs": "Semana de calibração: pare 1–2 reps antes da falha nas técnicas. Descanso maior por ser composto pesado"
+      "obs": "Semana de calibração: pare 1–2 reps antes da falha nas técnicas. Descanso maior por ser composto pesado",
+      "semanas": [
+       1
+      ]
      },
      {
       "nome": "Leg press 45°",
@@ -925,13 +929,31 @@ const FICHA_EMBUTIDA = {
       "obs": "Pré-exaustão"
      },
      {
-      "nome": "Agachamento livre (sem. 3 e 5) / Hack machine (sem. 4 e 6)",
+      "nome": "Agachamento livre",
       "prescricao": "4x6 (carga alta)",
       "series": 4,
       "exec": 40,
       "descanso": 100,
       "bloco": 1,
-      "obs": "Descanso maior por ser composto pesado"
+      "obs": "Descanso maior por ser composto pesado",
+      "semanas": [
+       3,
+       5
+      ]
+     },
+     {
+      "nome": "Hack machine",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado",
+      "semanas": [
+       2,
+       4,
+       6
+      ]
      },
      {
       "nome": "Leg press 45°",
@@ -1159,7 +1181,8 @@ const FICHA_EMBUTIDA = {
    "Séries por faixa",
    "Ex.: 2x15 + 2x10. Só a última série de cada faixa vai perto da falha."
   ]
- ]
+ ],
+ "versao": 2
 };
 /* ======================================================= */
 
@@ -1182,7 +1205,7 @@ function usarFicha(f){
   E = (S.etapas[f.etapa] ??= novaEtapa());
   document.title = `Treino · Etapa ${f.etapa}`;
 }
-usarFicha(S.fichaRemota && S.fichaRemota.etapa >= FICHA_EMBUTIDA.etapa ? S.fichaRemota : FICHA_EMBUTIDA);
+usarFicha(S.fichaRemota && (S.fichaRemota.etapa>FICHA_EMBUTIDA.etapa || (S.fichaRemota.etapa===FICHA_EMBUTIDA.etapa && (S.fichaRemota.versao||0)>=(FICHA_EMBUTIDA.versao||0))) ? S.fichaRemota : FICHA_EMBUTIDA);
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Não foi possível salvar neste navegador"); } }
 
 /* ---------- Datas ---------- */
@@ -1203,7 +1226,14 @@ function faseAtual(){
   if(E.faseModo==="1"||E.faseModo==="2") return E.faseModo;
   return FICHA.fases_semanas["1"].includes(Math.min(semanaAtual(),FICHA.semanas)) ? "1" : "2";
 }
-const treino = (letra, fase=faseAtual()) => FICHA.fases[fase][letra];
+const daSemana = (it, sem) => !it.semanas || !it.semanas.length || it.semanas.includes(sem);
+function treino(letra, fase=faseAtual(), sem=Math.min(semanaAtual(), FICHA.semanas)){
+  const t=FICHA.fases[fase]?.[letra]; if(!t) return t;
+  return sem==null ? t : {...t, itens: t.itens.filter(it=>daSemana(it, sem))};
+}
+const UNID = { kg:"kg", placas:"placas", livre:"livre" };
+const unidPadrao = nome => (S.unidades && S.unidades[nome]) || "kg";
+const semTxt = arr => arr.length>1 ? `sem. ${arr.slice(0,-1).join(", ")} e ${arr[arr.length-1]}` : `sem. ${arr[0]}`;
 const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
 const totalMin = t => t.itens.reduce((a,it)=>a+minutos(it),0);
 
@@ -1333,18 +1363,18 @@ function semanaPanel(){
 }
 
 function iniciar(letra){
-  E.atual = { letra, fase: faseAtual(), inicio: Date.now(), feitos: [], marcas: {} };
+  E.atual = { letra, fase: faseAtual(), semana: Math.min(semanaAtual(), FICHA.semanas), inicio: Date.now(), feitos: [], marcas: {} };
   escolha = null; save(); render(); scrollTo(0,0);
 }
 
 function viewSessao(){
-  const a = E.atual, t = treino(a.letra, a.fase);
+  const a = E.atual, t = treino(a.letra, a.fase, a.semana ?? undefined);
   const n = t.itens.length, f = a.feitos.length;
   const items = t.itens.map((it,i)=>{
     const done = a.feitos.includes(i);
     const forca = it.series>0;
     const chips = forca
-      ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`]
+      ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`].concat(it.semanas&&it.semanas.length?[`${semTxt(it.semanas)}`]:[])
       : [`${it.bloco} min`];
     const kg = E.cargas[it.nome];
     const timerSeg = forca ? it.descanso : it.bloco*60;
@@ -1359,7 +1389,8 @@ function viewSessao(){
       <div class="tools">
         <button class="btn" data-timer="${timerSeg}" data-lbl="${esc(it.nome)}">${ico.clock}${timerLbl}</button>
         ${forca && !/abdômen|core/i.test(it.nome) ? `<label class="load"><span class="sr">Carga de ${esc(it.nome)}</span>
-          <input inputmode="decimal" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—"><span>kg</span></label>
+          <input type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—"></label>
+          <button class="unit" data-unit="${esc(it.nome)}" aria-label="Unidade da carga de ${esc(it.nome)}">${UNID[(kg&&kg.u)||unidPadrao(it.nome)]}</button>
           ${kg?`<span class="last">${relDia(kg.d)}</span>`:""}` : ""}
       </div>
     </li>`;
@@ -1391,18 +1422,28 @@ function viewSessao(){
     if(a.feitos.length===t.itens.length) toast("Tudo feito. Conclua o treino no fim da lista.");
   });
   document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>{ const li=b.closest("[data-item]"); if(li) marcarAtivo(+li.dataset.item); startTimer(+b.dataset.timer, b.dataset.lbl); });
+  const salvarCarga=(nome, v, u)=>{
+    if(v===""){ delete E.cargas[nome]; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:null, u, data:hojeISO()}); return; }
+    E.cargas[nome]={v, u, d:hojeISO()}; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:v, u, data:hojeISO()});
+  };
   document.querySelectorAll("[data-kg]").forEach(inp=>inp.onchange=()=>{
-    const v=inp.value.trim().replace(",",".");
-    const nome=inp.dataset.kg;
-    if(v===""){ delete E.cargas[nome]; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:null, data:hojeISO()}); }
-    else { const n=parseFloat(v); if(!(n>=0)){ toast("Carga inválida"); return; } E.cargas[nome]={v:String(n), d:hojeISO()}; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:n, data:hojeISO()}); }
+    const nome=inp.dataset.kg, v=inp.value.trim().replace(/\s+/g," ").slice(0,40);
+    salvarCarga(nome, v, E.cargas[nome]?.u || unidPadrao(nome));
+  });
+  document.querySelectorAll("[data-unit]").forEach(b=>b.onclick=()=>{
+    const nome=b.dataset.unit, ordem=Object.keys(UNID), atual=E.cargas[nome]?.u || unidPadrao(nome);
+    const nova=ordem[(ordem.indexOf(atual)+1)%ordem.length];
+    S.unidades ??= {}; S.unidades[nome]=nova; save();
+    b.textContent=UNID[nova];
+    const inp=document.querySelector(`[data-kg="${CSS.escape(nome)}"]`);
+    if(E.cargas[nome]) salvarCarga(nome, E.cargas[nome].v, nova); else if(inp && inp.value.trim()) salvarCarga(nome, inp.value.trim(), nova);
   });
   $("#cancelBtn").onclick = ()=>{ if(confirm(`Cancelar o treino ${a.letra}? Nada será registrado e as marcações serão perdidas.`)){ E.atual=null; save(); stopTimer(); render(); } };
   $("#finishBtn").onclick = concluir;
 }
 
 function concluir(){
-  const a=E.atual, t=treino(a.letra,a.fase), falt=t.itens.length-a.feitos.length;
+  const a=E.atual, t=treino(a.letra,a.fase,a.semana ?? undefined), falt=t.itens.length-a.feitos.length;
   if(!confirm(falt>0 ? `Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir o treino ${a.letra} assim mesmo?` : `Concluir o treino ${a.letra} e registrar ${Math.round((Date.now()-a.inicio)/6e4)} min?`)) return;
   if(!E.inicio){ E.inicio = hojeISO(); enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
@@ -1420,7 +1461,7 @@ function concluir(){
 
 function viewFicha(){
   fichaFase ??= faseAtual(); fichaLetra ??= (E.atual?.letra || proxima());
-  const t = treino(fichaLetra, fichaFase);
+  const t0 = treino(fichaLetra, fichaFase, null); const t = {...t0, itens: t0.itens.filter(it=>!it.semanas || it.semanas.length)};
   const sem = FICHA.fases_semanas;
   $("#view").innerHTML = `
   <h1 class="page">Ficha completa</h1>
@@ -1431,7 +1472,7 @@ function viewFicha(){
   <div class="letters" role="group" aria-label="Treino">${LETRAS.map(l=>`<button data-l="${l}" aria-pressed="${l===fichaLetra}" aria-label="Treino ${l}">${plate(l,"sm")}</button>`).join("")}</div>
   <p class="meta" style="margin-top:8px"><strong style="color:var(--ink)">Treino ${fichaLetra}:</strong> ${esc(t.foco)}</p>
   <div class="table">
-    ${t.itens.map(it=>`<div class="trow"><span class="t">${esc(it.nome)}</span><span class="min">${fmtMin(minutos(it))}</span>
+    ${t.itens.map(it=>`<div class="trow"><span class="t">${esc(it.nome)}${it.semanas&&it.semanas.length?` <span class="chip" style="margin-left:4px">${semTxt(it.semanas)}</span>`:""}</span><span class="min">${fmtMin(minutos(it))}</span>
       <span class="m">${esc(it.prescricao)}${it.series?`. Descanso ${it.descanso}s`:""}${it.obs?`. ${esc(it.obs)}`:""}</span></div>`).join("")}
     <div class="total"><span>Tempo estimado da sessão</span><span class="min">${fmtMin(totalMin(t))}</span></div>
   </div>`;
@@ -1502,7 +1543,7 @@ function metricasTempo(){
   const porLetra={}, porEx={};
   for(const x of E.historico){
     if(!(x.duracao>0)) continue;
-    const t=treino(x.letra, x.fase); if(!t) continue;
+    const t=treino(x.letra, x.fase, semanaDaEtapa(x.data) ?? x.semana); if(!t) continue;
     // estimado só com os itens marcados como feitos
     const feitosNomes=(x.itens||[]).map(i=>i.n);
     const est = feitosNomes.length ? t.itens.filter(it=>feitosNomes.includes(it.nome)).reduce((a,it)=>a+minutos(it),0) : totalMin(t)*(x.feitos/x.total||1);
@@ -1668,7 +1709,7 @@ function migrar(rem){
     });
     for(const [nome,c] of Object.entries(st.cargas||{})){
       const r=rem.cargas.find(y=>y.etapa==et && y.nome===nome);
-      if(!r || r.data < c.d) ops.push({tipo:"setCarga", etapa:+et, nome, kg:parseFloat(c.v), data:c.d});
+      if(!r || r.data < c.d) ops.push({tipo:"setCarga", etapa:+et, nome, kg:String(c.v), u:c.u||"kg", data:c.d});
     }
     if(st.inicio && !rem.config[`etapa.${et}.inicio`]) ops.push({tipo:"setConfig", chave:`etapa.${et}.inicio`, valor:st.inicio});
     if(st.faseModo && st.faseModo!=="auto" && !rem.config[`etapa.${et}.faseModo`]) ops.push({tipo:"setConfig", chave:`etapa.${et}.faseModo`, valor:st.faseModo});
@@ -1692,14 +1733,15 @@ function aplicarRemoto(rem){
       if(l){ if(!x.inicio && l.inicio) x.inicio=l.inicio; if(!x.fim && l.fim) x.fim=l.fim; if(!(x.itens&&x.itens.length) && l.itens) x.itens=l.itens; }
       if(!x.inicio) delete x.inicio; if(!x.fim) delete x.fim; if(!x.itens || !x.itens.length) delete x.itens;
       return x; });
-    st.cargas = {}; rem.cargas.filter(x=>String(x.etapa)===et).forEach(c=>st.cargas[c.nome]={v:String(c.kg), d:c.data});
+    st.cargas = {}; rem.cargas.filter(x=>String(x.etapa)===et).forEach(c=>{ st.cargas[c.nome]={v:String(c.kg), u:c.u||"kg", d:c.data}; (S.unidades ??= {})[c.nome] ??= c.u||"kg"; });
     st.inicio = cfg[`etapa.${et}.inicio`] || "";
     st.faseModo = cfg[`etapa.${et}.faseModo`] || "auto";
   });
   S.peso = rem.peso.slice().sort((a,b)=>a.d<b.d?-1:1);
   S.meta = { kg: cfg["meta.kg"] ? +cfg["meta.kg"] : "", data: cfg["meta.data"] || "" };
   S.idade = cfg["idade"] ? +cfg["idade"] : "";
-  if(rem.ficha && rem.ficha.etapa >= FICHA_EMBUTIDA.etapa){ S.fichaRemota = rem.ficha; if(rem.ficha.etapa!==FICHA.etapa){ usarFicha(rem.ficha); toast(`Ficha da etapa ${rem.ficha.etapa} carregada da planilha`); } else usarFicha(rem.ficha); }
+  const maisNova=(a,b)=> a.etapa!==b.etapa ? a.etapa>b.etapa : (a.versao||0)>=(b.versao||0);
+  if(rem.ficha && maisNova(rem.ficha, FICHA_EMBUTIDA)){ S.fichaRemota = rem.ficha; if(rem.ficha.etapa!==FICHA.etapa){ usarFicha(rem.ficha); toast(`Ficha da etapa ${rem.ficha.etapa} carregada da planilha`); } else usarFicha(rem.ficha); }
   else { S.fichaRemota = null; usarFicha(FICHA_EMBUTIDA); }
 }
 
@@ -1716,7 +1758,9 @@ async function sincronizar(){
     let extra=[];
     if(!S.sync.migrado){ extra=migrar(j.estado); S.sync.migrado=true; }
     const etapasRem=j.estado.etapas||[];
-    if(!fichaEnviada && !etapasRem.includes(FICHA_EMBUTIDA.etapa) && !(j.estado.ficha && j.estado.ficha.etapa>FICHA_EMBUTIDA.etapa)){
+    const rf=j.estado.ficha;
+    const embutidaMaisNova = !rf || FICHA_EMBUTIDA.etapa>rf.etapa || (FICHA_EMBUTIDA.etapa===rf.etapa && (FICHA_EMBUTIDA.versao||0)>(rf.versao||0));
+    if(!fichaEnviada && (!etapasRem.includes(FICHA_EMBUTIDA.etapa) || embutidaMaisNova) && embutidaMaisNova){
       extra.push({tipo:"setFicha", ficha:FICHA_EMBUTIDA, ativar:true}); fichaEnviada=true;
     }
     if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return sincronizar(); }
