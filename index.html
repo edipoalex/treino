@@ -206,6 +206,12 @@ button{cursor:pointer}
 .hist .info span{font-size:14px;color:var(--muted)}
 .empty{text-align:center;color:var(--muted);padding:32px 12px}
 
+/* Versão */
+.versao{text-align:center;font-size:12px;color:var(--muted);margin:16px 0 0;opacity:.8}
+.nova-versao{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:35;max-width:616px;margin:0 auto;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border-radius:14px;padding:8px 8px 8px 14px;font-size:14px;font-weight:600;box-shadow:var(--shadow)}
+.nova-versao span{flex:1}
+.nova-versao .btn{min-height:40px;padding:0 14px;font-size:14px;background:var(--bg);color:var(--ink);border-color:var(--bg)}
+
 /* Sync */
 .sync-dot{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--surface)}
 .sync-dot.ok{background:var(--ok)}
@@ -375,8 +381,10 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
       <button class="btn block danger" id="resetBtn">Apagar histórico desta etapa</button>
       <button class="btn block primary" id="closeSettings">Fechar</button>
     </div>
+    <p class="versao" id="versaoTxt"></p>
   </div>
 </dialog>
+<div class="nova-versao" id="novaVersao" hidden><span>Nova versão do app disponível</span><button class="btn" id="atualizarApp">Atualizar</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -384,6 +392,8 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
+const APP_VERSAO = "1.10";
+const APP_DATA = "2026-10-27";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
  "semanas": 6,
@@ -1970,7 +1980,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; 
 
 /* ---------- Ajustes ---------- */
 const dlg=$("#settings");
-$("#openSettings").onclick=()=>{ setTimeout(atualizarSyncUI); $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; $("#metaKg").value=S.meta.kg?fmtKg(+S.meta.kg):""; $("#metaData").value=S.meta.data||""; applyTheme(); dlg.showModal(); };
+$("#openSettings").onclick=()=>{ setTimeout(atualizarSyncUI); $("#versaoTxt").textContent=textoVersao(); $("#startDate").value=E.inicio||""; $("#phaseMode").value=E.faseModo; $("#metaKg").value=S.meta.kg?fmtKg(+S.meta.kg):""; $("#metaData").value=S.meta.data||""; applyTheme(); dlg.showModal(); };
 $("#closeSettings").onclick=()=>dlg.close();
 dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
 document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>{ S.theme=b.dataset.themeOpt; save(); applyTheme(); });
@@ -1995,7 +2005,25 @@ $("#importFile").onchange=async e=>{
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyTheme);
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ render(); if(!$("#timer").hidden) tick(); agendarSync(200); if(E.atual) manterTela(true); } });
 
-applyTheme(); render(); atualizarSyncUI(); agendarSync(100);
+/* ---------- Versão do app ---------- */
+function textoVersao(){
+  const d=APP_DATA.split("-").reverse().join("/");
+  return `App v${APP_VERSAO} · ${d} · Ficha etapa ${FICHA.etapa}${FICHA.versao?` (rev. ${FICHA.versao})`:""}`;
+}
+let ultimaChecagem=0;
+async function checarVersao(){
+  if(location.protocol==="file:" || Date.now()-ultimaChecagem<60000) return;
+  ultimaChecagem=Date.now();
+  try{
+    const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});
+    const m=(await r.text()).match(/const APP_VERSAO = "([^"]+)"/);
+    if(m && m[1]!==APP_VERSAO) $("#novaVersao").hidden=false;
+  }catch(e){}
+}
+$("#atualizarApp").onclick=()=>{ location.replace(location.pathname+"?v="+Date.now()); };
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) checarVersao(); });
+
+applyTheme(); render(); atualizarSyncUI(); agendarSync(100); checarVersao();
 </script>
 </body>
 </html>
