@@ -125,19 +125,20 @@ button{cursor:pointer}
 .progress{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin:12px 0 4px}
 .progress span{display:block;height:100%;background:var(--c,var(--ink));transition:width .3s}
 .items{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
-.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:44px 1fr;gap:4px 12px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:52px 1fr;gap:4px 12px}
 .item{transition:background-color .25s,border-color .25s}
 .item.done{background:var(--ok-bg);border-color:var(--ok-line)}
 .item{position:relative}
 .info-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font:700 16px/1 Georgia,serif;font-style:italic;display:grid;place-items:center}
 .item .name{padding-right:40px}
-.series{grid-column:2;display:flex;align-items:center;gap:8px;margin-top:10px}
+.series{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-top:10px}
 .pips{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
 .pip{width:15px;height:15px;border-radius:50%;border:2px solid var(--line);background:transparent;flex:none}
 .series [data-menos]{margin-left:auto}
 .pip.on{background:var(--ok);border-color:var(--ok)}
 .series .cnt{font-family:var(--display);font-weight:700;font-size:20px;white-space:nowrap}
-.series .btn{min-height:44px;min-width:44px;padding:0 12px;font-size:16px}
+.series .btn{min-height:56px;min-width:56px;padding:0 14px;font-size:20px;font-weight:700;border-radius:14px}
+.series .mais{min-width:88px}
 .series .btn:disabled{opacity:.4}
 .series .mais{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .item.verso{background:var(--surface-2);animation:virar .32s ease-out;display:block}
@@ -157,7 +158,7 @@ button{cursor:pointer}
 .item.done .presc,.item.done .obs{opacity:.75}
 .item.done .chip{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
 .done-at{font-size:13px;font-weight:600;color:var(--ok);display:inline-flex;align-items:center;gap:4px}
-.check{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--surface-2);display:grid;place-items:center;grid-row:span 2}
+.check{width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--surface-2);display:grid;place-items:center;grid-row:span 2}
 .check svg{width:22px;height:22px;opacity:0}
 .item.done .check{background:var(--ok);border-color:var(--ok);color:#fff}
 .item.done .check svg{opacity:1}
@@ -166,15 +167,17 @@ button{cursor:pointer}
 .chips{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .chip{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--muted);font-weight:500}
 .obs{grid-column:2;font-size:13px;color:var(--muted);margin:4px 0 0}
-.tools{grid-column:2;display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
-.tools .btn{min-height:44px;padding:0 14px;font-size:15px}
-.load{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:0 10px;min-height:44px;background:var(--surface-2)}
-.load input{width:92px;border:0;background:none;font-weight:600;font-size:16px;text-align:right;padding:0}
-.load input:focus{outline:none}
-.load:focus-within{outline:3px solid var(--pB);outline-offset:2px}
-.load span{font-size:14px;color:var(--muted)}
-.unit{min-height:32px;min-width:44px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;color:var(--muted);padding:0 8px}
-.last{font-size:13px;color:var(--muted)}
+.tools{grid-column:1/-1;display:grid;gap:10px;margin-top:12px}
+.tools .btn-desc{min-height:60px;width:100%;font-size:18px;font-weight:700;border-radius:16px;gap:10px}
+.tools .btn-desc svg{width:22px;height:22px}
+.carga{display:flex;align-items:stretch;min-height:54px;border:1px solid var(--line);border-radius:16px;background:var(--surface-2);overflow:hidden}
+.carga:focus-within{outline:3px solid var(--pB);outline-offset:2px}
+.carga .rot{display:flex;flex-direction:column;justify-content:center;padding:0 12px;font-size:12px;color:var(--muted);line-height:1.2;border-right:1px solid var(--line);min-width:64px}
+.carga .rot b{font-size:13px;color:var(--ink);font-weight:600}
+.carga input{flex:1;min-width:0;border:0;background:none;font-weight:700;font-size:20px;text-align:right;padding:0 12px;color:var(--ink)}
+.carga input:focus{outline:none}
+.unit{min-width:76px;border:0;border-left:1px solid var(--line);background:var(--surface);font-size:15px;font-weight:700;color:var(--ink);padding:0 12px}
+.unit:active{background:var(--line)}
 .sticky-foot{position:sticky;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 8px);margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:10px;
   background:linear-gradient(to top,var(--bg) 70%,transparent);padding-top:12px}
 
@@ -280,12 +283,15 @@ details[open] summary::after{transform:rotate(-135deg)}
 .timer.finished .tfill{transform:scaleX(0)!important}
 .timer.finished .timer-card{border-color:#E08A1E;animation:pulso 1s ease-in-out 3}
 @keyframes pulso{50%{box-shadow:0 0 0 6px rgba(224,138,30,.45)}}
-.timer-card .clock{font-family:var(--display);font-weight:700;font-size:40px;line-height:1;min-width:92px;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-.timer-card .lbl{flex:1;font-size:14px;opacity:.9;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.timer-card button{min-height:44px;min-width:44px;border-radius:12px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.18);color:#fff;font-weight:600;padding:0 10px}
-body.timer-on{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 120px)}
+.timer-card .tinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.timer-card .clock{font-family:var(--display);font-weight:700;font-size:46px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.timer-card .lbl{font-size:13px;opacity:.9;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timer-card button{width:60px;height:60px;flex:none;border-radius:16px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.2);color:#fff;font-weight:700;font-size:18px;padding:0;display:grid;place-items:center}
+.timer-card button svg{width:24px;height:24px}
+.timer-card{gap:10px;padding:12px}
+body.timer-on{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 130px)}
 
-body.timer-on .toast{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 116px)}
+body.timer-on .toast{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0px) + 120px)}
 
 /* Sheet */
 dialog{border:0;padding:0;background:transparent;max-width:640px;width:100%;margin:auto auto 0;color:var(--ink)}
@@ -318,11 +324,11 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 
 <div class="timer" id="timer" hidden>
   <div class="wrap"><div class="timer-card" role="timer" aria-live="polite"><span class="tfill" id="tBar" aria-hidden="true"></span>
-    <span class="clock" id="tClock">0:00</span><span class="lbl" id="tLbl"></span>
-    <button id="tReset" aria-label="Reiniciar cronômetro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+    <div class="tinfo"><span class="clock" id="tClock">0:00</span><span class="lbl" id="tLbl"></span></div>
+    <button id="tReset" aria-label="Reiniciar cronômetro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
     <button id="tPlus" aria-label="Mais 15 segundos">+15</button>
     <button id="tStop" aria-label="Fechar cronômetro">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div></div>
 </div>
@@ -392,8 +398,8 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const APP_VERSAO = "1.11";
-const APP_DATA = "2026-10-28";
+const APP_VERSAO = "1.12";
+const APP_DATA = "2026-11-04";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
  "semanas": 6,
@@ -2177,11 +2183,12 @@ function viewSessao(){
         <button class="btn mais" data-mais="${i}" aria-label="Contar uma série">+1</button>
       </div>` : ""}
       <div class="tools">
-        <button class="btn" data-timer="${timerSeg}" data-lbl="${esc(it.nome)}" data-idx="${i}" data-forca="${forca?1:0}">${ico.clock}${timerLbl}</button>
-        ${forca && !/abdômen|core/i.test(it.nome) ? `<label class="load"><span class="sr">Carga de ${esc(it.nome)}</span>
-          <input type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—"></label>
+        <button class="btn btn-desc" data-timer="${timerSeg}" data-lbl="${esc(it.nome)}" data-idx="${i}" data-forca="${forca?1:0}">${ico.clock}${timerLbl}</button>
+        ${forca && !/abdômen|core/i.test(it.nome) ? `<div class="carga">
+          <label class="rot" for="kg-${i}">Carga<b>${kg?relDia(kg.d):"—"}</b></label>
+          <input id="kg-${i}" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—">
           <button class="unit" data-unit="${esc(it.nome)}" aria-label="Unidade da carga de ${esc(it.nome)}">${UNID[(kg&&kg.u)||unidPadrao(it.nome)]}</button>
-          ${kg?`<span class="last">${relDia(kg.d)}</span>`:""}` : ""}
+        </div>` : ""}
       </div>
     </li>`;
   }).join("");
