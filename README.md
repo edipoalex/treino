@@ -15,7 +15,8 @@ js/estado.js            estado salvo no aparelho (localStorage) e ficha em uso
 js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do Apps Script)
 js/progresso.js         datas, sequência, voltas, fases, frequência e peso
 js/series.js            leitura da prescrição em séries ("6 pesado", "20 leve"…)
-js/cargas.js            cargas por exercício (kg, placas, livre)
+js/cargas.js            cargas por exercício (kg, placas, livre; pesado e leve no contraste)
+js/metricas.js          volume e recordes a partir das cargas registradas em cada série
 js/descanso.js          cronômetro de descanso
 js/sync.js              sincronização com a planilha
 js/navegacao.js         abas e render()

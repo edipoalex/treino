@@ -90,3 +90,13 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
 .descanso .prox{font-family:var(--display);font-weight:700;font-size:28px;text-align:center;line-height:1.15}
 .descanso .acoes{margin-top:auto;width:100%;max-width:608px;display:grid;gap:16px}
 .descanso .btn{min-height:64px;font-size:18px}
+/* Contraste: carga pesada e leve; a do grupo da próxima série fica destacada */
+.c-grupo{border:2px solid transparent;border-radius:18px;padding:8px 10px 2px;margin:0 -10px}
+.c-grupo.atual{border-color:var(--c);background:color-mix(in srgb, var(--c) 8%, transparent)}
+/* Resumo ao concluir: recordes e cargas por exercício */
+.recordes{display:grid;gap:4px;margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--ok-bg);color:var(--ink);font-size:15px}
+.recordes b{display:flex;align-items:center;gap:6px;color:var(--ok)}
+.recordes small{color:var(--muted)}
+.r-cargas{list-style:none;margin:8px 0;padding:0;font-size:15px}
+.r-cargas li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
+.r-cargas li span:last-child{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
