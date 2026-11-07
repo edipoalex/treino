@@ -32,7 +32,7 @@ export function normalizarEstado(S){
   if(!Array.isArray(S.fila) || !S.sync.url) S.fila = []; // sem planilha não há fila: a 1ª conexão envia tudo pelo migrar()
   if(S.fichaRemota && validarFicha(S.fichaRemota)) S.fichaRemota = null;
   if(S.timer && !(num(S.timer.fim) && num(S.timer.total) && num(S.timer.k))) delete S.timer;
-  S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao" };
+  S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas" };
   S.v = ESTADO_V;
   return S;
 }

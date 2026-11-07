@@ -1,3 +1,4 @@
+import { consumirRepeticao, confete, contar, marcar, recente, segurarRepete } from "../movimento.js";
 import { blocoCarga, cargaDe, cargaResumo, cargasDaSerie, chaveCarga, digitarCarga, enviarCargasPendentes, grupoDaSerie, gruposDe, partesDe, passoCarga, salvarCarga, temCarga, trocarUnidade } from "../cargas.js";
 import { iniciarDescanso, maisTempo, pararDescanso } from "../descanso.js";
 import { E, FICHA, S, save } from "../estado.js";
@@ -9,13 +10,10 @@ import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSes
 import { enfileirar, hora } from "../sync.js";
 import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
 import { $, esc, fmtNum } from "../util.js";
+import { icone } from "../icones.js";
 
 /* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
-export const ICO = {
-  mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>',
-  lista:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
-  copiar:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>'
-};
+export const ICO = { mais:icone("ellipsis"), lista:icone("list"), copiar:icone("copy") };
 export const PASSO = { kg:2.5, placas:1 };
 export const treinoAtual = a => treino(a.letra, a.fase, a.volta ?? a.semana ?? undefined, a.modo||"completo");
 export const minDesde = t => Math.max(0, Math.round((Date.now()-t)/6e4));
@@ -25,16 +23,16 @@ export const primeiroPendente = (a,t) => { const i=t.itens.findIndex((_,k)=>!a.f
 export function botaoAcao(it,i,a,destaque){
   const T=S.timer;
   if(T && T.k===i && S.pref.descanso==="botao" && T.fim>Date.now())
-    return `<div class="t-linha"><button class="btn primary cor t-btn" data-pular aria-label="Pular descanso"><span class="t-fill" id="tFill"></span><span id="tTxt">⏱ ${fmtSeg((T.fim-Date.now())/1000)}</span></button>
+    return `<div class="t-linha"><button class="btn primary cor t-btn" data-pular aria-label="Pular descanso"><span class="t-fill" id="tFill"></span>${icone("timer")}<span id="tTxt">${fmtSeg((T.fim-Date.now())/1000)}</span></button>
       <button class="btn t-mais" data-mais15>+15 s</button></div>`;
   const cls = destaque ? "primary cor" : "";
   if(!it.series){
     const ok=a.feitos.includes(i);
-    return `<div class="linha2"><button class="btn" data-bloco="${i}">▶ ${it.bloco} min</button><button class="btn ${ok?"":cls}" data-feito="${i}">${ok?"Feito ✓":"Marcar feito"}</button></div>`;
+    return `<div class="linha2"><button class="btn" data-bloco="${i}">${icone("play")} ${it.bloco} min</button><button class="btn ${ok?"":cls} ${ok&&recente("feito")?.i===i?"feito-btn":""}" data-feito="${i}">${ok?`${icone("check")} Feito`:"Marcar feito"}</button></div>`;
   }
   const f=(a.series||{})[i]||0;
   if(f>=it.series) return `<button class="btn reabrir" data-reabrir="${i}">${ico.check} Concluído · ${it.series}/${it.series} · desfazer</button>`;
-  return `<button class="btn ${cls} serie-btn" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
+  return `<button class="btn ${cls} serie-btn ${recente("fimDescanso",2600)?.k===i?"acende":""}" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
 }
 export const chipsDe = it => (it.series>0
   ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`].concat(voltasDo(it)&&voltasDo(it).length?[semTxt(voltasDo(it))]:[])
@@ -47,18 +45,21 @@ export function topoSessao(a,t){
   <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div>
   ${a.modo==="express" && notaExpress(t)?`<p class="meta" style="font-size:14px;margin:0 2px 12px">${esc(notaExpress(t))}</p>`:""}`;
 }
+/* O que acabou de mudar ganha animação na próxima renderização */
+const pop = (i,j) => { const m=recente("serie"); return m && m.i===i && (j===undefined || m.j===j); };
+const recem = i => { const s=recente("serie"), f=recente("feito"); return (s && s.i===i && s.fim) || (f && f.i===i); };
 export function sessaoLista(a,t){
   const n=t.itens.length, f=a.feitos.length;
   const cards=t.itens.map((it,i)=>{
     const done=a.feitos.includes(i), ativo=a.ativo===i, forca=it.series>0, fs=(a.series||{})[i]||0, ser=forca?seriesDe(it):[];
     const emDescanso = S.timer && S.timer.k===i;
-    return `<li class="item ${done?"done":""} ${ativo&&!done?"ativo":""}" data-item="${i}">
+    return `<li class="item ${done?"done":""} ${ativo&&!done?"ativo":""} ${done&&recem(i)?"recem":""}" data-item="${i}">
       <div class="i-cab"><div class="i-tit"><p class="name">${esc(it.nome)}</p>${ativo&&!done?`<span class="ativo-tag">em execução</span>`:""}</div>
-        <button class="info-btn" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">i</button></div>
+        <button class="info-btn" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">${icone("info")}</button></div>
       <p class="presc">${esc(it.prescricao)}</p>
       <div class="chips">${chipsDe(it)}</div>
       ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
-      ${forca?`<div class="i-pips"><div class="pips" aria-hidden="true">${ser.map((_,j)=>`<span class="pip ${j<fs?"on":""}"></span>`).join("")}</div><b class="cnt">${fs}/${it.series}</b>
+      ${forca?`<div class="i-pips"><div class="pips" aria-hidden="true">${ser.map((_,j)=>`<span class="pip ${j<fs?"on":""} ${pop(i,j)?"pop":""}"></span>`).join("")}</div><b class="cnt ${pop(i)?"pop":""}">${fs}/${it.series}</b>
         ${fs<it.series?`<span class="meta prox-serie">próxima: ${esc(rotSerie(ser[fs]))}</span>`:""}</div>`:""}
       ${done && a.marcas?.[i] ? `<p class="done-at">${ico.check} Feito às ${hora(a.marcas[i])}</p>` : ""}
       ${ativo && !done ? blocoCarga(it,i) : (temCarga(it)?`<p class="meta c-resumo">Carga: ${esc(cargaResumo(it))}</p>`:"")}
@@ -74,7 +75,7 @@ export function sessaoLista(a,t){
 export function sessaoFoco(a,t){
   const i=a.ativo, it=t.itens[i], forca=it.series>0, fs=(a.series||{})[i]||0, done=a.feitos.includes(i);
   const ser=forca?seriesDe(it):[], prox=t.itens[i+1], emDescanso = S.timer && S.timer.k===i;
-  const lista = forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""}"><span class="n">${j+1}${j<fs?" ✓":""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
+  const lista = forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""} ${pop(i,j)?"pop":""}"><span class="n">${j+1}${j<fs?icone("check","ic-sm"):""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
     : `<p class="presc" style="font-size:19px;margin:14px 0">${esc(it.prescricao)}</p>`;
   return `<h2 class="f-nome">${esc(it.nome)}</h2>
     <div class="chips">${chipsDe(it)}<button class="btn f-como" data-info="${i}">Como fazer</button></div>
@@ -86,7 +87,7 @@ export function sessaoFoco(a,t){
       ${botaoAcao(it,i,a,true)}
       ${done && !emDescanso ? `<button class="btn primary cor grande block" data-navega="1" style="margin-top:12px">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
     </div>
-    <div class="f-nav"><button class="btn" data-navega="-1" ${i===0?"disabled":""}>‹ Anterior</button><button class="btn" data-navega="1">${prox?"Próximo ›":"Concluir"}</button></div>`;
+    <div class="f-nav"><button class="btn" data-navega="-1" ${i===0?"disabled":""}>${icone("chevron-left")} Anterior</button><button class="btn" data-navega="1">${prox?`Próximo ${icone("chevron-right")}`:"Concluir"}</button></div>`;
 }
 export function viewSessao(){
   const a=E.atual, t=treinoAtual(a);
@@ -94,6 +95,8 @@ export function viewSessao(){
   if(a.ativo==null || a.ativo>=t.itens.length) a.ativo = primeiroPendente(a,t);
   $("#view").innerHTML = `<div class="L-${esc(a.letra)}">${topoSessao(a,t)}${S.pref.modo==="foco" ? sessaoFoco(a,t) : sessaoLista(a,t)}</div>`;
   $("#view").onclick = cliqueSessao;
+  segurarRepete($("#view"), "[data-passo]", dado=>{ const b=E.atual; if(!b) return; const [i,pi,gi,dir]=dado.passo.split(":").map(Number);
+    marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); passoCarga(treinoAtual(b).itens[i],pi,gi,dir); });
   $("#view").onchange = e => {
     const inp=e.target.closest("[data-txt]"); if(!inp) return;
     const [i,pi,gi]=inp.dataset.txt.split(":").map(Number), it=treinoAtual(E.atual).itens[i];
@@ -113,7 +116,7 @@ export function cliqueSessao(e){
   if(d.feito!=null) return alternarFeito(+d.feito);
   if(d.reabrir!=null) return reabrir(+d.reabrir);
   if(d.info!=null) return comoFazer(t.itens[+d.info], a.letra);
-  if(d.passo){ const [i,pi,gi,dir]=par(d.passo); return passoCarga(t.itens[i],pi,gi,dir); }
+  if(d.passo){ if(consumirRepeticao()) return; const [i,pi,gi,dir]=par(d.passo); marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); return passoCarga(t.itens[i],pi,gi,dir); }
   if(d.digitar){ const [i,pi,gi]=par(d.digitar); return digitarCarga(t.itens[i],pi,gi); }
   if(d.uni){ const [i,pi,gi]=par(d.uni); return trocarUnidade(t.itens[i],pi,gi); }
   if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); return rerender(true); }
@@ -127,7 +130,7 @@ export function registrarSerie(i){
   const f=a.series[i]||0; if(f>=it.series) return;
   const ser=seriesDe(it);
   if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerie(it,g) }; }
-  a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15);
+  a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15); marcar("serie",{i, j:f, fim:f+1===it.series});
   const fimEx = a.series[i]===it.series;
   if(fimEx && !a.feitos.includes(i)){ a.feitos.push(i); (a.marcas ??= {})[i]=Date.now(); }
   save();
@@ -142,7 +145,7 @@ export function registrarSerie(i){
 export function alternarFeito(i){
   const a=E.atual, k=a.feitos.indexOf(i); a.marcas ??= {};
   if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
-  else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); if(S.timer?.k===i) pararDescanso(false);
+  else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); marcar("feito",{i}); if(S.timer?.k===i) pararDescanso(false);
     desfazer(`${treinoAtual(a).itens[i].nome} feito`, ()=>{ const j=a.feitos.indexOf(i); if(j>=0){ a.feitos.splice(j,1); delete a.marcas[i]; } save(); rerender(); }); }
   save(); rerender();
 }
@@ -232,14 +235,16 @@ export function concluir(){
   const outras=Object.values(S.etapas).flatMap(e=>e.historico||[]).filter(h=>h!==x);
   const recs=recordesDaSessao(x, outras);
   const linhasCargas=x.itens.filter(i=>i.cs?.length).map(i=>`<li><span>${esc(i.n)}</span><span>${esc(resumoCargas(i))}</span></li>`).join("");
-  E.atual=null; save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false);
+  E.atual=null; save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
   render(); scrollTo(0,0);
   folha(`<div class="L-${esc(a.letra)}" style="display:flex;align-items:center;gap:14px">${plate(a.letra,"sm")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
-    <div class="stats"><div class="stat"><b>${x.duracao}</b><span>min</span></div><div class="stat"><b>${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
+    <div class="stats"><div class="stat"><b data-contar="${x.duracao}">${x.duracao}</b><span>min</span></div><div class="stat"><b data-contar="${seriesFeitas}">${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b ${vol>=1000?`data-contar="${Math.round(vol/100)/10}" data-dec="1" data-suf=" t"`:`data-contar="${Math.round(vol)}" data-suf=" kg"`}>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
     ${vol && volAnt ? `<p class="meta">Volume ${difVol>=0?"+":"−"}${Math.abs(difVol)}% sobre o último treino ${esc(a.letra)}.</p>` : ""}
     ${recs.length?`<div class="recordes"><b>${ico.trofeu} ${recs.length>1?`${recs.length} recordes`:"Recorde"}</b>${recs.map(r=>`<span>${esc([r.k, r.g].filter(Boolean).join(" · "))}: ${fmtRec(r)} <small>(antes ${fmtNum(r.antes)})</small></span>`).join("")}</div>`:""}
     ${linhasCargas?`<ul class="r-cargas">${linhasCargas}</ul>`:""}
     ${anterior?`<p class="meta">Último treino ${esc(a.letra)}: ${anterior.duracao} min (${relDia(anterior.data)}).</p>`:""}
     <p class="meta">Próximo da sequência: treino ${esc(proxima())}.</p>
     <button class="btn primary" data-fechar>Fechar</button>`);
+  const fr=$("#folha"); if(fr) contar(fr);
+  if(recs.length) setTimeout(confete, 450);
 }

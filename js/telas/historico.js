@@ -4,6 +4,7 @@ import { DIA, addPeso, fmtData, fmtKg, freqAlvo, hojeISO, minutos, parseISO, par
 import { enfileirar } from "../sync.js";
 import { plate, toast } from "../ui.js";
 import { $, esc } from "../util.js";
+import { icone } from "../icones.js";
 import { fmtRec, fmtVolume, maximos, temCargas, volumeSessao } from "../metricas.js";
 
 export function chartFreq(){
@@ -158,7 +159,7 @@ export function viewHistorico(){
       <input id="pKg" inputmode="decimal" placeholder="kg" aria-label="Peso em kg">
       <button class="btn primary" id="pAdd">Registrar</button>
     </div>
-    ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${esc(p.d)}" aria-label="Apagar registro de ${fmtData(p.d)}">✕</button></li>`).join("")}</ul>`:""}
+    ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${esc(p.d)}" aria-label="Apagar registro de ${fmtData(p.d)}">${icone("x")}</button></li>`).join("")}</ul>`:""}
     ${!parseKg(S.meta.kg)?`<p class="meta" style="margin-top:10px;font-size:14px">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
   </section>
 
