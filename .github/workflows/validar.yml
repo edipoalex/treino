@@ -15,9 +15,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Sintaxe, ficha, tempos e versões
+      - name: Módulos, ficha, tempos e versões
         run: node scripts/validar.mjs --base "$BASE"
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+      - name: Testes unitários do app
+        run: node --test tests/*.test.js
       - name: Testes do Apps Script (planilha simulada)
         run: node scripts/testar-planilha.mjs

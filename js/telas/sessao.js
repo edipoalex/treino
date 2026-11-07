@@ -1,0 +1,227 @@
+import { blocoCarga, cargaDe, cargaResumo, digitarCarga, enviarCargasPendentes, partesDe, passoCarga, salvarCarga, temCarga, trocarUnidade } from "../cargas.js";
+import { iniciarDescanso, maisTempo, pararDescanso } from "../descanso.js";
+import { E, FICHA, S, save } from "../estado.js";
+import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
+import { nav, render } from "../navegacao.js";
+import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpress, totalMin, treino, voltasDo } from "../progresso.js";
+import { rotSerie, seriesDe } from "../series.js";
+import { enfileirar, hora } from "../sync.js";
+import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
+import { $, esc } from "../util.js";
+
+/* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
+export const ICO = {
+  mais:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>',
+  lista:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  copiar:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>'
+};
+export const PASSO = { kg:2.5, placas:1 };
+export const treinoAtual = a => treino(a.letra, a.fase, a.volta ?? a.semana ?? undefined, a.modo||"completo");
+export const minDesde = t => Math.max(0, Math.round((Date.now()-t)/6e4));
+export const rerender = (topo=false) => { const y=scrollY; render(); scrollTo(0, topo?0:y); };
+export const primeiroPendente = (a,t) => { const i=t.itens.findIndex((_,k)=>!a.feitos.includes(k)); return i<0 ? t.itens.length-1 : i; };
+/* Botão de ação: "Série N de M feita"; com descanso no botão, vira o cronômetro (tocar nele pula). */
+export function botaoAcao(it,i,a,destaque){
+  const T=S.timer;
+  if(T && T.k===i && S.pref.descanso==="botao" && T.fim>Date.now())
+    return `<div class="t-linha"><button class="btn primary cor t-btn" data-pular aria-label="Pular descanso"><span class="t-fill" id="tFill"></span><span id="tTxt">⏱ ${fmtSeg((T.fim-Date.now())/1000)}</span></button>
+      <button class="btn t-mais" data-mais15>+15 s</button></div>`;
+  const cls = destaque ? "primary cor" : "";
+  if(!it.series){
+    const ok=a.feitos.includes(i);
+    return `<div class="linha2"><button class="btn" data-bloco="${i}">▶ ${it.bloco} min</button><button class="btn ${ok?"":cls}" data-feito="${i}">${ok?"Feito ✓":"Marcar feito"}</button></div>`;
+  }
+  const f=(a.series||{})[i]||0;
+  if(f>=it.series) return `<button class="btn reabrir" data-reabrir="${i}">${ico.check} Concluído · ${it.series}/${it.series} · desfazer</button>`;
+  return `<button class="btn ${cls} serie-btn" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
+}
+export const chipsDe = it => (it.series>0
+  ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`].concat(voltasDo(it)&&voltasDo(it).length?[semTxt(voltasDo(it))]:[])
+  : [`${it.bloco} min`]).map(c=>`<span class="chip">${c}</span>`).join("");
+export function topoSessao(a,t){
+  const n=t.itens.length;
+  return `<div class="s-topo"><button class="icon-btn s-ic" id="sMenu" aria-label="Opções do treino">${ICO.mais}</button>
+    <div class="s-tit">${plate(a.letra,"xs")}<div><b>Treino ${esc(a.letra)}${a.modo==="express"?" · express":""}</b><span class="meta">${a.feitos.length} de ${n} feitos · ${minDesde(a.inicio)} min</span></div></div>
+    ${S.pref.modo==="foco"?`<button class="icon-btn s-ic" id="sLista" aria-label="Ver todos os exercícios">${ICO.lista}</button>`:`<span class="s-ic" aria-hidden="true"></span>`}</div>
+  <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div>
+  ${a.modo==="express" && notaExpress(t)?`<p class="meta" style="font-size:14px;margin:0 2px 12px">${esc(notaExpress(t))}</p>`:""}`;
+}
+export function sessaoLista(a,t){
+  const n=t.itens.length, f=a.feitos.length;
+  const cards=t.itens.map((it,i)=>{
+    const done=a.feitos.includes(i), ativo=a.ativo===i, forca=it.series>0, fs=(a.series||{})[i]||0, ser=forca?seriesDe(it):[];
+    const emDescanso = S.timer && S.timer.k===i;
+    return `<li class="item ${done?"done":""} ${ativo&&!done?"ativo":""}" data-item="${i}">
+      <div class="i-cab"><div class="i-tit"><p class="name">${esc(it.nome)}</p>${ativo&&!done?`<span class="ativo-tag">em execução</span>`:""}</div>
+        <button class="info-btn" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">i</button></div>
+      <p class="presc">${esc(it.prescricao)}</p>
+      <div class="chips">${chipsDe(it)}</div>
+      ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
+      ${forca?`<div class="i-pips"><div class="pips" aria-hidden="true">${ser.map((_,j)=>`<span class="pip ${j<fs?"on":""}"></span>`).join("")}</div><b class="cnt">${fs}/${it.series}</b>
+        ${fs<it.series?`<span class="meta prox-serie">próxima: ${esc(rotSerie(ser[fs]))}</span>`:""}</div>`:""}
+      ${done && a.marcas?.[i] ? `<p class="done-at">${ico.check} Feito às ${hora(a.marcas[i])}</p>` : ""}
+      ${ativo && !done ? blocoCarga(it,i) : (temCarga(it)?`<p class="meta c-resumo">Carga: ${esc(cargaResumo(it))}</p>`:"")}
+      ${done && !emDescanso ? (forca?botaoAcao(it,i,a,false):"") : botaoAcao(it,i,a,ativo)}
+    </li>`;
+  }).join("");
+  return `<ul class="items">${cards}</ul>
+  <section class="panel fim-treino" style="text-align:center">
+    <p class="meta" style="margin:0 0 12px">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
+    <button class="btn primary cor grande block" id="finishBtn">Concluir treino ${esc(a.letra)}</button>
+  </section>`;
+}
+export function sessaoFoco(a,t){
+  const i=a.ativo, it=t.itens[i], forca=it.series>0, fs=(a.series||{})[i]||0, done=a.feitos.includes(i);
+  const ser=forca?seriesDe(it):[], prox=t.itens[i+1], emDescanso = S.timer && S.timer.k===i;
+  const lista = forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""}"><span class="n">${j+1}${j<fs?" ✓":""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
+    : `<p class="presc" style="font-size:19px;margin:14px 0">${esc(it.prescricao)}</p>`;
+  return `<h2 class="f-nome">${esc(it.nome)}</h2>
+    <div class="chips">${chipsDe(it)}<button class="btn f-como" data-info="${i}">Como fazer</button></div>
+    ${forca?`<p class="presc meta">${esc(it.prescricao)}</p>`:""}
+    ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
+    ${lista}
+    <div class="f-rodape">
+      ${!done ? blocoCarga(it,i) : ""}
+      ${botaoAcao(it,i,a,true)}
+      ${done && !emDescanso ? `<button class="btn primary cor grande block" data-navega="1" style="margin-top:12px">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
+    </div>
+    <div class="f-nav"><button class="btn" data-navega="-1" ${i===0?"disabled":""}>‹ Anterior</button><button class="btn" data-navega="1">${prox?"Próximo ›":"Concluir"}</button></div>`;
+}
+export function viewSessao(){
+  const a=E.atual, t=treinoAtual(a);
+  a.series ??= {};
+  if(a.ativo==null || a.ativo>=t.itens.length) a.ativo = primeiroPendente(a,t);
+  $("#view").innerHTML = `<div class="L-${esc(a.letra)}">${topoSessao(a,t)}${S.pref.modo==="foco" ? sessaoFoco(a,t) : sessaoLista(a,t)}</div>`;
+  $("#view").onclick = cliqueSessao;
+  $("#view").onchange = e => {
+    const inp=e.target.closest("[data-txt]"); if(!inp) return;
+    const [i,pi]=inp.dataset.txt.split(":").map(Number), p=partesDe(treinoAtual(E.atual).itens[i])[pi];
+    salvarCarga(p.key, inp.value, cargaDe(p.key).u);
+  };
+  manterTela(true);
+}
+export function cliqueSessao(e){
+  const a=E.atual; if(!a) return;
+  const t=treinoAtual(a), el=e.target.closest("button,a,input,[data-item]"); if(!el || el.matches("a,input")) return;
+  const d=el.dataset, par = v => v.split(":").map(Number);
+  if(d.serie!=null) return registrarSerie(+d.serie);
+  if(d.pular!=null) return pararDescanso();
+  if(d.mais15!=null) return maisTempo(15);
+  if(d.bloco!=null){ const i=+d.bloco; a.ativo=i; save(); return iniciarDescanso(i, t.itens[i].bloco*60, "Fim do bloco"); }
+  if(d.feito!=null) return alternarFeito(+d.feito);
+  if(d.reabrir!=null) return reabrir(+d.reabrir);
+  if(d.info!=null) return comoFazer(t.itens[+d.info], a.letra);
+  if(d.passo){ const [i,pi,dir]=par(d.passo); return passoCarga(t.itens[i],pi,dir); }
+  if(d.digitar){ const [i,pi]=par(d.digitar); return digitarCarga(t.itens[i],pi); }
+  if(d.uni){ const [i,pi]=par(d.uni); return trocarUnidade(t.itens[i],pi); }
+  if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); return rerender(true); }
+  if(el.id==="sMenu") return menuSessao();
+  if(el.id==="sLista") return listaGeral();
+  if(el.id==="finishBtn") return concluir();
+  if(d.item!=null && el.matches("[data-item]")){ const i=+d.item; if(a.ativo!==i){ a.ativo=i; save(); rerender(); } }
+}
+export function registrarSerie(i){
+  const a=E.atual, t=treinoAtual(a), it=t.itens[i]; a.series ??= {};
+  const f=a.series[i]||0; if(f>=it.series) return;
+  a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15);
+  const fimEx = a.series[i]===it.series;
+  if(fimEx && !a.feitos.includes(i)){ a.feitos.push(i); (a.marcas ??= {})[i]=Date.now(); }
+  save();
+  desfazer(`Série ${f+1} de ${it.series} registrada`, ()=>{
+    a.series[i]=f; const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
+    pararDescanso(false); save(); rerender();
+  });
+  const ser=seriesDe(it), seguinte=t.itens[i+1];
+  const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaResumo(it)}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
+  if(!fimEx || seguinte) iniciarDescanso(i, it.descanso, prox); else rerender();
+}
+export function alternarFeito(i){
+  const a=E.atual, k=a.feitos.indexOf(i); a.marcas ??= {};
+  if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
+  else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); if(S.timer?.k===i) pararDescanso(false);
+    desfazer(`${treinoAtual(a).itens[i].nome} feito`, ()=>{ const j=a.feitos.indexOf(i); if(j>=0){ a.feitos.splice(j,1); delete a.marcas[i]; } save(); rerender(); }); }
+  save(); rerender();
+}
+export function reabrir(i){
+  const a=E.atual; a.series ??= {}; a.series[i]=Math.max(0,(a.series[i]||0)-1);
+  const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas?.[i]; }
+  a.ativo=i; save(); rerender();
+}
+export function comoFazer(it, letra){
+  const mets=metodosDe(it), c=temCarga(it)?cargaResumo(it):"";
+  folha(`<h3>${esc(it.nome)}</h3>
+    <h4>Como executar</h4><ul>${guiaDe(it.nome).map(d=>`<li>${esc(d)}</li>`).join("")}</ul>
+    ${mets.length?`<h4>Método</h4>${mets.map(([m,d])=>`<p><strong>${esc(m)}</strong>${d?`: ${esc(d)}`:""}</p>`).join("")}`:""}
+    <h4>Nesta ficha</h4><p>${esc(it.prescricao)}${it.series?`. ${it.series} ${it.series>1?"séries":"série"}, ${it.descanso}s de descanso`:`. ${it.bloco} min`}.${it.obs?` ${esc(it.obs)}.`:""}</p>
+    ${c && c!=="—"?`<p>Última carga: <strong>${esc(c)}</strong></p>`:""}
+    <a class="btn claude" href="${linkClaude(it,letra)}" target="_blank" rel="noopener">Perguntar ao Claude</a>
+    <button class="btn" data-copiar>${ICO.copiar} Copiar a pergunta</button>
+    <button class="btn" data-fechar>Fechar</button>`,
+    f=>{ f.querySelector("[data-copiar]").onclick=async()=>{ const ok=await copiarTexto(perguntaClaude(it,letra)); toast(ok?"Pergunta copiada. Cole no projeto do Claude.":"Não foi possível copiar neste navegador"); }; });
+}
+export function menuSessao(){
+  const a=E.atual, outro = a.modo==="express" ? "completo" : "express";
+  const tOutro = temExpress(a.letra) ? treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined,outro) : null;
+  folha(`<h3>Opções do treino</h3>
+    <h4>Modo do treino</h4>
+    <div class="seg"><button data-m="lista" aria-pressed="${S.pref.modo==="lista"}">Lista</button><button data-m="foco" aria-pressed="${S.pref.modo==="foco"}">Foco</button></div>
+    ${tOutro?`<button class="btn" data-versao="${outro}">Trocar para ${outro==="express"?"Express":"Completo"} · ${Math.round(totalMin(tOutro))} min</button>`:""}
+    <div class="linha2" style="margin-top:0"><button class="btn" data-aba="ficha">Ver ficha</button><button class="btn" data-aba="guia">Ver guia</button></div>
+    <div style="height:8px"></div>
+    <button class="btn danger" data-cancelar>Cancelar treino</button>
+    <button class="btn" data-fechar>Fechar</button>`,
+    f=>{
+      f.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{ S.pref.modo=b.dataset.m; save(); fecharFolha(); rerender(true); });
+      f.querySelector("[data-versao]")?.addEventListener("click", e=>{ fecharFolha(); trocarVersao(e.currentTarget.dataset.versao); });
+      f.querySelectorAll("[data-aba]").forEach(b=>b.onclick=()=>{ fecharFolha(); nav.tab=b.dataset.aba; render(); scrollTo(0,0); });
+      f.querySelector("[data-cancelar]").onclick=()=>{
+        f.querySelector(".corpo").innerHTML=`<h3>Cancelar o treino ${esc(a.letra)}?</h3><p class="meta">As séries marcadas não serão registradas.</p>
+          <button class="btn" data-fechar>Voltar ao treino</button><div style="height:8px"></div><button class="btn danger" data-sim>Sim, cancelar</button>`;
+        f.querySelector("[data-sim]").onclick=()=>{ fecharFolha(); pararDescanso(false); E.atual=null; save(); manterTela(false); render(); scrollTo(0,0); };
+      };
+    });
+}
+export function listaGeral(){
+  const a=E.atual, t=treinoAtual(a);
+  folha(`<h3>Treino ${esc(a.letra)}</h3>
+    ${t.itens.map((it,i)=>{ const ok=a.feitos.includes(i), fs=(a.series||{})[i]||0;
+      return `<button class="ex ${i===a.ativo?"at":""} ${ok?"ok":""}" data-ir="${i}"><span class="cnt">${i+1}</span><span>${esc(it.nome)}</span><span class="st">${it.series?`${fs}/${it.series}`:(ok?"feito":`${it.bloco} min`)}</span></button>`; }).join("")}
+    <button class="btn" data-fechar>Fechar</button>`,
+    f=>f.querySelectorAll("[data-ir]").forEach(b=>b.onclick=()=>{ a.ativo=+b.dataset.ir; save(); fecharFolha(); rerender(true); }));
+}
+export function trocarVersao(novo){
+  const a=E.atual, t=treinoAtual(a);
+  if(novo===(a.modo||"completo")) return;
+  const temAlgo = a.feitos.length || Object.values(a.series||{}).some(v=>v>0);
+  if(temAlgo && !confirm(`Trocar para ${novo==="express"?"Express":"Completo"}? Os exercícios que existem nas duas versões mantêm as marcações e séries.`)) return;
+  const novoT=treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined,novo);
+  const map={}; t.itens.forEach((it,i)=>{ const j=novoT.itens.findIndex(x=>x.nome===it.nome); if(j>=0) map[i]=j; });
+  const remap=obj=>{ const o={}; for(const [k,v] of Object.entries(obj||{})) if(map[k]!=null) o[map[k]]=v; return o; };
+  a.feitos=a.feitos.filter(i=>map[i]!=null).map(i=>map[i]);
+  a.marcas=remap(a.marcas); a.series=remap(a.series);
+  for(const k in a.series) a.series[k]=Math.min(a.series[k], novoT.itens[k].series||0);
+  a.ativo = a.ativo!=null && map[a.ativo]!=null ? map[a.ativo] : 0;
+  pararDescanso(false); a.modo=novo; save(); rerender(true);
+}
+export function concluir(){
+  const a=E.atual, t=treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined, a.modo||"completo"), falt=t.itens.length-a.feitos.length;
+  if(!confirm(falt>0 ? `Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir o treino ${a.letra} assim mesmo?` : `Concluir o treino ${a.letra} e registrar ${Math.round((Date.now()-a.inicio)/6e4)} min?`)) return;
+  if(!E.inicio){ E.inicio = hojeISO(); enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); }
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const fim=Date.now();
+  const itens = a.feitos.slice().sort((x,y)=>(a.marcas?.[x]||0)-(a.marcas?.[y]||0))
+    .map(i=>({ n:t.itens[i].nome, t: a.marcas?.[i] ? Math.round((a.marcas[i]-a.inicio)/1000) : null, e: Math.round(minutos(t.itens[i])*60), ...(t.itens[i].series ? {s:a.series?.[i]||0, sp:t.itens[i].series} : {}) }));
+  E.historico.push({ id, letra:a.letra, fase:a.fase, semana:semanaAtual(), data:isoDe(new Date(a.inicio)), // data do início, mesmo se passar da meia-noite
+    duracao: Math.round((fim-a.inicio)/6e4), feitos:a.feitos.length, total:t.itens.length,
+    inicio: hora(a.inicio), fim: hora(fim), itens, modo: a.modo||"completo", volta: a.volta ?? null, numero: E.historico.length+1 });
+  { const x=E.historico[E.historico.length-1]; enfileirar({tipo:"addSessao", etapa:FICHA.etapa, ...x}); }
+  const seriesFeitas=Object.values(a.series||{}).reduce((x,y)=>x+y,0), x=E.historico[E.historico.length-1];
+  const anterior=E.historico.slice(0,-1).filter(h=>h.letra===a.letra && h.duracao>0).pop();
+  E.atual=null; save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false);
+  render(); scrollTo(0,0);
+  folha(`<div class="L-${esc(a.letra)}" style="display:flex;align-items:center;gap:14px">${plate(a.letra,"sm")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
+    <div class="stats"><div class="stat"><b>${x.duracao}</b><span>min</span></div><div class="stat"><b>${seriesFeitas}</b><span>séries</span></div><div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div></div>
+    ${anterior?`<p class="meta">Último treino ${esc(a.letra)}: ${anterior.duracao} min (${relDia(anterior.data)}).</p>`:""}
+    <p class="meta">Próximo da sequência: treino ${esc(proxima())}.</p>
+    <button class="btn primary" data-fechar>Fechar</button>`);
+}

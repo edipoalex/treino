@@ -1,0 +1,1466 @@
+/* Ficha da etapa atual. Gerado por scripts/aplicar-ficha.mjs a partir de fichas/etapa-NN.json: não edite à mão. */
+export const FICHA_EMBUTIDA = {
+ "etapa": 19,
+ "semanas": 6,
+ "frequencia": "4–5x por semana",
+ "fases_semanas": {
+  "1": [
+   1
+  ],
+  "2": [
+   2,
+   3,
+   4,
+   5,
+   6
+  ]
+ },
+ "fases": {
+  "1": {
+   "A": {
+    "foco": "Peito + Tríceps + cardio HIIT",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "3x8 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Crossover cruzando à frente + crossover soco para baixo",
+      "prescricao": "Bi-set 2x12+12",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "3x até próximo da falha",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "HIIT: 6x (30s forte / 30s leve) + 2 min de desaquecimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 10,
+      "obs": "Bike ou esteira; PSE 8–9 nos tiros"
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "4 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "3x8 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Crossover cruzando à frente + crossover soco para baixo",
+      "prescricao": "Bi-set 1x12+12",
+      "series": 1,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "2x até próximo da falha",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "Drop duplo 1x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     }
+    ]
+   },
+   "B": {
+    "foco": "Costas + Bíceps + posterior de ombro + abdômen",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "3x8 (carga alta)",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "Drop 2x (10 reps / −20% até a falha)",
+      "series": 2,
+      "exec": 55,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "3 voltas: 15 reps + 45s de prancha",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "2x8 (carga alta)",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "2x15",
+      "series": 2,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "Contraste: 1x6 / 1x20",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "Drop 1x (10 reps / −20% até a falha)",
+      "series": 1,
+      "exec": 55,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "2 voltas: 15 reps + 45s de prancha",
+      "series": 2,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     }
+    ]
+   },
+   "C": {
+    "foco": "Pernas + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Pré-exaustão"
+     },
+     {
+      "nome": "Agachamento livre",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Descanso maior por ser composto pesado",
+      "voltas": [
+       1
+      ]
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "Pirâmide: 1x30 / 1x20 / 1x10 / 1x6",
+      "series": 4,
+      "exec": 55,
+      "descanso": 90,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "3x10",
+      "series": 3,
+      "exec": 40,
+      "descanso": 90,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "3x12+15",
+      "series": 3,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 na bike (baixo impacto)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "4 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "Drop duplo 1x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Pré-exaustão"
+     },
+     {
+      "nome": "Agachamento livre",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Descanso maior por ser composto pesado",
+      "voltas": [
+       1
+      ]
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "Pirâmide: 1x30 / 1x20 / 1x10 / 1x6",
+      "series": 4,
+      "exec": 55,
+      "descanso": 90,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "2x10",
+      "series": 2,
+      "exec": 40,
+      "descanso": 90,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "Rest-pause 1x (falha / 10s / falha / 10s / falha)",
+      "series": 1,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. 1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "2x12+15",
+      "series": 2,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     }
+    ]
+   },
+   "D": {
+    "foco": "Ombros + Trapézio + abdômen + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10 / 10s / 1x6 / falha)",
+      "series": 2,
+      "exec": 120,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Mesma carga do início ao fim"
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Elevação frontal com anilha + remada alta com halteres",
+      "prescricao": "Bi-set 2x10+10",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "3x12 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + pallof press",
+      "prescricao": "3 voltas: 15 reps + 12 por lado",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo (ou HIIT de 10 min, se o tempo apertar)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 15,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10 / 10s / 1x6 / falha)",
+      "series": 2,
+      "exec": 120,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas. Mesma carga do início ao fim"
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Elevação frontal com anilha + remada alta com halteres",
+      "prescricao": "Bi-set 1x10+10",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "2x12 (na última: drop −20% até a falha)",
+      "series": 2,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": "Volta de calibração: pare 1–2 reps antes da falha nas técnicas"
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + pallof press",
+      "prescricao": "2 voltas: 15 reps + 12 por lado",
+      "series": 2,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     }
+    ]
+   },
+   "E": {
+    "foco": "Cardio intervalado + core",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Intervalado: 4x (4 min forte / 3 min leve)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 28,
+      "obs": "Forte: 85–90% FCmáx / PSE 8. Esteira inclinada, bike ou remo"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 12,
+      "obs": ""
+     },
+     {
+      "nome": "Core: roda abdominal + abdominal remador + prancha lateral",
+      "prescricao": "3 voltas: 10 + 15 reps + 30s por lado",
+      "series": 3,
+      "exec": 150,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Intervalado: 3x (4 min forte / 3 min leve)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 21,
+      "obs": "Forte: 85–90% FCmáx / PSE 8. Esteira inclinada, bike ou remo"
+     },
+     {
+      "nome": "Core: roda abdominal + abdominal remador + prancha lateral",
+      "prescricao": "2 voltas: 10 + 15 reps + 30s por lado",
+      "series": 2,
+      "exec": 150,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ]
+   }
+  },
+  "2": {
+   "A": {
+    "foco": "Peito + Tríceps + cardio HIIT",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "3x8 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Crossover cruzando à frente + crossover soco para baixo",
+      "prescricao": "Bi-set 2x12+12",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "3x até próximo da falha",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "HIIT: 6x (30s forte / 30s leve) + 2 min de desaquecimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 10,
+      "obs": "Bike ou esteira; PSE 8–9 nos tiros"
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "4 min de esteira leve + 2 séries de aproximação no supino",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Supino reto com barra",
+      "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Supino 30° com halteres",
+      "prescricao": "3x8 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 50,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador peitoral",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Crossover cruzando à frente + crossover soco para baixo",
+      "prescricao": "Bi-set 1x12+12",
+      "series": 1,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps nas paralelas (livre ou graviton)",
+      "prescricao": "2x até próximo da falha",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Tríceps corda",
+      "prescricao": "Drop duplo 1x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     }
+    ]
+   },
+   "B": {
+    "foco": "Costas + Bíceps + posterior de ombro + abdômen",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "3x8 (carga alta)",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6",
+      "series": 3,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "Drop 2x (10 reps / −20% até a falha)",
+      "series": 2,
+      "exec": 55,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "3 voltas: 15 reps + 45s de prancha",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Mobilidade de ombro + 2 séries de aproximação na puxada",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Puxada aberta pronada",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6",
+      "series": 5,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Remada na máquina pegada neutra",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Remada curvada com barra supinada",
+      "prescricao": "2x8 (carga alta)",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Voador dorsal (posterior de ombro)",
+      "prescricao": "2x15",
+      "series": 2,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca barra reta",
+      "prescricao": "Contraste: 1x6 / 1x20",
+      "series": 2,
+      "exec": 40,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Rosca martelo com halteres",
+      "prescricao": "Drop 1x (10 reps / −20% até a falha)",
+      "series": 1,
+      "exec": 55,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: elevação de pernas na paralela + prancha",
+      "prescricao": "2 voltas: 15 reps + 45s de prancha",
+      "series": 2,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     }
+    ]
+   },
+   "C": {
+    "foco": "Pernas + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "5 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "Drop duplo 2x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Pré-exaustão"
+     },
+     {
+      "nome": "Agachamento livre",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado",
+      "voltas": [
+       3,
+       5
+      ]
+     },
+     {
+      "nome": "Hack machine",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado",
+      "voltas": [
+       2,
+       4,
+       6
+      ]
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "Pirâmide: 1x30 / 1x20 / 1x10 / 1x6",
+      "series": 4,
+      "exec": 55,
+      "descanso": 90,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "3x10",
+      "series": 3,
+      "exec": 40,
+      "descanso": 90,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)",
+      "series": 2,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "3x12+15",
+      "series": 3,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 na bike (baixo impacto)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 8,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "4 min de bike + 2 séries de aproximação no agachamento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Cadeira extensora",
+      "prescricao": "Drop duplo 1x (10 reps / −10% até a falha / −10% até a falha)",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Pré-exaustão"
+     },
+     {
+      "nome": "Agachamento livre",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado",
+      "voltas": [
+       3,
+       5
+      ]
+     },
+     {
+      "nome": "Hack machine",
+      "prescricao": "4x6 (carga alta)",
+      "series": 4,
+      "exec": 40,
+      "descanso": 100,
+      "bloco": 1,
+      "obs": "Descanso maior por ser composto pesado",
+      "voltas": [
+       2,
+       4,
+       6
+      ]
+     },
+     {
+      "nome": "Leg press 45°",
+      "prescricao": "Pirâmide: 1x30 / 1x20 / 1x10 / 1x6",
+      "series": 4,
+      "exec": 55,
+      "descanso": 90,
+      "bloco": 1,
+      "obs": "Quanto menos reps, mais carga"
+     },
+     {
+      "nome": "Stiff com barra",
+      "prescricao": "2x10",
+      "series": 2,
+      "exec": 40,
+      "descanso": 90,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Mesa ou cadeira flexora",
+      "prescricao": "Rest-pause 1x (falha / 10s / falha / 10s / falha)",
+      "series": 1,
+      "exec": 70,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "1ª falha entre 10 e 14 reps"
+     },
+     {
+      "nome": "Panturrilha em pé + sentada (bi-set)",
+      "prescricao": "2x12+15",
+      "series": 2,
+      "exec": 70,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": ""
+     }
+    ]
+   },
+   "D": {
+    "foco": "Ombros + Trapézio + abdômen + cardio",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10 / 10s / 1x6 / falha)",
+      "series": 2,
+      "exec": 120,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Mesma carga do início ao fim"
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação frontal com anilha + remada alta com halteres",
+      "prescricao": "Bi-set 2x10+10",
+      "series": 2,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "3x12 (na última: drop −20% até a falha)",
+      "series": 3,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + pallof press",
+      "prescricao": "3 voltas: 15 reps + 12 por lado",
+      "series": 3,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo (ou HIIT de 10 min, se o tempo apertar)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 15,
+      "obs": ""
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Rotação de ombro com elástico + aproximação no desenvolvimento",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Desenvolvimento com halteres",
+      "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20",
+      "series": 4,
+      "exec": 45,
+      "descanso": 75,
+      "bloco": 1,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação lateral com halteres",
+      "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10 / 10s / 1x6 / falha)",
+      "series": 2,
+      "exec": 120,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": "Mesma carga do início ao fim"
+     },
+     {
+      "nome": "Crucifixo invertido no voador",
+      "prescricao": "3x15",
+      "series": 3,
+      "exec": 40,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Elevação frontal com anilha + remada alta com halteres",
+      "prescricao": "Bi-set 1x10+10",
+      "series": 1,
+      "exec": 60,
+      "descanso": 75,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Encolhimento com halteres",
+      "prescricao": "2x12 (na última: drop −20% até a falha)",
+      "series": 2,
+      "exec": 45,
+      "descanso": 60,
+      "bloco": 0.5,
+      "obs": ""
+     },
+     {
+      "nome": "Abdômen: abdominal na polia + pallof press",
+      "prescricao": "2 voltas: 15 reps + 12 por lado",
+      "series": 2,
+      "exec": 90,
+      "descanso": 45,
+      "bloco": 0.5,
+      "obs": "Circuito"
+     }
+    ]
+   },
+   "E": {
+    "foco": "Cardio intervalado + core",
+    "itens": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 5,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Intervalado: 4x (4 min forte / 3 min leve)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 28,
+      "obs": "Forte: 85–90% FCmáx / PSE 8. Esteira inclinada, bike ou remo"
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Zona 2 contínuo",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 12,
+      "obs": ""
+     },
+     {
+      "nome": "Core: roda abdominal + abdominal remador + prancha lateral",
+      "prescricao": "3 voltas: 10 + 15 reps + 30s por lado",
+      "series": 3,
+      "exec": 150,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ],
+    "express": [
+     {
+      "nome": "Aquecimento",
+      "prescricao": "Caminhada leve progressiva",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 4,
+      "obs": ""
+     },
+     {
+      "nome": "Cardio",
+      "prescricao": "Intervalado: 3x (4 min forte / 3 min leve)",
+      "series": 0,
+      "exec": 0,
+      "descanso": 0,
+      "bloco": 21,
+      "obs": "Forte: 85–90% FCmáx / PSE 8. Esteira inclinada, bike ou remo"
+     },
+     {
+      "nome": "Core: roda abdominal + abdominal remador + prancha lateral",
+      "prescricao": "2 voltas: 10 + 15 reps + 30s por lado",
+      "series": 2,
+      "exec": 150,
+      "descanso": 60,
+      "bloco": 1,
+      "obs": "Circuito"
+     }
+    ]
+   }
+  }
+ },
+ "orientacoes": [
+  [
+   "Sequência",
+   "Siga A, B, C, D, E e volte ao A, sem ligar ao dia da semana. Treinando 4x, a próxima semana começa de onde parou."
+  ],
+  [
+   "Contagem da etapa",
+   "A etapa avança por treinos feitos, não por semanas: 6 voltas de A a E = 30 treinos, com limite de 8 semanas. Treino express conta normalmente."
+  ],
+  [
+   "Fase 1, volta 1",
+   "Calibração: os 5 primeiros treinos (A a E) usam a ficha da fase 2, mas parando 1–2 reps antes da falha nas técnicas para achar a carga certa. HIIT e intervalado já entram."
+  ],
+  [
+   "Fase 2, voltas 2 a 6",
+   "Intensificação: contraste, rest-pause, drop, micro-pausas e bi-sets, com falha onde a ficha pede. Descanso de 75s (90–100s nos compostos de perna)."
+  ],
+  [
+   "Critério de falha",
+   "Use uma carga em que a primeira falha aconteça entre 10 e 14 repetições."
+  ],
+  [
+   "Progressão",
+   "Completou todas as repetições da faixa com boa execução em 2 treinos seguidos: suba 2–5% (2–5 kg em compostos, 1–2 kg em isolados)."
+  ],
+  [
+   "Aquecimento",
+   "4–5 min de cardio leve e 2 séries de aproximação no primeiro exercício (12 reps com ~40% e 6 reps com ~70% da carga)."
+  ],
+  [
+   "Se o tempo apertar",
+   "Tire uma série do último exercício de musculação ou troque o Zona 2 final por 10 min de HIIT. Não corte o aquecimento."
+  ],
+  [
+   "Express (~40 min)",
+   "Para dias corridos: mantém aquecimento e os compostos principais, reduz séries dos isolados e tira o cardio do almoço. Faça Zona 2 de 25–30 min de manhã ou no fim da tarde, ou some ao treino E."
+  ]
+ ],
+ "metodos": [
+  [
+   "Contraste de cargas",
+   "1x6 pesado, descanso, 1x20 leve, descanso, 1x6 pesado… Quanto menos repetições, mais carga."
+  ],
+  [
+   "Rest-pause",
+   "Vá até a falha, descanse 10s, falhe de novo, descanse 10s e falhe pela terceira vez. Conta uma série. Não mexa na carga."
+  ],
+  [
+   "Drop-set",
+   "Faça as repetições indicadas, reduza a carga no percentual pedido e continue até a falha sem descanso. No drop duplo, reduza uma segunda vez."
+  ],
+  [
+   "Micro-pausas",
+   "1x30, 20s, 1x20, 15s, 1x10, 10s, 1x6 e falha, com a mesma carga do começo ao fim. Conta uma série."
+  ],
+  [
+   "Bi-set",
+   "Dois exercícios seguidos, sem descanso entre eles. O par conta uma série."
+  ],
+  [
+   "Pirâmide",
+   "1x30, 1x20, 1x10, 1x6, aumentando a carga a cada série."
+  ],
+  [
+   "Séries por faixa",
+   "Ex.: 2x15 + 2x10. Só a última série de cada faixa vai perto da falha."
+  ]
+ ],
+ "versao": 3,
+ "progressao": {
+  "unidade": "volta",
+  "treinos_por_volta": 5,
+  "voltas": 6,
+  "fases_voltas": {
+   "1": [
+    1
+   ],
+   "2": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "limite_semanas": 8
+ },
+ "express_alvo": 40
+};
