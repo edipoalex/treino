@@ -398,8 +398,8 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const APP_VERSAO = "1.12";
-const APP_DATA = "2026-11-04";
+const APP_VERSAO = "1.13";
+const APP_DATA = "2026-11-07";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
  "semanas": 6,
@@ -1872,21 +1872,95 @@ const KEY = "treino-app-v1";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
+/* ---------- Validação (dados vindos da planilha ou de backup) ---------- */
+const RX = { data:/^\d{4}-\d{2}-\d{2}$/, letra:/^[A-Z]$/, fase:/^\d{1,2}$/, hora:/^\d{1,2}[:h]\d{2}$/, id:/^[\w.-]{1,64}$/ };
+const UNIDS = ["kg","placas","livre"];
+const num = v => typeof v==="number" && isFinite(v);
+const txtOk = (v,max=2000) => typeof v==="string" && v.length<=max && !/[<>]/.test(v);
+const vazio = v => v===null || v===undefined || v==="";
+
+/* Mesmas regras do Apps Script (apps-script/Code.gs). Devolve "" se a ficha é válida. */
+function validarFicha(f){
+  if(!f || typeof f!=="object") return "ficha ausente";
+  if(!Number.isInteger(f.etapa) || f.etapa<1) return "etapa inválida";
+  if(![f.semanas, f.versao, f.express_alvo].every(v=>vazio(v)||num(v))) return "número inválido";
+  if(!f.fases || typeof f.fases!=="object" || !Object.keys(f.fases).length) return "sem fases";
+  const listaInt = a => vazio(a) || (Array.isArray(a) && a.every(Number.isInteger));
+  for(const fase of Object.keys(f.fases)){
+    if(!RX.fase.test(fase)) return `fase "${fase}" inválida`;
+    const ts=f.fases[fase]; if(!ts || typeof ts!=="object" || !Object.keys(ts).length) return `fase ${fase} vazia`;
+    for(const letra of Object.keys(ts)){
+      if(!RX.letra.test(letra)) return `treino "${letra}" inválido`;
+      const t=ts[letra];
+      if(!t || !txtOk(t.foco,200) || !Array.isArray(t.itens) || !t.itens.length) return `treino ${letra} inválido`;
+      if(!vazio(t.express) && !Array.isArray(t.express)) return `express do treino ${letra} inválido`;
+      for(const it of t.itens.concat(t.express||[])){
+        if(!it || !it.nome || !txtOk(it.nome,200) || !txtOk(it.prescricao) || !(vazio(it.obs)||txtOk(it.obs))) return `exercício inválido no treino ${letra}`;
+        if(![it.series,it.exec,it.descanso,it.bloco].every(v=>num(v)&&v>=0)) return `números inválidos em ${it.nome}`;
+        if(!listaInt(it.voltas) || !listaInt(it.semanas)) return `voltas inválidas em ${it.nome}`;
+      }
+    }
+  }
+  const pares = a => vazio(a) || (Array.isArray(a) && a.every(p=>Array.isArray(p) && p.every(x=>txtOk(x))));
+  if(!pares(f.orientacoes) || !pares(f.metodos)) return "orientações ou métodos inválidos";
+  return /[<>]/.test(JSON.stringify(f)) ? "texto com < ou >" : "";
+}
+/* >0 se a ficha a é mais nova que b (etapa, depois revisão) */
+const cmpFicha = (a,b) => a.etapa!==b.etapa ? a.etapa-b.etapa : (a.versao||0)-(b.versao||0);
+
+function limparSessao(x){
+  if(!x || typeof x!=="object") return null;
+  if(!vazio(x.id) && !RX.id.test(String(x.id))) return null;
+  if(!RX.letra.test(x.letra) || !RX.fase.test(String(x.fase)) || !RX.data.test(x.data)) return null;
+  const s={...x, fase:String(x.fase)};
+  for(const k of ["inicio","fim"]) if(!vazio(s[k]) && !RX.hora.test(String(s[k]))) delete s[k];
+  for(const k of ["semana","duracao","volta","numero"]) if(!vazio(s[k]) && !num(s[k])) delete s[k];
+  for(const k of ["feitos","total"]) if(!num(s[k])) s[k]=0;
+  if(s.modo!=="completo" && s.modo!=="express") delete s.modo;
+  if(!Array.isArray(s.itens)) delete s.itens; else s.itens=s.itens.filter(i=>i && typeof i.n==="string");
+  return s;
+}
+const pesoOk = p => p && RX.data.test(p.d) && num(p.kg);
+const unidOk = u => UNIDS.includes(u) ? u : "kg";
+
 /* ---------- Estado persistido ---------- */
+const ESTADO_V = 2;
 function load(){
   try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
   return {};
 }
-let S = load();
-S.theme ??= "auto"; S.etapas ??= {}; S.idade ??= ""; S.peso ??= []; S.meta ??= { kg:"", data:"" };
-S.fila ??= []; S.sync ??= { url:"", k:"", migrado:false, ultimo:0, erro:"" };
 function novaEtapa(){ return { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null }; }
+/* Completa e limpa o estado (do navegador ou de um backup importado). Versão em S.v. */
+function normalizarEstado(S){
+  if(!S || typeof S!=="object") S={};
+  if(!["auto","light","dark"].includes(S.theme)) S.theme="auto";
+  if(!S.etapas || typeof S.etapas!=="object") S.etapas={};
+  for(const st of Object.values(S.etapas)){
+    st.historico = (Array.isArray(st.historico)?st.historico:[]).map(limparSessao).filter(Boolean);
+    if(!st.cargas || typeof st.cargas!=="object") st.cargas={};
+    for(const c of Object.values(st.cargas)){ c.v=String(c.v??""); c.u=unidOk(c.u); }
+    if(!RX.data.test(st.inicio||"")) st.inicio="";
+    if(!["auto","1","2"].includes(st.faseModo)) st.faseModo="auto";
+    st.atual ??= null;
+    if(st.atual){ st.atual.series ??= {}; st.atual.feitos ??= []; st.atual.marcas ??= {}; }
+  }
+  S.peso = (Array.isArray(S.peso)?S.peso:[]).filter(pesoOk);
+  S.idade = num(+S.idade) && +S.idade>0 ? +S.idade : "";
+  S.meta = { kg: num(+S.meta?.kg) && +S.meta.kg>0 ? +S.meta.kg : "", data: RX.data.test(S.meta?.data||"") ? S.meta.data : "" };
+  S.sync ??= { url:"", k:"", migrado:false, ultimo:0, erro:"" };
+  if(!Array.isArray(S.fila) || !S.sync.url) S.fila = []; // sem planilha não há fila: a 1ª conexão envia tudo pelo migrar()
+  if(S.fichaRemota && validarFicha(S.fichaRemota)) S.fichaRemota = null;
+  S.v = ESTADO_V;
+  return S;
+}
+let S = normalizarEstado(load());
 function usarFicha(f){
-  FICHA = f; LETRAS = Object.keys(f.fases["1"]);
+  FICHA = f; LETRAS = Object.keys(f.fases["1"] || Object.values(f.fases)[0]);
   E = (S.etapas[f.etapa] ??= novaEtapa());
   document.title = `Treino · Etapa ${f.etapa}`;
 }
-usarFicha(S.fichaRemota && (S.fichaRemota.etapa>FICHA_EMBUTIDA.etapa || (S.fichaRemota.etapa===FICHA_EMBUTIDA.etapa && (S.fichaRemota.versao||0)>=(FICHA_EMBUTIDA.versao||0))) ? S.fichaRemota : FICHA_EMBUTIDA);
+{ const erro=validarFicha(FICHA_EMBUTIDA); if(erro) console.error("FICHA_EMBUTIDA inválida:", erro); }
+usarFicha(S.fichaRemota && cmpFicha(S.fichaRemota, FICHA_EMBUTIDA)>=0 ? S.fichaRemota : FICHA_EMBUTIDA);
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Não foi possível salvar neste navegador"); } }
 
 /* ---------- Datas ---------- */
@@ -1968,7 +2042,7 @@ function applyTheme(){
 }
 
 /* ---------- UI helpers ---------- */
-const plate = (l, cls="", sub="") => `<div class="plate L-${l} ${cls}" aria-hidden="true"><b>${l}</b>${sub?`<i>${esc(sub)}</i>`:""}</div>`;
+const plate = (l, cls="", sub="") => `<div class="plate L-${esc(l)} ${cls}" aria-hidden="true"><b>${esc(l)}</b>${sub?`<i>${esc(sub)}</i>`:""}</div>`;
 let toastT;
 function toast(msg){ const t=$("#toast"); const dl=document.getElementById("settings"); const host=dl&&dl.open?dl:document.body; if(t.parentNode!==host) host.appendChild(t); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 const ico = {
@@ -2148,8 +2222,7 @@ function viewSessao(){
     const kg = E.cargas[it.nome];
     const timerSeg = forca ? it.descanso : it.bloco*60;
     const timerLbl = forca ? `Descanso ${it.descanso}s` : `Cronômetro ${it.bloco} min`;
-    a.series ??= {};
-    const feitas=a.series[i]||0;
+    const feitas=(a.series||{})[i]||0;
     if(a.info===i){
       const mets=metodosDe(it.prescricao);
       return `<li class="item verso" data-item="${i}">
@@ -2270,7 +2343,7 @@ function viewSessao(){
     E.cargas[nome]={v, u, d:hojeISO()}; enfileirar({tipo:"setCarga", etapa:FICHA.etapa, nome, kg:v, u, data:hojeISO()});
   };
   document.querySelectorAll("[data-kg]").forEach(inp=>inp.onchange=()=>{
-    const nome=inp.dataset.kg, v=inp.value.trim().replace(/\s+/g," ").slice(0,40);
+    const nome=inp.dataset.kg, v=inp.value.replace(/[<>]/g,"").trim().replace(/\s+/g," ").slice(0,40);
     salvarCarga(nome, v, E.cargas[nome]?.u || unidPadrao(nome));
   });
   document.querySelectorAll("[data-unit]").forEach(b=>b.onclick=()=>{
@@ -2458,7 +2531,7 @@ function viewHistorico(){
       <input id="pKg" inputmode="decimal" placeholder="kg" aria-label="Peso em kg">
       <button class="btn primary" id="pAdd">Registrar</button>
     </div>
-    ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${p.d}" aria-label="Apagar registro de ${fmtData(p.d)}">✕</button></li>`).join("")}</ul>`:""}
+    ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${esc(p.d)}" aria-label="Apagar registro de ${fmtData(p.d)}">✕</button></li>`).join("")}</ul>`:""}
     ${!parseKg(S.meta.kg)?`<p class="meta" style="margin-top:10px;font-size:14px">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
   </section>
 
@@ -2466,7 +2539,7 @@ function viewHistorico(){
 
   <section class="panel" aria-labelledby="hSes" style="padding-bottom:8px"><h3 id="hSes">Sessões</h3>
   ${h.length ? `<ul class="hist" style="margin-top:0">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}${x.modo==="express"?" · express":""}, ${fmtData(x.data)}</strong>
-    <span>${x.inicio&&x.fim?`${x.inicio}–${x.fim}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens. Fase ${x.fase}, ${x.volta?`volta ${x.volta}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
+    <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
     ${i===0?`<button class="btn" id="undoBtn" style="min-height:44px">Desfazer</button>`:""}</li>`).join("")}</ul>`
   : `<p class="empty" style="padding:16px 8px">Nenhum treino registrado nesta etapa.</p>`}
   ${h.length>8?`<button class="btn ghost block" id="verTodas" style="margin-top:8px">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
@@ -2543,8 +2616,9 @@ $("#tStop").onclick=stopTimer;
 /* ---------- Sincronização com a planilha ---------- */
 const SCRIPT_PADRAO="https://script.google.com/macros/s/AKfycbxwTnJ-NgKNXqWs5DKNwUwjG6dw0hC1vETohzrDlxh5x-7ijcNBh_oLuQ8YiGh5QB_M/exec";
 let syncMsg="";
-let syncTimer=null, sincronizando=false, renderPendente=false, fichaEnviada=false;
-function enfileirar(op){ S.fila.push(op); save(); agendarSync(); }
+let syncTimer=null, sincronizando=false, renderPendente=false, fichaEnviada=false, falhasSync=0;
+// Sem planilha conectada não há fila: o que existe no aparelho vai pelo migrar() na 1ª conexão.
+function enfileirar(op){ if(S.sync.url) S.fila.push(op); save(); agendarSync(); }
 function agendarSync(ms=600){ clearTimeout(syncTimer); if(S.sync.url) syncTimer=setTimeout(sincronizar, ms); atualizarSyncUI(); }
 
 function migrar(rem){
@@ -2552,7 +2626,7 @@ function migrar(rem){
   const ops=[]; const ids=new Set(rem.sessoes.map(x=>x.id));
   for(const [et, st] of Object.entries(S.etapas)){
     (st.historico||[]).forEach((x,i)=>{
-      x.id ??= `${x.data}-${x.letra}-${i}`;
+      x.id ??= `${x.data}-${x.letra}-${String(x.inicio||i).replace(/\W/g,"")}`; // estável entre aparelhos quando há horário
       if(!ids.has(x.id)) ops.push({tipo:"addSessao", etapa:+et, ...x});
     });
     for(const [nome,c] of Object.entries(st.cargas||{})){
@@ -2582,16 +2656,43 @@ function aplicarRemoto(rem){
       if(!x.modo) delete x.modo; if(!x.volta) delete x.volta; if(!x.numero) delete x.numero;
       if(!x.inicio) delete x.inicio; if(!x.fim) delete x.fim; if(!x.itens || !x.itens.length) delete x.itens;
       return x; });
-    st.cargas = {}; rem.cargas.filter(x=>String(x.etapa)===et).forEach(c=>{ st.cargas[c.nome]={v:String(c.kg), u:c.u||"kg", d:c.data}; (S.unidades ??= {})[c.nome] ??= c.u||"kg"; });
-    st.inicio = cfg[`etapa.${et}.inicio`] || "";
-    st.faseModo = cfg[`etapa.${et}.faseModo`] || "auto";
+    st.historico = st.historico.map(limparSessao).filter(Boolean);
+    st.cargas = {}; rem.cargas.filter(x=>String(x.etapa)===et && typeof x.nome==="string" && RX.data.test(x.data)).forEach(c=>{ const u=unidOk(c.u); st.cargas[c.nome]={v:String(c.kg), u, d:c.data}; (S.unidades ??= {})[c.nome] ??= u; });
+    st.inicio = ""; st.faseModo = "auto";
   });
-  S.peso = rem.peso.slice().sort((a,b)=>a.d<b.d?-1:1);
-  S.meta = { kg: cfg["meta.kg"] ? +cfg["meta.kg"] : "", data: cfg["meta.data"] || "" };
-  S.idade = cfg["idade"] ? +cfg["idade"] : "";
-  const maisNova=(a,b)=> a.etapa!==b.etapa ? a.etapa>b.etapa : (a.versao||0)>=(b.versao||0);
-  if(rem.ficha && maisNova(rem.ficha, FICHA_EMBUTIDA)){ S.fichaRemota = rem.ficha; if(rem.ficha.etapa!==FICHA.etapa){ usarFicha(rem.ficha); toast(`Ficha da etapa ${rem.ficha.etapa} carregada da planilha`); } else usarFicha(rem.ficha); }
+  S.peso = rem.peso.filter(pesoOk).sort((a,b)=>a.d<b.d?-1:1);
+  S.meta = { kg:"", data:"" }; S.idade = "";
+  for(const [chave, valor] of Object.entries(cfg)) aplicarConfig(chave, valor);
+  const erroFicha = rem.ficha ? validarFicha(rem.ficha) : "";
+  if(erroFicha) console.warn("Ficha da planilha ignorada:", erroFicha);
+  const rf = rem.ficha && !erroFicha ? rem.ficha : null;
+  if(rf && cmpFicha(rf, FICHA_EMBUTIDA)>=0){ S.fichaRemota = rf; const trocou = rf.etapa!==FICHA.etapa; usarFicha(rf); if(trocou) toast(`Ficha da etapa ${rf.etapa} carregada da planilha`); }
   else { S.fichaRemota = null; usarFicha(FICHA_EMBUTIDA); }
+}
+
+function aplicarConfig(chave, valor){
+  const m = /^etapa\.(\d+)\.(inicio|faseModo)$/.exec(chave);
+  if(m){
+    const st = (S.etapas[m[1]] ??= novaEtapa());
+    if(m[2]==="inicio") st.inicio = RX.data.test(valor||"") ? valor : "";
+    else st.faseModo = ["1","2"].includes(String(valor)) ? String(valor) : "auto";
+  } else if(chave==="meta.kg") S.meta.kg = num(+valor) && +valor>0 ? +valor : "";
+  else if(chave==="meta.data") S.meta.data = RX.data.test(valor||"") ? valor : "";
+  else if(chave==="idade") S.idade = num(+valor) && +valor>0 ? +valor : "";
+}
+
+/* Reaplica no estado local uma alteração que ainda está na fila (não chegou à planilha),
+   para o estado remoto não "desfazer" na tela o que foi feito durante a sincronização. */
+function aplicarOpLocal(op){
+  const st = et => (S.etapas[et] ??= novaEtapa());
+  switch(op.tipo){
+    case "addSessao": { const {tipo, etapa, ...x} = op; const h=st(etapa).historico; if(!h.some(y=>y.id===x.id)) h.push(x); break; }
+    case "delSessao": for(const e of Object.values(S.etapas)) e.historico = e.historico.filter(y=>y.id!==op.id); break;
+    case "setPeso": S.peso = S.peso.filter(p=>p.d!==op.data).concat({d:op.data, kg:op.kg}).sort((a,b)=>a.d<b.d?-1:1); break;
+    case "delPeso": S.peso = S.peso.filter(p=>p.d!==op.data); break;
+    case "setCarga": { const c=st(op.etapa).cargas; if(vazio(op.kg)) delete c[op.nome]; else c[op.nome]={v:String(op.kg), u:unidOk(op.u), d:op.data}; break; }
+    case "setConfig": aplicarConfig(op.chave, op.valor); break;
+  }
 }
 
 async function sincronizar(){
@@ -2606,23 +2707,33 @@ async function sincronizar(){
     S.fila.splice(0, ops.length);
     let extra=[];
     if(!S.sync.migrado){ extra=migrar(j.estado); S.sync.migrado=true; }
-    const etapasRem=j.estado.etapas||[];
+    if(j.rejeitadas?.length){
+      console.warn("Alterações recusadas pela planilha:", j.rejeitadas);
+      toast(`${j.rejeitadas.length} ${j.rejeitadas.length>1?"alterações recusadas":"alteração recusada"} pela planilha (veja a aba Rejeitadas)`);
+    }
     const rf=j.estado.ficha;
-    const embutidaMaisNova = !rf || FICHA_EMBUTIDA.etapa>rf.etapa || (FICHA_EMBUTIDA.etapa===rf.etapa && (FICHA_EMBUTIDA.versao||0)>(rf.versao||0));
-    if(!fichaEnviada && (!etapasRem.includes(FICHA_EMBUTIDA.etapa) || embutidaMaisNova) && embutidaMaisNova){
+    const embutidaMaisNova = !rf || cmpFicha(FICHA_EMBUTIDA, rf)>0;
+    if(!fichaEnviada && embutidaMaisNova && !validarFicha(FICHA_EMBUTIDA)){
       extra.push({tipo:"setFicha", ficha:FICHA_EMBUTIDA, ativar:true}); fichaEnviada=true;
     }
-    if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return sincronizar(); }
+    // await: a trava "sincronizando" só pode ser liberada depois que a nova rodada terminar
+    if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return await sincronizar(); }
     aplicarRemoto(j.estado);
+    S.fila.forEach(aplicarOpLocal); // alterações feitas durante a requisição continuam visíveis
     if(!S.sync.ultimo) toast("Conectado à planilha");
-    S.sync.ultimo=Date.now(); S.sync.erro="";
+    S.sync.ultimo=Date.now(); S.sync.erro=""; falhasSync=0;
     save();
     if(S.fila.length) agendarSync(300);
     const ativo=document.activeElement;
     if(ativo && /INPUT|SELECT|TEXTAREA/.test(ativo.tagName)) renderPendente=true; else { const y=scrollY; render(); scrollTo(0,y); }
   }catch(err){
     if(/chave/.test(err.message) && !S.sync.ultimo){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; syncMsg="Chave inválida. Confira e tente de novo."; }
-    else S.sync.erro = /chave/.test(err.message) ? "Chave inválida" : "Sem conexão com a planilha";
+    else if(/chave/.test(err.message)) S.sync.erro = "Chave inválida";
+    else {
+      S.sync.erro = /ocupada|servidor/.test(err.message) ? "Erro na planilha, tentando de novo" : "Sem conexão com a planilha";
+      // nova tentativa com espera crescente: 15s, 30s, 1min… até 5min
+      falhasSync++; clearTimeout(syncTimer); syncTimer=setTimeout(sincronizar, Math.min(300000, 15000*2**(falhasSync-1)));
+    }
     save();
   }finally{ sincronizando=false; atualizarSyncUI(); }
 }
@@ -2699,8 +2810,15 @@ $("#exportBtn").onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
 $("#importFile").onchange=async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  try{ const d=JSON.parse(await f.text()); if(!d.etapas) throw 0; d.sync = S.sync; d.sync.migrado=false; d.fila=S.fila; localStorage.setItem(KEY,JSON.stringify(d)); location.reload(); }
+  const f=e.target.files[0]; e.target.value=""; if(!f) return;
+  try{
+    const d=JSON.parse(await f.text());
+    if(!d || typeof d!=="object" || !d.etapas || typeof d.etapas!=="object" || Array.isArray(d.etapas)) throw 0;
+    if(!confirm("Substituir os dados deste aparelho pelo backup?")) return;
+    // a conexão e a fila deste aparelho são mantidas; o backup é limpo e validado como o estado salvo
+    const novo=normalizarEstado({...d, sync:{...S.sync, migrado:false}, fila:S.fila});
+    localStorage.setItem(KEY,JSON.stringify(novo)); location.reload();
+  }
   catch(err){ toast("Arquivo inválido. Use um backup exportado por este app."); }
 };
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",applyTheme);
@@ -2725,6 +2843,9 @@ $("#atualizarApp").onclick=()=>{ location.replace(location.pathname+"?v="+Date.n
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden) checarVersao(); });
 
 applyTheme(); render(); atualizarSyncUI(); agendarSync(100); checarVersao();
+
+/* ---------- Offline ---------- */
+if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
