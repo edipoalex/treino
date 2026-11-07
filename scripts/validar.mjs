@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Validação do app Treino (sem dependências).
    Uso:
-     node scripts/validar.mjs                   valida index.html, sw.js, apps-script/Code.gs e a ficha embutida
+     node scripts/validar.mjs                   valida os módulos (sintaxe e imports), sw.js, apps-script/Code.gs e a ficha atual
      node scripts/validar.mjs --base <ref git>  também compara com outra versão (APP_VERSAO e "versao" da ficha subiram?)
      node scripts/validar.mjs --ficha arq.json  valida só uma ficha avulsa (ex.: a entregue pelo agente)
    As regras de formato da ficha vêm das próprias funções validarFicha() do app e do Apps Script,
@@ -15,35 +15,70 @@ import { fileURLToPath } from "node:url";
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ler = arq => fs.readFileSync(path.join(RAIZ, arq), "utf8");
 
-/* ---------- Leitura do index.html ---------- */
-export function scriptDoApp(html){
-  const m = html.match(/<script>\n([\s\S]*?)\n<\/script>/);
-  if(!m) throw new Error("index.html: bloco <script> não encontrado");
-  return m[1];
-}
-const MARCA = "const FICHA_EMBUTIDA = ";
+/* ---------- Leitura do app ---------- */
+// O app são módulos ES sem build: index.html + css/ + js/. A ficha fica em js/ficha-atual.js e a versão em js/versao.js.
+const MARCA = "export const FICHA_EMBUTIDA = ";
 export function trechoDaFicha(codigo){
   const i = codigo.indexOf(MARCA);
-  if(i<0) throw new Error("index.html: FICHA_EMBUTIDA não encontrada");
+  if(i<0) throw new Error("js/ficha-atual.js: FICHA_EMBUTIDA não encontrada");
   const ini = i + MARCA.length, fim = codigo.indexOf("\n};", ini) + 2;
   return { ini, fim, texto: codigo.slice(ini, fim) };
 }
-export function lerApp(html){
-  const codigo = scriptDoApp(html);
-  const ficha = JSON.parse(trechoDaFicha(codigo).texto);
-  const versao = (codigo.match(/const APP_VERSAO = "([^"]+)"/)||[])[1];
-  const data = (codigo.match(/const APP_DATA = "([^"]+)"/)||[])[1];
-  return { codigo, ficha, versao, data };
+/* lerArq(caminho) devolve o conteúdo ou null; serve tanto para o disco quanto para outra versão no git. */
+export function lerApp(lerArq, listar){
+  const v = lerArq("js/versao.js");
+  if(v===null){ // versão antiga (até v1.16): tudo dentro do index.html
+    const html = lerArq("index.html"); if(html===null) return null;
+    const codigo = (html.match(/<script>\n([\s\S]*?)\n<\/script>/)||[])[1] || html;
+    const i = codigo.indexOf("const FICHA_EMBUTIDA = ") + "const FICHA_EMBUTIDA = ".length;
+    return { arquivos: { "index.html": html }, ficha: JSON.parse(codigo.slice(i, codigo.indexOf("\n};", i) + 2)),
+      versao: (codigo.match(/const APP_VERSAO = "([^"]+)"/)||[])[1], data: (codigo.match(/const APP_DATA = "([^"]+)"/)||[])[1] };
+  }
+  const arquivos = {};
+  for(const a of ["index.html", "sw.js", ...listar()]) arquivos[a] = lerArq(a);
+  return { arquivos, ficha: JSON.parse(trechoDaFicha(arquivos["js/ficha-atual.js"]).texto),
+    versao: (v.match(/APP_VERSAO = "([^"]+)"/)||[])[1], data: (v.match(/APP_DATA = "([^"]+)"/)||[])[1] };
+}
+function listarDisco(){
+  const out = [];
+  const anda = d => { for(const e of fs.readdirSync(path.join(RAIZ, d), { withFileTypes: true })){
+    const p = `${d}/${e.name}`; if(e.isDirectory()) anda(p); else if(/\.(js|css)$/.test(e.name)) out.push(p); } };
+  anda("css"); anda("js");
+  return out.sort();
+}
+const lerDisco = a => { try{ return ler(a); }catch(e){ return null; } };
+export const appAtual = () => lerApp(lerDisco, listarDisco);
+function appNoGit(ref){
+  const git = (...a) => execFileSync("git", a, { cwd: RAIZ, encoding: "utf8", stdio: ["ignore","pipe","ignore"] });
+  return lerApp(a => { try{ return git("show", `${ref}:${a}`); }catch(e){ return null; } },
+    () => git("ls-tree", "-r", "--name-only", ref, "--", "css", "js").split("\n").filter(a=>/\.(js|css)$/.test(a)).sort());
+}
+
+/* ---------- Módulos: sintaxe, imports e lista do service worker ---------- */
+function checarModulos(app, erros){
+  const exportsDe = {};
+  for(const [a, src] of Object.entries(app.arquivos)){
+    if(!a.endsWith(".js")) continue;
+    try{ execFileSync(process.execPath, ["--check", path.join(RAIZ, a)], { stdio: ["ignore","ignore","pipe"] }); }
+    catch(e){ erros.push(`${a}: erro de sintaxe: ${String(e.stderr).trim().split("\n").slice(0,5).join(" ")}`); }
+    exportsDe[a] = new Set([...src.matchAll(/^export (?:async )?(?:function|const|let) ([^=(;]+)/gm)]
+      .flatMap(m => m[1].split(",").map(s => s.trim().split(/[\s=]/)[0])));
+  }
+  for(const [a, src] of Object.entries(app.arquivos)){
+    if(!a.startsWith("js/")) continue;
+    for(const m of src.matchAll(/^import \{([^}]+)\} from "([^"]+)";/gm)){
+      const alvo = path.posix.normalize(path.posix.join(path.posix.dirname(a), m[2]));
+      if(!exportsDe[alvo]){ erros.push(`${a}: importa ${m[2]}, que não existe`); continue; }
+      for(const n of m[1].split(",").map(s=>s.trim())) if(!exportsDe[alvo].has(n)) erros.push(`${a}: ${alvo} não exporta "${n}"`);
+    }
+  }
+  const sw = app.arquivos["sw.js"];
+  for(const a of Object.keys(app.arquivos)) if(/^(js|css)\//.test(a) && !sw.includes(`"${a}"`)) erros.push(`sw.js: ${a} fora da lista ARQUIVOS (o app não abriria offline)`);
+  for(const m of app.arquivos["index.html"].matchAll(/(?:href|src)="((?:css|js)\/[^"]+)"/g)) if(!(m[1] in app.arquivos)) erros.push(`index.html: ${m[1]} não existe`);
 }
 
 /* ---------- Validadores reaproveitados ---------- */
-function validadorDoApp(codigo){
-  const ini = codigo.indexOf("const RX = {"), fim = codigo.indexOf("function limparSessao");
-  if(ini<0 || fim<0) throw new Error("index.html: validarFicha() não encontrada");
-  const ctx = {}; vm.createContext(ctx);
-  vm.runInContext(codigo.slice(ini, fim) + "\nthis.validar = validarFicha;", ctx);
-  return ctx.validar;
-}
+const { validarFicha: validadorDoApp } = await import("../js/validacao.js");
 function validadorDaPlanilha(){
   const ctx = {}; vm.createContext(ctx);
   vm.runInContext(ler("apps-script/Code.gs") + "\nthis.validar = validarFicha;", ctx);
@@ -54,8 +89,8 @@ function validadorDaPlanilha(){
 const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
 const r1 = v => Math.round(v*10)/10;
 
-export function checarFicha(f, codigoApp, erros, avisos){
-  const validadores = [["app", validadorDoApp(codigoApp)], ["planilha", validadorDaPlanilha()]];
+export function checarFicha(f, erros, avisos){
+  const validadores = [["app", validadorDoApp], ["planilha", validadorDaPlanilha()]];
   for(const [nome, v] of validadores){ const e = v(f); if(e) erros.push(`ficha recusada pelo ${nome}: ${e}`); }
   if(erros.length) return null;
 
@@ -140,32 +175,34 @@ function principal(){
   const args = process.argv.slice(2);
   const opt = n => { const i=args.indexOf(n); return i>=0 ? args[i+1] : null; };
   const erros = [], avisos = [];
-  const app = lerApp(ler("index.html"));
+  const app = appAtual();
 
   let ficha = app.ficha;
   if(opt("--ficha")){
     try{ ficha = JSON.parse(fs.readFileSync(path.resolve(opt("--ficha")), "utf8")); }
     catch(e){ console.error(`✗ ${opt("--ficha")}: JSON inválido (${e.message})`); process.exit(1); }
   } else {
-    for(const [nome, codigo] of [["index.html", app.codigo], ["sw.js", ler("sw.js")], ["apps-script/Code.gs", ler("apps-script/Code.gs")]]){
+    checarModulos(app, erros);
+    for(const [nome, codigo] of [["sw.js", ler("sw.js")], ["apps-script/Code.gs", ler("apps-script/Code.gs")]]){
       try{ new vm.Script(codigo, { filename: nome }); } catch(e){ erros.push(`${nome}: erro de sintaxe: ${e.message}`); }
     }
     if(!/^\d+\.\d+$/.test(app.versao||"")) erros.push(`APP_VERSAO inválida: ${app.versao}`);
     if(!/^\d{4}-\d{2}-\d{2}$/.test(app.data||"")) erros.push(`APP_DATA inválida: ${app.data}`);
     const arq = `fichas/etapa-${String(ficha.etapa).padStart(2,"0")}.json`;
     if(fs.existsSync(path.join(RAIZ, arq)) && JSON.stringify(JSON.parse(ler(arq))) !== JSON.stringify(ficha))
-      erros.push(`${arq} difere da FICHA_EMBUTIDA (use scripts/aplicar-ficha.mjs para manter os dois iguais)`);
+      erros.push(`${arq} difere de js/ficha-atual.js (use scripts/aplicar-ficha.mjs para manter os dois iguais)`);
   }
 
-  const resumo = checarFicha(ficha, app.codigo, erros, avisos);
+  const resumo = checarFicha(ficha, erros, avisos);
 
   const base = opt("--base");
   if(base && !/^0+$/.test(base) && !opt("--ficha")){
     let antigo = null;
-    try{ antigo = lerApp(execFileSync("git", ["show", `${base}:index.html`], { cwd: RAIZ, encoding: "utf8", stdio: ["ignore","pipe","ignore"] })); }
-    catch(e){ avisos.push(`não foi possível ler index.html em ${base}; comparação de versão ignorada`); }
+    try{ antigo = appNoGit(base); }catch(e){}
+    if(!antigo) avisos.push(`não foi possível ler o app em ${base}; comparação de versão ignorada`);
     if(antigo){
-      if(antigo.codigo !== app.codigo && antigo.versao === app.versao) erros.push(`index.html mudou, mas APP_VERSAO continua ${app.versao} (os aparelhos não verão o aviso de nova versão)`);
+      const igual = JSON.stringify(Object.entries(antigo.arquivos).sort()) === JSON.stringify(Object.entries(app.arquivos).sort());
+      if(!igual && antigo.versao === app.versao) erros.push(`o app mudou, mas APP_VERSAO continua ${app.versao} (os aparelhos não verão o aviso de nova versão)`);
       const a = antigo.ficha, n = ficha;
       if(JSON.stringify(a) !== JSON.stringify(n)){
         if(n.etapa < a.etapa) erros.push(`etapa voltou de ${a.etapa} para ${n.etapa}`);

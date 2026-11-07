@@ -1,0 +1,10 @@
+{
+  "name": "treino",
+  "private": true,
+  "type": "module",
+  "description": "App de treino (PWA estático, sem build).",
+  "scripts": {
+    "validar": "node scripts/validar.mjs",
+    "test": "node --test tests/*.test.js && node scripts/testar-planilha.mjs"
+  }
+}

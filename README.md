@@ -1,9 +1,35 @@
 # Treino – app da ficha atual
 
-App web (um único `index.html`) para acompanhar a ficha de treino pelo celular.
+App web estático para acompanhar a ficha de treino pelo celular. Sem build: o navegador carrega os
+módulos ES direto, e o GitHub Pages publica o que estiver na `main`.
 
 Acesse: https://edipoalex.github.io/treino/ e use **Adicionar à tela inicial**.
 Depois do primeiro acesso, o app abre também sem internet (`sw.js`).
+
+## Estrutura
+```
+index.html              só a estrutura da página
+css/                    base · componentes · sessao · telas (nessa ordem, a mesma do CSS original)
+js/app.js               ponto de entrada: carrega o estado, liga os eventos, desenha a tela
+js/estado.js            estado salvo no aparelho (localStorage) e ficha em uso
+js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do Apps Script)
+js/progresso.js         datas, sequência, voltas, fases, frequência e peso
+js/series.js            leitura da prescrição em séries ("6 pesado", "20 leve"…)
+js/cargas.js            cargas por exercício (kg, placas, livre)
+js/descanso.js          cronômetro de descanso
+js/sync.js              sincronização com a planilha
+js/navegacao.js         abas e render()
+js/telas/               hoje · sessao · ficha · historico · guia
+js/ajustes.js, js/ui.js, js/guia-exercicios.js, js/atualizacao.js, js/util.js
+js/versao.js            APP_VERSAO e APP_DATA
+js/ficha-atual.js       gerado a partir de fichas/etapa-NN.json (não edite à mão)
+tests/                  testes unitários (node --test)
+```
+Os módulos só declaram funções e constantes; tudo que mexe na página roda a partir de `js/app.js`.
+Arquivo novo em `js/` ou `css/` precisa entrar na lista `ARQUIVOS` do `sw.js` (o validador cobra).
+
+Para rodar localmente: `python3 -m http.server` na pasta e abra `http://localhost:8000`
+(módulos ES não carregam por `file://`).
 
 ## Nova ficha
 A ficha vem do agente do projeto como JSON. Para aplicar:
@@ -12,16 +38,17 @@ A ficha vem do agente do projeto como JSON. Para aplicar:
 node scripts/aplicar-ficha.mjs caminho/etapa-20.json
 ```
 
-O script valida a ficha (com erro, não altera nada), grava `fichas/etapa-NN.json`, substitui
-`FICHA_EMBUTIDA` no `index.html`, ajusta o `versao` da ficha e sobe `APP_VERSAO`/`APP_DATA`.
+O script valida a ficha (com erro, não altera nada), grava `fichas/etapa-NN.json`, regera
+`js/ficha-atual.js`, ajusta o `versao` da ficha e sobe `APP_VERSAO`/`APP_DATA` em `js/versao.js`.
 Histórico, cargas e ajustes ficam separados por número de etapa, então trocar a ficha não apaga o histórico anterior.
 
 ## Validação
-`node scripts/validar.mjs` confere a sintaxe do app, do `sw.js` e do Apps Script, a ficha embutida
-(formato, letras iguais em todas as fases, voltas, tempo por janela até 60 min) e se `fichas/etapa-NN.json`
-bate com o `index.html`. Com `--base <ref>` também exige que `APP_VERSAO` e o `versao` da ficha tenham subido.
-`--ficha arq.json` valida só uma ficha avulsa. `node scripts/testar-planilha.mjs` testa o Apps Script contra uma
-planilha simulada. O GitHub Actions roda os dois em todo PR e push na `main`.
+`node scripts/validar.mjs` confere a sintaxe de cada módulo, se todo import existe, se o `sw.js` lista todos os
+arquivos, a sintaxe do Apps Script, a ficha atual (formato, letras iguais em todas as fases, voltas, tempo por
+janela até 60 min) e se `fichas/etapa-NN.json` bate com `js/ficha-atual.js`. Com `--base <ref>` também exige que
+`APP_VERSAO` e o `versao` da ficha tenham subido. `--ficha arq.json` valida só uma ficha avulsa.
+`npm test` roda os testes unitários (`tests/`) e o teste do Apps Script contra uma planilha simulada
+(`scripts/testar-planilha.mjs`). O GitHub Actions roda tudo em todo PR e push na `main`.
 
 Regras da ficha (validadas no app e na planilha; ficha inválida é recusada):
 - treinos com uma letra de `A` a `Z`, fases numéricas (`"1"`, `"2"`);
