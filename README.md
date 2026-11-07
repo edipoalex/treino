@@ -6,8 +6,21 @@ Acesse: https://edipoalex.github.io/treino/ e use **Adicionar à tela inicial**.
 Depois do primeiro acesso, o app abre também sem internet (`sw.js`).
 
 ## Nova ficha
-Só o objeto `FICHA_EMBUTIDA` dentro do `index.html` muda. Suba também o `versao` da ficha e o `APP_VERSAO`.
+A ficha vem do agente do projeto como JSON. Para aplicar:
+
+```bash
+node scripts/aplicar-ficha.mjs caminho/etapa-20.json
+```
+
+O script valida a ficha (com erro, não altera nada), grava `fichas/etapa-NN.json`, substitui
+`FICHA_EMBUTIDA` no `index.html`, ajusta o `versao` da ficha e sobe `APP_VERSAO`/`APP_DATA`.
 Histórico, cargas e ajustes ficam separados por número de etapa, então trocar a ficha não apaga o histórico anterior.
+
+## Validação
+`node scripts/validar.mjs` confere a sintaxe do app, do `sw.js` e do Apps Script, a ficha embutida
+(formato, letras iguais em todas as fases, voltas, tempo por janela até 60 min) e se `fichas/etapa-NN.json`
+bate com o `index.html`. Com `--base <ref>` também exige que `APP_VERSAO` e o `versao` da ficha tenham subido.
+`--ficha arq.json` valida só uma ficha avulsa. O GitHub Actions roda a validação em todo PR e push na `main`.
 
 Regras da ficha (validadas no app e na planilha; ficha inválida é recusada):
 - treinos com uma letra de `A` a `Z`, fases numéricas (`"1"`, `"2"`);
