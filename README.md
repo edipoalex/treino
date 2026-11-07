@@ -45,7 +45,10 @@ Alterações que a planilha recusa (dado inválido) vão para a aba **Rejeitadas
 
 ## Agente das fichas
 O prompt do projeto que cria as fichas fica em [`agente/prompt.md`](agente/prompt.md).
-Ele não contém dados pessoais: o agente lê os dados do atleta na planilha (abas Atleta, Config e Peso).
+O agente cuida só do treino (fichas, orientações, feedback) e entrega a ficha como `etapa-NN.json`;
+a manutenção técnica do app é feita com o Claude Code. A seção `<ficha_para_o_app>` do prompt é o
+contrato da ficha: ao mudar campos ou regras no app, atualize-a junto.
+O prompt não contém dados pessoais: o agente lê os dados do atleta na planilha (abas Atleta, Config e Peso).
 
 ## Backup
 Use **Ajustes › Exportar** de vez em quando. Com a planilha conectada, ela também guarda os dados.
