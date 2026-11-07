@@ -35,6 +35,11 @@ Arquivo novo em `js/` ou `css/` precisa entrar na lista `ARQUIVOS` do `sw.js` (o
 Para rodar localmente: `python3 -m http.server` na pasta e abra `http://localhost:8000`
 (módulos ES não carregam por `file://`).
 
+## Ícone do app
+`node scripts/gerar-icone.mjs` gera `icon.svg` e os PNGs (iPhone 180 px, Android 192/512 px e versão
+"maskable") a partir da anilha 3D de `js/anilha.js`. Precisa do Google Chrome instalado para converter em PNG.
+No iPhone, o ícone da tela inicial só muda ao remover o app da tela inicial e adicionar de novo.
+
 ## Nova ficha
 A ficha vem do agente do projeto como JSON. Para aplicar:
 
