@@ -23,7 +23,8 @@
   --bg:#E8EBEE; --surface:#FFFFFF; --surface-2:#F3F5F7; --ink:#17212B; --muted:#5B6672; --line:#D3D8DE;
   --ok:#1F8A4C; --warn:#B4541A; --ok-bg:#E4F3EA; --ok-line:#9FD3B4;
   --pA:#D6343B; --pB:#2F6FDB; --pC:#E3B21C; --pD:#2E9E5B; --pE:#4F5B69;
-  --onA:#fff; --onB:#fff; --onC:#1A1A1A; --onD:#fff; --onE:#fff;
+  --pF:#7B4FD0; --pG:#E07A1F; --pH:#138A8A;
+  --onA:#fff; --onB:#fff; --onC:#1A1A1A; --onD:#fff; --onE:#fff; --onF:#fff; --onG:#1A1A1A; --onH:#fff;
   --shadow:0 1px 0 rgba(23,33,43,.06), 0 8px 24px -16px rgba(23,33,43,.35);
   --display:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   --body:"Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -92,6 +93,7 @@ button{cursor:pointer}
 .plate.xs b{font-size:16px;position:static;transform:none}
 .L-A{--c:var(--pA);--on:var(--onA)}.L-B{--c:var(--pB);--on:var(--onB)}.L-C{--c:var(--pC);--on:var(--onC)}
 .L-D{--c:var(--pD);--on:var(--onD)}.L-E{--c:var(--pE);--on:var(--onE)}
+.L-F{--c:var(--pF);--on:var(--onF)}.L-G{--c:var(--pG);--on:var(--onG)}.L-H{--c:var(--pH);--on:var(--onH)}
 
 /* Hoje */
 .hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px 0 8px}
@@ -398,7 +400,7 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const APP_VERSAO = "1.14";
+const APP_VERSAO = "1.15";
 const APP_DATA = "2026-11-07";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
@@ -1957,6 +1959,7 @@ function normalizarEstado(S){
   S.sync ??= { url:"", k:"", migrado:false, ultimo:0, erro:"" };
   if(!Array.isArray(S.fila) || !S.sync.url) S.fila = []; // sem planilha não há fila: a 1ª conexão envia tudo pelo migrar()
   if(S.fichaRemota && validarFicha(S.fichaRemota)) S.fichaRemota = null;
+  if(S.timer && !(num(S.timer.fim) && num(S.timer.total) && num(S.timer.orig) && typeof S.timer.lbl==="string")) delete S.timer;
   S.v = ESTADO_V;
   return S;
 }
@@ -2380,7 +2383,7 @@ function concluir(){
   const fim=Date.now();
   const itens = a.feitos.slice().sort((x,y)=>(a.marcas?.[x]||0)-(a.marcas?.[y]||0))
     .map(i=>({ n:t.itens[i].nome, t: a.marcas?.[i] ? Math.round((a.marcas[i]-a.inicio)/1000) : null, e: Math.round(minutos(t.itens[i])*60), ...(t.itens[i].series ? {s:a.series?.[i]||0, sp:t.itens[i].series} : {}) }));
-  E.historico.push({ id, letra:a.letra, fase:a.fase, semana:semanaAtual(), data:hojeISO(),
+  E.historico.push({ id, letra:a.letra, fase:a.fase, semana:semanaAtual(), data:isoDe(new Date(a.inicio)), // data do início, mesmo se passar da meia-noite
     duracao: Math.round((fim-a.inicio)/6e4), feitos:a.feitos.length, total:t.itens.length,
     inicio: hora(a.inicio), fim: hora(fim), itens, modo: a.modo||"completo", volta: a.volta ?? null, numero: E.historico.length+1 });
   { const x=E.historico[E.historico.length-1]; enfileirar({tipo:"addSessao", etapa:FICHA.etapa, ...x}); }
@@ -2602,9 +2605,19 @@ function render(){
 
 /* ---------- Timer ---------- */
 let tEnd=0, tInt=null, tLabel="", tTotal=0, tOrig=0;
+function mostrarTimer(){
+  $("#timer").hidden=false; document.body.classList.add("timer-on"); $("#timer").classList.remove("finished");
+  $("#tLbl").textContent=tLabel; clearInterval(tInt); tick(); tInt=setInterval(tick,250);
+}
+// guardado no aparelho para o cronômetro continuar se o app for recarregado ou fechado no meio do descanso
+function guardarTimer(){ S.timer={ fim:tEnd, lbl:tLabel, total:tTotal, orig:tOrig }; save(); }
+function retomarTimer(){
+  const T=S.timer; if(!T) return;
+  if(!E.atual || !(T.fim>Date.now())){ delete S.timer; save(); return; }
+  tEnd=T.fim; tLabel=T.lbl; tTotal=T.total; tOrig=T.orig; mostrarTimer();
+}
 function startTimer(seg,lbl){
-  tEnd=Date.now()+seg*1000; tLabel=lbl; tTotal=seg; tOrig=seg; $("#timer").hidden=false; document.body.classList.add("timer-on"); $("#timer").classList.remove("finished");
-  $("#tLbl").textContent=lbl; clearInterval(tInt); tick(); tInt=setInterval(tick,250);
+  tEnd=Date.now()+seg*1000; tLabel=lbl; tTotal=seg; tOrig=seg; mostrarTimer(); guardarTimer();
   try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){}
 }
 let actx=null;
@@ -2622,8 +2635,8 @@ function tick(){
   $("#tBar").style.transform=`scaleX(${frac})`;
   $("#timer").classList.toggle("low", r<=10);
 }
-function stopTimer(){ clearInterval(tInt); $("#timer").hidden=true; document.body.classList.remove("timer-on"); }
-$("#tPlus").onclick=()=>{ if($("#timer").classList.contains("finished")){ startTimer(15,tLabel); } else { tEnd+=15000; tTotal=Math.max(tTotal,(tEnd-Date.now())/1000); } tick(); };
+function stopTimer(){ clearInterval(tInt); $("#timer").hidden=true; document.body.classList.remove("timer-on"); if(S.timer){ delete S.timer; save(); } }
+$("#tPlus").onclick=()=>{ if($("#timer").classList.contains("finished")){ startTimer(15,tLabel); } else { tEnd+=15000; tTotal=Math.max(tTotal,(tEnd-Date.now())/1000); guardarTimer(); } tick(); };
 $("#tReset").onclick=()=>{ const o=tOrig, l=tLabel; startTimer(o,l); };
 $("#tStop").onclick=stopTimer;
 
@@ -2780,7 +2793,7 @@ function atualizarSyncUI(){
     <button class="btn primary" id="syncCon">Conectar</button>`;
   $("#syncNow") && ($("#syncNow").onclick=()=>sincronizar());
   $("#syncLink") && ($("#syncLink").onclick=async()=>{ try{ await navigator.clipboard.writeText(linkConfig()); toast("Link copiado. Abra-o no outro navegador."); }catch(e){ prompt("Copie o link:", linkConfig()); } });
-  $("#syncOff") && ($("#syncOff").onclick=()=>{ if(confirm("Desconectar este aparelho da planilha? Os dados continuam na planilha.")){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
+  $("#syncOff") && ($("#syncOff").onclick=()=>{ if(confirm(`Desconectar este aparelho da planilha? Os dados continuam na planilha.${S.fila.length?`\n\nAtenção: ${S.fila.length} ${S.fila.length>1?"alterações ainda não enviadas serão perdidas":"alteração ainda não enviada será perdida"}. Sincronize antes, se puder.`:""}`)){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
   $("#syncCon") && ($("#syncCon").onclick=()=>{
     const limpa=v=>String(v||"").replace(/[\s\u200B-\u200D\uFEFF]/g,"");
     let k=limpa($("#syncKey").value), url=limpa($("#syncUrl").value)||SCRIPT_PADRAO;
@@ -2815,8 +2828,8 @@ $("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; enfileirar({tipo:"setCo
 $("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; enfileirar({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg}); render(); };
 $("#metaData").onchange=e=>{ S.meta.data=e.target.value; enfileirar({tipo:"setConfig", chave:"meta.data", valor:S.meta.data}); render(); };
 $("#resetBtn").onclick=()=>{ if(confirm(`Apagar as sessões e a data de início da etapa ${FICHA.etapa}${S.sync.url?" também na planilha":""}? As cargas registradas na planilha continuam como histórico.`)){
-  E.historico.forEach(x=>{ if(x.id) S.fila.push({tipo:"delSessao", id:x.id}); });
-  S.fila.push({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:""});
+  E.historico.forEach(x=>{ if(x.id) enfileirar({tipo:"delSessao", id:x.id}); });
+  enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:""});
   S.etapas[FICHA.etapa]=novaEtapa(); save(); location.reload(); } };
 $("#exportBtn").onclick=()=>{
   const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
@@ -2856,7 +2869,7 @@ async function checarVersao(){
 $("#atualizarApp").onclick=()=>{ location.replace(location.pathname+"?v="+Date.now()); };
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden) checarVersao(); });
 
-applyTheme(); render(); atualizarSyncUI(); agendarSync(100); checarVersao();
+applyTheme(); render(); retomarTimer(); atualizarSyncUI(); agendarSync(100); checarVersao();
 
 /* ---------- Offline ---------- */
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});

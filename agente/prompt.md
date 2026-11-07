@@ -219,7 +219,7 @@ Campos
   - "express_alvo": minutos de referência do express.
 
 Regras de validação (o app recusa a ficha inteira se alguma falhar)
-- Treinos com uma letra maiúscula de A a Z; fases com chaves numéricas ("1", "2"…); toda fase e todo treino com pelo menos um item; mesmas letras em todas as fases.
+- Treinos com uma letra maiúscula de A a Z (o app tem cores de anilha de A a H); fases com chaves numéricas ("1", "2"…); toda fase e todo treino com pelo menos um item; mesmas letras em todas as fases.
 - series, exec, descanso e bloco numéricos e ≥ 0; voltas e semanas como listas de inteiros dentro da etapa; etapa e versao inteiros.
 - Cada volta (ou semana) pertence a exatamente uma fase em fases_voltas (ou fases_semanas).
 - foco, nome e metodo com até 200 caracteres; prescricao, obs, orientacoes, metodos, guia e notas com até 2000.

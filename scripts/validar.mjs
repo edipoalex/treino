@@ -66,6 +66,8 @@ export function checarFicha(f, codigoApp, erros, avisos){
     if(ls.join(",") !== letras.join(",")) erros.push(`fase ${fa} tem os treinos ${ls.join(", ")}; esperado ${letras.join(", ")} (mesmas letras em todas as fases)`);
   }
   if(erros.length) return null;
+  const semCor = letras.filter(l=>!"ABCDEFGH".includes(l));
+  if(semCor.length) avisos.push(`treino ${semCor.join(", ")} sem cor de anilha no app (há cores de A a H)`);
 
   const prog = f.progressao;
   const uni = prog ? "volta" : "semana";

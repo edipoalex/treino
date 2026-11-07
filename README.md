@@ -20,7 +20,8 @@ Histórico, cargas e ajustes ficam separados por número de etapa, então trocar
 `node scripts/validar.mjs` confere a sintaxe do app, do `sw.js` e do Apps Script, a ficha embutida
 (formato, letras iguais em todas as fases, voltas, tempo por janela até 60 min) e se `fichas/etapa-NN.json`
 bate com o `index.html`. Com `--base <ref>` também exige que `APP_VERSAO` e o `versao` da ficha tenham subido.
-`--ficha arq.json` valida só uma ficha avulsa. O GitHub Actions roda a validação em todo PR e push na `main`.
+`--ficha arq.json` valida só uma ficha avulsa. `node scripts/testar-planilha.mjs` testa o Apps Script contra uma
+planilha simulada. O GitHub Actions roda os dois em todo PR e push na `main`.
 
 Regras da ficha (validadas no app e na planilha; ficha inválida é recusada):
 - treinos com uma letra de `A` a `Z`, fases numéricas (`"1"`, `"2"`);
