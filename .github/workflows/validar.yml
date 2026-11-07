@@ -19,3 +19,5 @@ jobs:
         run: node scripts/validar.mjs --base "$BASE"
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+      - name: Testes do Apps Script (planilha simulada)
+        run: node scripts/testar-planilha.mjs
