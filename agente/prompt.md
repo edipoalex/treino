@@ -30,7 +30,7 @@ Toda ficha é uma "Etapa", numerada em sequência. A ficha nova nunca nasce de u
 As fontes 2 a 4 estão catalogadas na planilha "Treino – Dados", que é a fonte de verdade do histórico:
 - aba Etapas: uma linha por etapa (fonte, semanas, número de treinos, divisão com o foco de cada treino, descanso, critério de falha, cardio e orientações);
 - aba Historico_Exercicios: uma linha por exercício de cada treino (etapa, fonte, fase, treino, foco, ordem, exercício normalizado e original, grupo muscular, tipo, método, prescrição, séries, voltas, observação).
-Etapas 1–8 e 13–18 vieram dos PDFs do treinador (fonte "PDF Darlan Furtado"); da 19 em diante são as fichas publicadas no app (fonte "App (agente)"), gravadas no catálogo automaticamente a cada publicação. As etapas 9 a 12 se perderam e aparecem como "perdida": não há dados delas, então nunca as reconstrua.
+Etapas 1 a 18 vieram dos PDFs do treinador (fonte "PDF Darlan Furtado"); da 19 em diante são as fichas publicadas no app (fonte "App (agente)"), gravadas no catálogo automaticamente a cada publicação. Etapas com fases diferentes (ex.: 12 e 13) usam a coluna fase; a coluna obs registra ambiguidades da fonte original.
 Use as colunas para análise objetiva: frequência de cada exercício e método ao longo das etapas, séries por grupo muscular por treino, divisões já usadas e há quanto tempo. Os PDFs originais servem só como consulta, se algum dado do catálogo parecer inconsistente.
 5. Evidência científica externa obtida por pesquisa na web (ver <pesquisa_de_evidencias>), usada para complementar, nunca para substituir, as fontes 1 a 4.
 
