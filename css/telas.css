@@ -114,3 +114,23 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 .sub{color:var(--muted);margin:0 0 8px}
 @media (min-width:720px){ .plate:not(.sm):not(.xs){--size:208px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Card do treino de hoje: toque vira e mostra os exercícios */
+.hoje-card{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent;transform-origin:50% 50%}
+.hoje-card .frente{display:flex;align-items:center;gap:14px}
+.hoje-card .plate.md{--size:112px}
+.hoje-card .virar{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--ink)}
+.hoje-card .virar .ic{width:16px;height:16px}
+.hoje-card .verso-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 8px}
+.hoje-card .verso-cab b{font-family:var(--display);font-size:24px}
+.hoje-card .previa{border:0;background:none;border-radius:0}
+.hoje-card .previa li{padding:10px 2px}
+.hoje-card:focus-visible{outline:3px solid color-mix(in srgb, var(--c) 65%, transparent);outline-offset:3px}
+/* Escolher outro treino: anilhas sempre à mostra */
+.escolher{display:flex;justify-content:space-between;gap:4px;margin:14px 0 0}
+.escolher button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;padding:4px 0;border-radius:14px;color:var(--muted);font-size:12px;font-weight:600;-webkit-tap-highlight-color:transparent}
+.escolher .plate{--size:48px;border-radius:50%;transition:transform .2s var(--e-mola, ease), opacity .2s}
+.escolher button[aria-pressed="false"] .plate{opacity:.55;transform:scale(.88)}
+.escolher button[aria-pressed="true"] .plate{outline:3px solid var(--c);outline-offset:3px}
+.escolher button[aria-pressed="true"]{color:var(--ink)}
+.escolher button:active .plate{transform:scale(.82)}

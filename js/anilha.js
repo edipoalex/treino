@@ -9,7 +9,7 @@ const F = 'font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight=
 const COR = 'style="fill:var(--c)"';
 
 // face da anilha (coordenadas 0–100); detalhada = furo, sulco e "TREINO"; senão a letra vai no cubo
-function face(L, detalhada){
+function face(L, detalhada, texto=true){
   const aro = `<circle cx="50" cy="50" r="47" ${COR}/><circle cx="50" cy="50" r="47" fill="url(#an-luz)"/>
     <circle cx="50" cy="50" r="45.6" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="2.8"/>
     <circle cx="50" cy="50" r="43.8" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1"/>`;
@@ -21,18 +21,18 @@ function face(L, detalhada){
     <circle cx="50" cy="50" r="19" fill="url(#an-me)" stroke="#000" stroke-opacity=".35" stroke-width="1"/>
     <circle cx="50" cy="50" r="14.5" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.4"/>
     <circle cx="50" cy="50" r="9" fill="#0d1014"/><circle cx="50" cy="50" r="9" fill="url(#an-fu)"/>
-    <text x="50" y="27.5" text-anchor="middle" font-size="19" ${F} style="fill:var(--on)">${L}</text>
-    <text x="50" y="81" text-anchor="middle" font-size="7.5" font-weight="600" fill-opacity=".85" letter-spacing=".6" font-family="Barlow Condensed, Arial Narrow, sans-serif" style="fill:var(--on)">TREINO</text>`;
+    ${texto?`<text x="50" y="27.5" text-anchor="middle" font-size="19" ${F} style="fill:var(--on)">${L}</text>
+    <text x="50" y="81" text-anchor="middle" font-size="7.5" font-weight="600" fill-opacity=".85" letter-spacing=".6" font-family="Barlow Condensed, Arial Narrow, sans-serif" style="fill:var(--on)">TREINO</text>`:""}`;
 }
 
-export function anilhaSVG(letra, { d3=false, detalhada=false } = {}){
+export function anilhaSVG(letra, { d3=false, detalhada=false, texto=true } = {}){
   const L = esc(letra);
-  if(!d3) return `<svg viewBox="0 0 100 100" aria-hidden="true">${face(L, detalhada)}</svg>`;
+  if(!d3) return `<svg viewBox="0 0 100 100" aria-hidden="true">${face(L, detalhada, texto)}</svg>`;
   const cx = 46, sx = .84, esp = 8, rx = (47*sx).toFixed(1);
   const lado = `M${cx} 3 L${cx+esp} 3 A${rx} 47 0 0 1 ${cx+esp} 97 L${cx} 97 A${rx} 47 0 0 0 ${cx} 3 Z`;
   return `<svg viewBox="0 0 100 100" aria-hidden="true">
     <ellipse cx="${cx+esp+2}" cy="54" rx="${rx}" ry="45" fill="#000" fill-opacity=".25"/>
     <path d="${lado}" ${COR}/><path d="${lado}" fill="url(#an-lat)"/>
     <path d="M${cx+esp/2} 3 A${rx} 47 0 0 1 ${cx+esp/2} 97" fill="none" stroke="#000" stroke-opacity=".25" stroke-width=".8"/>
-    <g transform="translate(${cx} 50) scale(${sx} 1) translate(-50 -50)">${face(L, detalhada)}</g></svg>`;
+    <g transform="translate(${cx} 50) scale(${sx} 1) translate(-50 -50)">${face(L, detalhada, texto)}</g></svg>`;
 }
