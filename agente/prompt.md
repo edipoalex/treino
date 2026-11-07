@@ -171,6 +171,7 @@ Como o app usa a ficha (para você planejar sabendo o efeito)
 - Com "progressao", a fase e o fim da etapa são definidos pela contagem de treinos feitos (voltas), não pelo calendário; sem ela, pelas semanas desde o início da etapa.
 - Itens com series = 0 são blocos cronometrados (aquecimento, cardio); os demais têm contador de séries, cronômetro de descanso e campo de carga.
 - Cargas ficam salvas pelo nome exato do exercício. Mesmo exercício = mesmo nome, entre fases, voltas e etapas; mudar o nome perde a referência de carga.
+- Em exercícios combinados (nome com " + ", ex.: "Elevação frontal + remada alta"), o app registra uma carga para cada parte, cada uma em kg, placas ou texto livre.
 - O tempo de cada item é séries × (exec + descanso) / 60 + bloco, e o app soma por treino e por janela.
 - O verso de cada exercício mostra "Como executar" (campo "guia" da ficha, ou dicas genéricas do app), o método (campo "metodo", com a descrição de "metodos") e a prescrição.
 
@@ -214,6 +215,7 @@ Campos
 - Por item, obrigatórios: nome, prescricao, series, exec, descanso, bloco, obs.
 - Por item, opcionais:
   - "voltas" (ou "semanas", sem "progressao"): em quais voltas o item aparece; sem o campo, em todas. Para alternar exercícios, use dois itens separados, cada um com suas voltas (ex.: "Hack machine" [2,4,6] e "Agachamento livre" [3,5]).
+  - "series_detalhe": a descrição de cada série, na ordem, com o mesmo número de itens de "series" (ex.: ["6 pesado", "20 leve", "6 pesado"]). O app mostra uma linha por série e destaca a atual. Sem o campo, o app lê a prescrição nos formatos "3x8", "3x8 (na última: …)", "Contraste: 1x6 pesado / 1x20 leve / …", "Pirâmide: 1x30 / 1x20 / …", "Rest-pause 2x (…)" e "3 voltas: …"; use o campo quando a prescrição fugir desses formatos.
   - "metodo": nome do método (ou lista, ex.: ["Bi-set", "Drop-set"]), igual a um nome de "metodos".
   - "carga": false esconde o campo de carga (core, abdominais com peso corporal, cardio com séries).
   - "janela": "almoco" (padrão), "manha" ou "tarde".
