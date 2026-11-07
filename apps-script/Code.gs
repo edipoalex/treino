@@ -11,13 +11,13 @@
  * Sem segredos no código, este arquivo pode ficar versionado no GitHub.
  */
 
-const API_VERSAO = 2;
+const API_VERSAO = 3;
 
 const ABAS = {
   Sessoes:      { cab: ['id','etapa','letra','fase','semana','data','duracao_min','itens_feitos','itens_total','registrado_em','hora_inicio','hora_fim','itens_json','modo','volta','numero'], num: ['etapa','semana','duracao_min','itens_feitos','itens_total','volta','numero'] },
-  Peso:         { cab: ['data','kg','registrado_em'], num: ['kg'] },
-  Cargas:       { cab: ['etapa','exercicio','carga','data','registrado_em','unidade'], num: ['etapa'] },
-  Config:       { cab: ['chave','valor','atualizado_em'], num: [] },
+  Peso:         { cab: ['data','kg','registrado_em','em'], num: ['kg','em'] },
+  Cargas:       { cab: ['etapa','exercicio','carga','data','registrado_em','unidade','em'], num: ['etapa','em'] },
+  Config:       { cab: ['chave','valor','atualizado_em','em'], num: ['em'] },
   Fichas:       { cab: ['etapa','ativa','semanas','frequencia','registrada_em','json'], num: ['etapa','semanas'] },
   Fichas_Itens: { cab: ['etapa','fase','semanas','treino','foco','ordem','exercicio','prescricao','series','descanso_s','minutos','obs'], num: ['etapa','ordem','series','descanso_s','minutos'] },
   Rejeitadas:   { cab: ['registrado_em','tipo','erro','op_json'], num: [] }
@@ -112,6 +112,7 @@ const textoOpc = (v, max) => vazio(v) || texto(v, max);
 
 function validarOp(op) {
   if (!op || typeof op !== 'object') return 'operação inválida';
+  if (!vazio(op.em) && !(numero(op.em) && op.em >= 0)) return 'hora da alteração inválida';
   switch (op.tipo) {
     case 'addSessao':
       if (!RX.id.test(txt(op.id))) return 'id inválido';
@@ -274,23 +275,40 @@ function aplicar(op) {
     anexar('Sessoes', [op.id, op.etapa, op.letra, op.fase, op.semana, op.data, op.duracao, op.feitos, op.total, agora(), op.inicio || '', op.fim || '', JSON.stringify(op.itens || []), op.modo || 'completo', op.volta || '', op.numero || '']);
   } else if (t === 'delSessao') {
     apagar('Sessoes', r => txt(r.id) === op.id);
-  } else if (t === 'setPeso') {
-    apagar('Peso', r => txt(r.data) === op.data);
-    anexar('Peso', [op.data, Number(op.kg), agora()]);
+  } else if (t === 'setPeso' || t === 'delPeso') {
+    // Exclusão fica gravada sem kg, para uma pesagem antiga de outro aparelho não voltar.
+    const mesma = r => txt(r.data) === op.data;
+    if (desatualizada('Peso', mesma, op)) return;
+    apagar('Peso', mesma);
+    anexar('Peso', [op.data, t === 'setPeso' ? Number(op.kg) : '', agora(), emDe(op)]);
     ordenar('Peso', 1);
-  } else if (t === 'delPeso') {
-    apagar('Peso', r => txt(r.data) === op.data);
   } else if (t === 'setCarga') {
     // Uma linha por exercício e data. Carga vazia fica gravada como "apagada nesta data",
     // para a carga de uma data anterior não voltar a aparecer no app.
-    apagar('Cargas', r => Number(r.etapa) === Number(op.etapa) && txt(r.exercicio) === op.nome && txt(r.data) === op.data);
-    anexar('Cargas', [op.etapa, op.nome, vazio(op.kg) ? '' : txt(op.kg), op.data, agora(), op.u || 'kg']);
+    const mesma = r => Number(r.etapa) === Number(op.etapa) && txt(r.exercicio) === op.nome && txt(r.data) === op.data;
+    if (desatualizada('Cargas', mesma, op)) return;
+    apagar('Cargas', mesma);
+    anexar('Cargas', [op.etapa, op.nome, vazio(op.kg) ? '' : txt(op.kg), op.data, agora(), op.u || 'kg', emDe(op)]);
   } else if (t === 'setConfig') {
-    apagar('Config', r => txt(r.chave) === op.chave);
-    anexar('Config', [op.chave, txt(op.valor), agora()]);
+    const mesma = r => txt(r.chave) === op.chave;
+    if (desatualizada('Config', mesma, op)) return;
+    apagar('Config', mesma);
+    anexar('Config', [op.chave, txt(op.valor), agora(), emDe(op)]);
   } else if (t === 'setFicha') {
     salvarFicha(op.ficha, op.ativar !== false);
   }
+}
+
+/* Conflitos entre aparelhos: cada alteração traz "em", a hora (ms) em que foi feita no aparelho.
+   Uma alteração mais antiga que a já gravada para o mesmo dado é ignorada (vale a mais recente,
+   não a que chega por último). Apps antigos não enviam "em": vale a hora de chegada. */
+function emDe(op) {
+  const limite = Date.now() + 864e5; // relógio do aparelho adiantado não passa de 1 dia
+  return numero(op.em) ? Math.min(op.em, limite) : Date.now();
+}
+function desatualizada(nome, mesma, op) {
+  const em = emDe(op);
+  return linhas(nome).some(r => mesma(r) && Number(r.em) > em);
 }
 
 function salvarFicha(f, ativar) {

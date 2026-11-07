@@ -398,7 +398,7 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const APP_VERSAO = "1.14";
+const APP_VERSAO = "1.15";
 const APP_DATA = "2026-11-07";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
@@ -2632,7 +2632,8 @@ const SCRIPT_PADRAO="https://script.google.com/macros/s/AKfycbxwTnJ-NgKNXqWs5DKN
 let syncMsg="";
 let syncTimer=null, sincronizando=false, renderPendente=false, fichaEnviada=false, falhasSync=0;
 // Sem planilha conectada não há fila: o que existe no aparelho vai pelo migrar() na 1ª conexão.
-function enfileirar(op){ if(S.sync.url) S.fila.push(op); save(); agendarSync(); }
+// "em": hora em que a alteração foi feita; a planilha ignora alterações mais antigas que a gravada.
+function enfileirar(op){ if(S.sync.url) S.fila.push({...op, em: op.em ?? Date.now()}); save(); agendarSync(); }
 function agendarSync(ms=600){ clearTimeout(syncTimer); if(S.sync.url) syncTimer=setTimeout(sincronizar, ms); atualizarSyncUI(); }
 
 function migrar(rem){
@@ -2655,7 +2656,7 @@ function migrar(rem){
   if(S.meta.kg && !rem.config["meta.kg"]) ops.push({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg});
   if(S.meta.data && !rem.config["meta.data"]) ops.push({tipo:"setConfig", chave:"meta.data", valor:S.meta.data});
   if(S.idade && !rem.config["idade"]) ops.push({tipo:"setConfig", chave:"idade", valor:S.idade});
-  return ops;
+  return ops.map(o=>({...o, em:1})); // dados antigos deste aparelho: nunca sobrescrevem o que já está na planilha
 }
 
 function aplicarRemoto(rem){
