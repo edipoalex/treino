@@ -20,7 +20,9 @@ const ABAS = {
   Config:       { cab: ['chave','valor','atualizado_em'], num: [] },
   Fichas:       { cab: ['etapa','ativa','semanas','frequencia','registrada_em','json'], num: ['etapa','semanas'] },
   Fichas_Itens: { cab: ['etapa','fase','semanas','treino','foco','ordem','exercicio','prescricao','series','descanso_s','minutos','obs'], num: ['etapa','ordem','series','descanso_s','minutos'] },
-  Rejeitadas:   { cab: ['registrado_em','tipo','erro','op_json'], num: [] }
+  Rejeitadas:   { cab: ['registrado_em','tipo','erro','op_json'], num: [] },
+  Etapas:       { cab: ['etapa','fonte','semanas','treinos','divisao','descanso','falha','cardio','orientacoes'], num: ['etapa'] },
+  Historico_Exercicios: { cab: ['etapa','fonte','fase','treino','foco','ordem','exercicio','exercicio_original','grupo','tipo','metodo','prescricao','series','voltas','obs'], num: ['etapa','ordem','series'] }
 };
 const PEDACO = 45000;        // limite seguro por célula (máx. 50.000)
 const MAX_TXT = 2000;        // tamanho máximo de qualquer texto recebido
@@ -324,6 +326,100 @@ function salvarFicha(f, ativar) {
     rg.setValues(rows);
     sujar('Fichas_Itens');
   }
+  catalogar(f);
+}
+
+/* ---------------- Catálogo de fichas ----------------
+   Abas Etapas e Historico_Exercicios: histórico estruturado de todas as etapas. As etapas dos PDFs
+   foram importadas uma vez; as do app são gravadas aqui sempre que uma ficha é publicada.
+   O agente do projeto usa essas abas como fonte de verdade para planejar as próximas etapas. */
+const FONTE_APP = 'App (agente)';
+const semAcento = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// primeira regra que casar com o nome do exercício (minúsculas, sem acento)
+const GRUPOS = [
+  [/aquecimento/, 'Aquecimento'],
+  [/cardio|esteira|bike|bicicleta|eliptico|hiit|zona 2|caminhada/, 'Cardio'],
+  [/abdom|prancha|roda abdominal|pallof|elevacao de pernas|\bcore\b/, 'Abdômen'],
+  [/panturrilha/, 'Panturrilha'],
+  [/encolhimento/, 'Trapézio'],
+  [/crucifixo inv|voador invertido|posterior de ombro|face pull|voador dorsal.*(ombro|testa)/, 'Ombro (posterior)'],
+  [/triceps|paralelas|mergulho|supino fechado|frances|testa/, 'Tríceps'],
+  [/rosca|biceps/, 'Bíceps'],
+  [/voador dorsal/, 'Costas'],
+  [/supino|voador|crucifixo|cross ?over|peitoral|peito|flexao de bracos/, 'Peito'],
+  [/desenvolvimento|elevacao lateral|elevacao frontal|^lateral|^frontal|remada alta|remada em pe/, 'Ombro'],
+  [/puxada|remada|serrote|barra fixa|pullover|pulldown|voador dorsal/, 'Costas'],
+  [/stiff|flexora|terra/, 'Posterior de coxa'],
+  [/abdutora|gluteo|elevacao pelvica/, 'Glúteo'],
+  [/agachamento|leg|hack|extensora|afundo|bulgaro|passada/, 'Quadríceps']
+];
+function grupoDe(nome) {
+  const grupos = [];
+  String(nome).split(' + ').forEach(parte => {
+    const n = semAcento(parte), r = GRUPOS.filter(g => g[0].test(n))[0];
+    const g = r ? r[1] : 'Outro';
+    if (grupos.indexOf(g) < 0) grupos.push(g);
+  });
+  return grupos.join(' + ');
+}
+const COMPOSTOS = /supino|puxada|remada|desenvolvimento|agachamento|leg|hack|stiff|terra|afundo|bulgaro|paralelas|barra fixa|serrote|mergulho|flexao de bracos/;
+function tipoDe(it) {
+  if (!it.series) return /aquecimento/.test(semAcento(it.nome)) ? 'aquecimento' : 'cardio';
+  if (String(it.nome).indexOf(' + ') >= 0) return 'combinado';
+  return COMPOSTOS.test(semAcento(it.nome)) ? 'composto' : 'isolado';
+}
+const METODOS = [
+  [/contraste/, 'Contraste de cargas'], [/rest-pause/, 'Rest-pause'], [/micro-pausa/, 'Micro-pausas'],
+  [/bi-set/, 'Bi-set'], [/tri-set/, 'Tri-set'], [/drop (duplo|-\d+%.*drop)/, 'Drop-set duplo'], [/drop/, 'Drop-set'],
+  [/piramide/, 'Pirâmide'], [/cluster/, 'Cluster'], [/myo/, 'Myo-reps'], [/\+ ?\dx\d|faixa/, 'Séries por faixa'], [/falha/, 'Até a falha']
+];
+function metodoDe(it) {
+  if (it.metodo) return [].concat(it.metodo).join(' + ');
+  if (!it.series) return /aquecimento/.test(semAcento(it.nome)) ? 'Aquecimento' : 'Cardio';
+  const p = semAcento(it.prescricao), m = METODOS.filter(x => x[0].test(p))[0];
+  return m ? m[1] : 'Séries retas';
+}
+
+function linhasCatalogo(f) {
+  const rows = [];
+  Object.keys(f.fases).forEach(fase => {
+    Object.keys(f.fases[fase]).forEach(letra => {
+      const t = f.fases[fase][letra];
+      // nome do catálogo sem o símbolo de grau ("Supino 30°" = "Supino 30"), como nas etapas dos PDFs
+      t.itens.forEach((it, i) => rows.push([f.etapa, FONTE_APP, fase, letra, t.foco, i + 1, String(it.nome).replace(/(\d+)\s*[º°]/g, '$1'), it.nome, grupoDe(it.nome),
+        tipoDe(it), metodoDe(it), it.prescricao, it.series, (it.voltas || it.semanas || []).join(', '), it.obs || '']));
+    });
+  });
+  return rows;
+}
+function linhaEtapa(f) {
+  const fase1 = f.fases['1'] || f.fases[Object.keys(f.fases)[0]];
+  const letras = Object.keys(fase1);
+  const conta = {};
+  letras.forEach(l => fase1[l].itens.forEach(it => { if (it.series) conta[it.descanso] = (conta[it.descanso] || 0) + it.series; }));
+  const descanso = Object.keys(conta).sort((a, b) => conta[b] - conta[a])[0];
+  const orient = f.orientacoes || [];
+  const achar = re => orient.filter(o => re.test(semAcento(o[0]))).map(o => o[1]).join(' ');
+  const p = f.progressao;
+  const semanas = p ? p.voltas + ' voltas de ' + p.treinos_por_volta + ' treinos (limite de ' + p.limite_semanas + ' semanas)' : String(f.semanas || '');
+  const corta = s => String(s).slice(0, MAX_TXT);
+  return [f.etapa, FONTE_APP, semanas, String(letras.length), letras.map(l => l + ' ' + fase1[l].foco).join(' | '),
+    descanso ? descanso + ' s' : '', achar(/falha/), achar(/cardio/), orient.map(o => o[0] + ': ' + o[1]).join(' ')].map((v, i) => i ? corta(v) : v);
+}
+function catalogar(f) {
+  apagar('Historico_Exercicios', r => Number(r.etapa) === Number(f.etapa) && txt(r.fonte) === FONTE_APP);
+  const rows = linhasCatalogo(f).map(r => paraCelula('Historico_Exercicios', r));
+  if (rows.length) {
+    const sh = aba('Historico_Exercicios');
+    const rg = sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length);
+    rg.setNumberFormats(rows.map(() => formatos('Historico_Exercicios', rows[0].length)));
+    rg.setValues(rows);
+    sujar('Historico_Exercicios');
+  }
+  apagar('Etapas', r => Number(r.etapa) === Number(f.etapa) && txt(r.fonte) === FONTE_APP);
+  anexar('Etapas', linhaEtapa(f));
+  ordenar('Etapas', 1);
 }
 
 /* ---------------- Leitura ---------------- */
