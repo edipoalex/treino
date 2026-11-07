@@ -30,5 +30,9 @@ em cada aparelho, **Ajustes › Desconectar este aparelho**, cole a chave nova e
 
 Alterações que a planilha recusa (dado inválido) vão para a aba **Rejeitadas**, com o JSON original.
 
+## Agente das fichas
+O prompt do projeto que cria as fichas fica em [`agente/prompt.md`](agente/prompt.md).
+Ele não contém dados pessoais: o agente lê os dados do atleta na planilha (abas Atleta, Config e Peso).
+
 ## Backup
 Use **Ajustes › Exportar** de vez em quando. Com a planilha conectada, ela também guarda os dados.
