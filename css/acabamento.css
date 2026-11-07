@@ -1,0 +1,38 @@
+/* Acabamento: ícones, botões com profundidade, estado pressionado e anilhas com volume.
+   Carregado depois dos outros CSS, só refina o que já existe. */
+:root{
+  --brilho:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 55%);
+  --sombra-btn:0 1px 0 rgba(23,33,43,.05), 0 2px 6px -2px rgba(23,33,43,.12);
+}
+:root[data-theme="dark"]{ --sombra-btn:0 1px 0 rgba(0,0,0,.35), 0 2px 8px -2px rgba(0,0,0,.6); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --sombra-btn:0 1px 0 rgba(0,0,0,.35), 0 2px 8px -2px rgba(0,0,0,.6); } }
+
+/* Ícones (Lucide, js/icones.js) */
+.ic{width:1.25em;height:1.25em;flex:none;display:inline-block;vertical-align:-.22em}
+.ic-sm{width:16px;height:16px}
+.info-btn{display:grid;place-items:center;font:inherit}
+.info-btn .ic{width:24px;height:24px}
+.t-btn .ic{width:22px;height:22px;position:relative}
+.f-serie .ic{width:16px;height:16px;vertical-align:-3px;margin-left:2px}
+.f-nav .ic{width:22px;height:22px}
+.weigh-list button .ic{width:18px;height:18px}
+
+/* Botões: três níveis. Principal na cor do treino (ou tinta) com brilho no topo e sombra da própria cor */
+.btn{box-shadow:var(--sombra-btn);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.btn.ghost{box-shadow:none}
+.btn.primary{background-image:var(--brilho);box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 8px 18px -10px color-mix(in srgb, var(--ink) 70%, transparent)}
+.btn.cor{background-image:var(--brilho);box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 10px 22px -12px color-mix(in srgb, var(--c) 85%, transparent)}
+.btn:disabled{opacity:.45;box-shadow:none}
+.c-btn,.c-uni,.icon-btn,.info-btn{box-shadow:var(--sombra-btn);-webkit-tap-highlight-color:transparent}
+.tab{-webkit-tap-highlight-color:transparent}
+:is(.btn,.c-btn,.c-uni,.c-val,.icon-btn,.info-btn,.tab,.pick button,.letters button,.seg button,.folha .ex,.week button):focus-visible{
+  outline:3px solid color-mix(in srgb, var(--c, var(--pB)) 65%, transparent);outline-offset:2px}
+
+/* Anilha com volume: luz no topo, sombra embaixo, aro e furo marcados */
+.plate{background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.28), rgba(255,255,255,0) 46%),
+  radial-gradient(circle at 70% 82%, rgba(0,0,0,.2), rgba(0,0,0,0) 58%), var(--c)}
+.plate::after{box-shadow:0 0 0 calc(var(--size,176px)*.03) rgba(0,0,0,.18), inset 0 2px 4px rgba(0,0,0,.35)}
+.plate.xs{background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.3), rgba(255,255,255,0) 50%), var(--c)}
+
+/* Números que mudam sem "pular" de largura */
+.c-val,.stat b,#tTxt,#dTxt,.cnt,.r-cargas span:last-child{font-variant-numeric:tabular-nums}

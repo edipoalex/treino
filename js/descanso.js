@@ -1,3 +1,4 @@
+import { marcar } from "./movimento.js";
 import { E, S, save } from "./estado.js";
 import { render } from "./navegacao.js";
 import { rerender } from "./telas/sessao.js";
@@ -29,9 +30,9 @@ export function pararDescanso(rend=true){
 export function tick(){
   const T=S.timer; if(!T) return;
   const r=(T.fim-Date.now())/1000;
-  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); pararDescanso(); toast("Descanso encerrado. Próxima série!"); return; }
+  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); marcar("fimDescanso",{k:T.k}); pararDescanso(); toast("Descanso encerrado. Próxima série!"); return; }
   const txt=fmtSeg(r), fr=Math.max(0,Math.min(1,r/T.total));
-  const tt=$("#tTxt"); if(tt){ tt.textContent="⏱ "+txt; $("#tFill").style.transform=`scaleX(${fr})`; tt.closest(".t-btn")?.classList.toggle("low", r<=10); }
+  const tt=$("#tTxt"); if(tt){ tt.textContent=txt; $("#tFill").style.transform=`scaleX(${fr})`; tt.closest(".t-btn")?.classList.toggle("low", r<=10); }
   const dt=$("#dTxt"); if(dt){ dt.textContent=txt; const arc=$("#dArc"), C=2*Math.PI*104; arc.setAttribute("stroke-dashoffset",(C*(1-fr)).toFixed(1)); arc.setAttribute("stroke", r<=10?"var(--warn)":"var(--c)"); }
 }
 export function abrirTelaDescanso(){

@@ -1,3 +1,4 @@
+import { recente } from "./movimento.js";
 import { E, FICHA, S, save } from "./estado.js";
 import { UNID, hojeISO, relDia, unidPadrao } from "./progresso.js";
 import { enfileirar } from "./sync.js";
@@ -66,7 +67,7 @@ export function blocoCarga(it,i){
     if(c.u==="livre" || (c.v && n==null))
       return `${rot}<div class="c-linha"><input class="c-txt" data-txt="${id}" value="${esc(c.v)}" placeholder="ex.: 10 / 20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Carga de ${esc(nome)}">${uni}</div>`;
     return `${rot}<div class="c-linha"><button class="c-btn" data-passo="${id}:-1" aria-label="Diminuir carga de ${esc(nome)}">−</button>
-      <button class="c-val" data-digitar="${id}" aria-label="Digitar carga de ${esc(nome)}">${n==null?"—":fmtNum(n)}</button>
+      <button class="c-val ${recente("carga",400)?.id===id?(recente("carga",400).dir>0?"sobe":"desce"):""}" data-digitar="${id}" aria-label="Digitar carga de ${esc(nome)}">${n==null?"—":fmtNum(n)}</button>
       <button class="c-btn" data-passo="${id}:1" aria-label="Aumentar carga de ${esc(nome)}">+</button>${uni}</div>`;
   }).join("");
   return `<div class="cargas">${gs.map((g,gi)=> gs.length>1

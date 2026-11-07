@@ -9,7 +9,7 @@ Depois do primeiro acesso, o app abre também sem internet (`sw.js`).
 ## Estrutura
 ```
 index.html              só a estrutura da página
-css/                    base · componentes · sessao · telas (nessa ordem, a mesma do CSS original)
+css/                    base · componentes · sessao · telas · acabamento · movimento (nessa ordem)
 js/app.js               ponto de entrada: carrega o estado, liga os eventos, desenha a tela
 js/estado.js            estado salvo no aparelho (localStorage) e ficha em uso
 js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do Apps Script)
@@ -17,6 +17,8 @@ js/progresso.js         datas, sequência, voltas, fases, frequência e peso
 js/series.js            leitura da prescrição em séries ("6 pesado", "20 leve"…)
 js/cargas.js            cargas por exercício (kg, placas, livre; pesado e leve no contraste)
 js/metricas.js          volume e recordes a partir das cargas registradas em cada série
+js/movimento.js         transições e microinterações (respeita Ajustes › Animações e "reduzir movimento")
+js/icones.js            ícones Lucide (ISC) guardados no app, para funcionar offline
 js/descanso.js          cronômetro de descanso
 js/sync.js              sincronização com a planilha
 js/navegacao.js         abas e render()

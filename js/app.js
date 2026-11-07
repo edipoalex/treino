@@ -8,15 +8,17 @@ import { iniciarAtualizacao, checarVersao } from "./atualizacao.js";
 import { enviarCargasPendentes } from "./cargas.js";
 import { retomarTimer, tick } from "./descanso.js";
 import { applyTheme, manterTela } from "./ui.js";
+import { entrada, iniciarMovimento } from "./movimento.js";
 
 iniciarEstado();
+iniciarMovimento();
 iniciarSync();
 iniciarNavegacao();
 iniciarAjustes();
 document.addEventListener("visibilitychange",()=>{ if(document.hidden){ enviarCargasPendentes(); return; } render(); tick(); agendarSync(200); if(E.atual) manterTela(true); });
 iniciarAtualizacao();
 
-applyTheme(); render(); retomarTimer(); atualizarSyncUI(); agendarSync(100); checarVersao();
+applyTheme(); render(); entrada(); retomarTimer(); atualizarSyncUI(); agendarSync(100); checarVersao();
 
 /* Offline */
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
