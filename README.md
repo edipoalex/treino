@@ -44,6 +44,10 @@ em cada aparelho, **Ajustes › Desconectar este aparelho**, cole a chave nova e
 
 Alterações que a planilha recusa (dado inválido) vão para a aba **Rejeitadas**, com o JSON original.
 
+**Catálogo de fichas:** as abas **Etapas** e **Historico_Exercicios** guardam o histórico estruturado de todas as
+etapas e são a fonte de verdade do agente. As etapas dos PDFs foram importadas uma vez (o conteúdo é licenciado
+para uso pessoal e não fica neste repositório); cada ficha publicada no app entra no catálogo automaticamente.
+
 ## Agente das fichas
 O prompt do projeto que cria as fichas fica em [`agente/prompt.md`](agente/prompt.md).
 O agente cuida só do treino (fichas, orientações, feedback) e entrega a ficha como `etapa-NN.json`;

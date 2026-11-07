@@ -71,5 +71,23 @@ const copia = o => JSON.parse(JSON.stringify(o));
   ok("ficha maliciosa não substitui a válida", !JSON.stringify(r.estado.ficha).includes("<"));
 }
 
+{ // catálogo: cada ficha publicada entra nas abas Etapas e Historico_Exercicios
+  const p = novaPlanilha({
+    Etapas: new Aba([["etapa","fonte","semanas","treinos","divisao","descanso","falha","cardio","orientacoes"], [18,"PDF Darlan Furtado","6","5","A Peito","80 s","","",""]]),
+    Historico_Exercicios: new Aba([["etapa","fonte","fase","treino","foco","ordem","exercicio","exercicio_original","grupo","tipo","metodo","prescricao","series","voltas","obs"], [18,"PDF Darlan Furtado","","A","Peito",1,"Supino reto com barra","SUPINO RETO COM BARRA","Peito","composto","Bi-set com drop","3x","3","",""]])
+  });
+  const itens = l => Object.values(ficha.fases).reduce((a, f) => a + (f[l] ? f[l].itens.length : 0), 0);
+  const total = Object.keys(ficha.fases["1"]).reduce((a, l) => a + itens(l), 0);
+  p.post([{ tipo:"setFicha", ficha, ativar:true }]);
+  p.post([{ tipo:"setFicha", ficha, ativar:true }]); // republicar não duplica
+  const hist = p.abas.Historico_Exercicios.rows.slice(1), etapas = p.abas.Etapas.rows.slice(1);
+  ok("catálogo recebe todos os itens da ficha, sem duplicar", hist.filter(r => r[0] === 19).length === total);
+  ok("etapas dos PDFs continuam intactas", hist.filter(r => r[0] === 18).length === 1 && etapas.some(r => r[0] === 18));
+  ok("aba Etapas ganha uma linha da etapa 19", etapas.filter(r => r[0] === 19).length === 1);
+  const supino = hist.find(r => r[0] === 19 && /Supino reto com barra/.test(r[6]));
+  ok("exercício classificado (grupo, tipo e método)", supino && supino[8] === "Peito" && supino[9] === "composto" && supino[10] === "Contraste de cargas");
+  ok("nome sem símbolo de grau no catálogo", !hist.some(r => r[0] === 19 && /[º°]/.test(r[6])));
+}
+
 console.log(falhas ? `\n${falhas} teste(s) falharam.` : "\nTodos os testes passaram.");
 process.exit(falhas ? 1 : 0);
