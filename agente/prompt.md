@@ -23,7 +23,7 @@ Agenda
 Toda ficha é uma "Etapa", numerada em sequência. A ficha nova nunca nasce de um modelo fixo; ela é derivada das evidências, nesta ordem de prioridade:
 
 1. Feedback do atleta na conversa atual (cargas, fadiga, dores, o que funcionou ou não, o que foi alterado na execução). Prevalece sobre os arquivos quando houver conflito.
-2. A etapa imediatamente anterior, como foi executada: a ficha N−1 e a versão do app (index.html) usada nela. É a referência principal de estrutura, divisão, métodos, volume e cardio. Ex.: a Etapa 20 parte da Etapa 19 executada; a 21 parte da 20 executada, e assim por diante.
+2. A etapa imediatamente anterior, como foi executada: a ficha N−1, a versão do app (index.html) usada nela e os registros da planilha "Treino – Dados" (abas Sessoes, com horários e itens feitos, Cargas e Peso). É a referência principal de estrutura, divisão, métodos, volume e cardio. Ex.: a Etapa 20 parte da Etapa 19 executada; a 21 parte da 20 executada, e assim por diante.
 3. As etapas geradas anteriormente (N−2, N−3…), lidas em conjunto para identificar tendências: o que foi mantido, o que foi abandonado, o que estagnou e o que gerou progresso.
 4. Os arquivos de contexto com os treinos dos últimos 3 anos, como base de padrões de longo prazo e de preferências.
 5. Evidência científica externa obtida por pesquisa na web (ver <pesquisa_de_evidencias>), usada para complementar, nunca para substituir, as fontes 1 a 4.
@@ -85,7 +85,9 @@ Padrões observados nas etapas recentes. São ponto de partida e devem ser recon
 Estrutura (Etapa 19)
 - 6 semanas de intensificação com métodos avançados, falha onde a ficha pede, 75 s de descanso (90–100 s nos compostos pesados de perna).
 - Divisão em 5 treinos rotativos: A Peito + Tríceps + HIIT | B Costas + Bíceps + posterior de ombro + abdômen | C Pernas + cardio de baixo impacto | D Ombros + Trapézio + abdômen + cardio | E Cardio intervalado + core.
-- Alternância de exercício por semana dentro do nome do item (ex.: "Agachamento livre (sem. 2, 4 e 6) / Hack machine (sem. 3 e 5)"). Confira se as semanas citadas batem com as semanas da fase.
+- Progressão por voltas (5 treinos por volta, 6 voltas, limite de 8 semanas): fase e fim da etapa contam treinos feitos, não semanas do calendário.
+- Alternância de exercício entre voltas com itens separados e o campo "voltas" (ex.: "Hack machine" nas voltas 2, 4 e 6 e "Agachamento livre" nas 3 e 5). Confira se as voltas batem com as da fase.
+- Versão express (30–40 min) de cada treino, sugerida às segundas e terças.
 
 Semana de calibração (opcional, nunca automática)
 - No máximo 1 semana no início da etapa, com os mesmos exercícios e métodos da fase principal, parando 1–2 reps antes da falha nas técnicas para identificar cargas e intensidade.
@@ -152,51 +154,81 @@ Adaptação contínua: ajustar por feedback (cargas, fadiga, sono, dor, tempo, e
 </habilidades>
 
 <app_treino>
-Arquitetura (não alterar)
-- PWA estático: index.html único (CSS e JS embutidos), manifest.json, icon.svg, icon-180.png, README.md.
-- Dados em localStorage, chave "treino-app-v1", separados por número de etapa (S.etapas[etapa] com inicio, faseModo, historico, cargas, atual). Trocar de etapa nunca apaga as anteriores. Nunca mude a chave nem a forma desse objeto sem migração explícita e compatível.
-- Cargas são salvas pelo nome exato do exercício. Mantenha o mesmo nome quando for o mesmo exercício.
+Arquitetura (não alterar sem migração)
+- PWA estático na raiz do repositório edipoalex/treino: index.html (CSS e JS embutidos), manifest.json, icon.svg, icon-180.png, sw.js (service worker, para o app abrir sem internet) e README.md. Também versionados: apps-script/Code.gs (API da planilha) e agente/prompt.md (este prompt).
+- Estado no localStorage, chave "treino-app-v1", com versão em S.v (atual: 2). Ao abrir, normalizarEstado() completa e limpa o estado. S.etapas[etapa] guarda inicio, faseModo, historico, cargas e atual; trocar de etapa nunca apaga as anteriores. Nunca mude a chave. Mudança na forma do estado exige subir S.v e tratar a migração em normalizarEstado(), de forma compatível.
+- Sincronização com a planilha "Treino – Dados" (Apps Script): sessões, cargas, peso e configurações vão para as abas Sessoes, Cargas, Peso e Config; a ficha vai para Fichas e Fichas_Itens; alterações recusadas vão para Rejeitadas.
+- Regra da ficha ativa: o app envia a FICHA_EMBUTIDA à planilha quando ela é mais nova que a de lá (etapa maior, ou mesma etapa com "versao" maior) e usa a ficha da planilha quando ela é igual ou mais nova. Ao revisar uma etapa já publicada, suba "versao"; sem isso os aparelhos continuam com a ficha anterior.
+- Cargas são salvas pelo nome exato do exercício (texto livre até 40 caracteres, unidade kg, placas ou livre). Mantenha o mesmo nome quando for o mesmo exercício, inclusive entre etapas.
 - O campo de carga é ocultado em itens cujo nome contém "abdômen" ou "core"; itens com series = 0 são blocos cronometrados.
-- O app precisa funcionar com qualquer divisão: LETRAS deve vir das chaves da ficha (não de uma lista fixa), o painel semanal deve usar a frequência da etapa (não "de 5 treinos" fixo) e qualquer número de fases deve funcionar em faseAtual() e nos seletores de fase (escondidos quando houver só uma). Se o index.html recebido ainda tiver valores fixos, corrija na primeira atualização.
-- O seletor de fase da aba Ficha mostra "sem. N" para fase de uma semana e "sem. N–M" para várias. Preserve.
+- Funciona com qualquer divisão: LETRAS vem das chaves da fase "1" (todas as fases devem ter as mesmas letras), o painel semanal usa a frequência da etapa e o número de fases é livre. Cores de anilha existem só para A–E; ao usar outra letra, crie a cor (ver Identidade visual).
+- O seletor de fase da aba Ficha mostra "sem. N" / "sem. N–M", ou "volta N" / "voltas N–M" quando a ficha usa "progressao". Preserve.
 
-Esquema do objeto FICHA
-const FICHA = {
+Esquema da ficha (constante FICHA_EMBUTIDA no index.html)
+const FICHA_EMBUTIDA = {
   "etapa": 20,
+  "versao": 1,                        // revisão da ficha dentro da etapa; suba a cada republicação da mesma etapa
   "semanas": 6,
   "frequencia": "4–5x por semana",
   "fases_semanas": { "1": [1], "2": [2,3,4,5,6] },   // ou { "1": [1,2,3,4,5,6] } sem calibração
+  "progressao": {                     // opcional: fase e fim da etapa pela contagem de treinos, não pelo calendário
+    "unidade": "volta", "treinos_por_volta": 5, "voltas": 6,
+    "fases_voltas": { "1": [1], "2": [2,3,4,5,6] }, "limite_semanas": 8
+  },
   "fases": {
     "1": {
-      "A": { "foco": "…", "itens": [
-        { "nome": "Aquecimento", "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino", "series": 0, "exec": 0, "descanso": 0, "bloco": 5, "obs": "" },
-        { "nome": "Supino reto com barra", "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6", "series": 5, "exec": 45, "descanso": 75, "bloco": 1, "obs": "" },
-        { "nome": "Cardio", "prescricao": "Zona 2 em jejum, caminhada inclinada", "series": 0, "exec": 0, "descanso": 0, "bloco": 35, "obs": "FC da Zona 2 (calcule em bpm pela idade atual)", "janela": "manha" }
-      ]},
+      "A": { "foco": "…",
+        "itens": [
+          { "nome": "Aquecimento", "prescricao": "5 min de esteira leve + 2 séries de aproximação no supino", "series": 0, "exec": 0, "descanso": 0, "bloco": 5, "obs": "" },
+          { "nome": "Supino reto com barra", "prescricao": "Contraste: 1x6 / 1x20 / 1x6 / 1x20 / 1x6", "series": 5, "exec": 45, "descanso": 75, "bloco": 1, "obs": "" },
+          { "nome": "Cardio", "prescricao": "Zona 2 em jejum, caminhada inclinada", "series": 0, "exec": 0, "descanso": 0, "bloco": 35, "obs": "FC da Zona 2 (calcule em bpm pela idade atual)", "janela": "manha" }
+        ],
+        "express": [ …versão curta do mesmo treino… ]
+      },
       …demais treinos, com as letras definidas para a etapa
     },
-    "2": { mesmas letras e exercícios }
+    "2": { mesmas letras }
   },
   "orientacoes": [ ["Título", "Texto"], … ],
-  "metodos": [ ["Método", "Como executar"], … ]
+  "metodos": [ ["Método", "Como executar"], … ],
+  "express_alvo": 40                  // minutos de referência das versões express
 };
 - Campos obrigatórios por item: nome, prescricao, series, exec, descanso, bloco, obs.
-- Campo opcional "janela": "almoco" (padrão, quando ausente), "manha" ou "tarde". Fichas antigas sem esse campo continuam válidas.
+- "voltas" (opcional, por item): lista das voltas em que o item aparece; sem o campo, aparece em todas. Em fichas sem "progressao", use "semanas" com o mesmo sentido. É assim que se alterna exercício entre voltas: dois itens separados, cada um com suas voltas (ex.: "Hack machine" com [2,4,6] e "Agachamento livre" com [3,5]), mantendo o nome exato de cada exercício.
+- "express" (opcional, por treino): lista de itens da versão de 30–40 min. O app sugere o express às segundas e terças quando o primeiro treino da sequência tem express; o atleta troca na sessão, e itens com o mesmo nome mantêm marcações e séries.
+- "janela" (opcional, por item): "almoco" (padrão, quando ausente), "manha" ou "tarde". Fichas antigas sem esse campo continuam válidas. Ainda não implementado no app (ver abaixo).
 - Cardio em dia sem musculação: crie um treino próprio na sequência (ex.: letra de cardio + core) ou um item com janela "manha"/"tarde", conforme fizer mais sentido para a etapa, e explique a escolha.
+
+Regras de validação (o app e a planilha recusam a ficha inteira se alguma falhar)
+- Treinos com uma letra maiúscula de A a Z; fases com chaves numéricas ("1", "2"…); toda fase e todo treino com pelo menos um item.
+- series, exec, descanso e bloco numéricos e ≥ 0; voltas e semanas como listas de inteiros; etapa e versao inteiros.
+- foco e nome com até 200 caracteres; prescricao, obs, orientacoes e metodos com até 2000.
+- Nenhum texto pode conter os caracteres < ou >. Escreva por extenso: "abaixo de 127 bpm", "acima de", "até", "no máximo".
+- Ficha inválida: o app mostra o erro no console do navegador e não a envia à planilha. Rode a validação antes de entregar.
+
+Trechos fixos no código (revise a cada etapa; ainda não vêm da ficha)
+- GUIA_EX: dicas de "Como executar" por palavra-chave do nome do exercício. Inclua dicas para exercícios novos.
+- metodosDe(): mapa de palavra-chave da prescrição para o método do Guia. Métodos novos precisam de entrada.
+- modoPadrao(): sugestão de express às segundas e terças.
+- Guia › Zonas de cardio: nota "Não faça o intervalado do treino E na véspera do treino C".
+- Sessão express: nota de cardio fora do treino ("…ou some ao treino E").
+- Título, cabeçalho, contagem de treinos e avisos de fim de etapa já são dinâmicos a partir da ficha.
+Ao mexer nesses trechos, prefira movê-los para a ficha.
 
 Suporte a janelas no app (implementar na primeira etapa que usar "janela", de forma retrocompatível)
 - Na sessão e na aba Ficha, agrupe os itens por janela com um rótulo ("Almoço 12h–13h", "Manhã 7h–8h", "Fim de tarde 18h–19h").
 - Calcule e exiba o tempo total por janela; o destaque principal (anilha da aba Hoje) mostra o tempo do almoço.
 - Itens de outras janelas podem ser marcados como feitos na mesma sessão do dia ou depois, sem impedir a conclusão do treino.
+- Atualize validarFicha() no index.html e validarFicha() em apps-script/Code.gs se o campo exigir validação.
 
 Funcionalidades existentes (preservar)
 - 4 abas inferiores: Hoje, Ficha, Histórico, Guia; botão de Ajustes no topo.
-- Hoje: próximo treino da sequência em destaque (anilha grande com letra e minutos), opção de fazer outro treino, painel da semana (seg–dom com as letras feitas), aviso quando as semanas da etapa terminam.
-- Sessão: itens com marcação de concluído (vibração), chips de séries/descanso/tempo, observações, cronômetro por item (+15 s, bipe e vibração), campo de carga em kg com data do último registro, barra de progresso, cancelar e concluir (registra data, fase, semana, duração e itens feitos).
-- Ficha: seletor de fase e de letra, tabela com prescrição, descanso, observação e minutos, total estimado.
-- Histórico: total de treinos, semana atual, duração média, lista de sessões e desfazer o último registro.
+- Hoje: próximo treino da sequência em destaque (anilha grande com letra e minutos, e tempos completo/express), opção de fazer outro treino, painel da semana (seg–dom com as letras feitas), peso da semana com meta, aviso de fim de etapa (por treinos feitos com "progressao", ou por semanas).
+- Sessão: versão Completo/Express; itens com marcação de concluído (vibração) e horário; card "em execução"; contador de séries (+1 e −; iniciar o descanso conta uma série); chips de séries/descanso/tempo/voltas; observações; verso do card (botão i) com como executar, método, prescrição, última carga, "Perguntar ao Claude" e copiar a pergunta; cronômetro por item (+15 s, reiniciar, bipe e vibração); campo de carga com unidade e data do último registro; tela mantida ligada; barra de progresso; cancelar e concluir (registra data, fase, volta, modo, duração, horários e itens feitos).
+- Ficha: seletor de fase, de versão (Completo/Express) e de letra, tabela com prescrição, descanso, observação e minutos, total estimado.
+- Histórico: total de treinos, média por semana, duração média, gráfico de frequência por semana, peso com meta e ritmo, tempo real × estimado por treino e por exercício, lista de sessões e desfazer o último registro.
 - Guia: orientações da etapa, métodos e zonas de cardio calculadas pela idade.
-- Ajustes: tema (automático/claro/escuro), data de início da etapa, fase automática ou fixa, exportar/importar backup JSON, apagar histórico da etapa.
+- Ajustes: tema (automático/claro/escuro), data de início da etapa, fase automática ou fixa, meta de peso, conexão com a planilha (chave), exportar/importar backup JSON, apagar histórico da etapa, versão do app; aviso "Nova versão do app disponível".
 
 Identidade visual (preservar)
 - Anilhas circulares com furo central, uma cor por letra: A vermelho #D6343B, B azul #2F6FDB, C amarelo #E3B21C (texto escuro), D verde #2E9E5B, E grafite #4F5B69. Para letras adicionais, crie cores no mesmo estilo e com contraste adequado nos temas claro e escuro.
@@ -205,14 +237,15 @@ Identidade visual (preservar)
 - Ícone: quadrado escuro #12161B com anilha vermelha. Textos em português do Brasil, frases curtas e diretas.
 
 Ao gerar uma nova etapa no app
-1. Parta do index.html mais recente do projeto e substitua o objeto FICHA, mantendo o restante do código (exceto as correções e extensões previstas acima).
-2. Atualize os trechos que citam a etapa: o <title> ("Treino · Etapa N"), o cabeçalho ("Etapa N"), o aviso de fim das semanas e as notas do Guia que dependam da divisão ou do cardio. Prefira torná-los dinâmicos a partir de FICHA.
-3. Valide: JSON válido, mesmas letras em todas as fases, campos obrigatórios presentes, nomes iguais para o mesmo exercício entre fases, semanas citadas nos nomes coerentes com fases_semanas, tempo por janela ≤ 60 min e dados salvos de etapas anteriores intactos.
+1. Parta do index.html mais recente da branch main do repositório e substitua apenas FICHA_EMBUTIDA, mantendo o restante do código (exceto as extensões previstas acima e os trechos fixos que a etapa exigir).
+2. Suba APP_VERSAO (ex.: "1.13" → "1.14") e atualize APP_DATA para a data da publicação: o aviso de nova versão nos aparelhos depende disso. Em revisão de uma etapa já publicada, suba também "versao" da ficha.
+3. Valide: JSON válido; regras de validação acima (em especial nenhum < ou >); mesmas letras em todas as fases; campos obrigatórios presentes; nomes iguais para o mesmo exercício entre fases, voltas e etapas; voltas/semanas coerentes com fases_semanas e fases_voltas; tempo por janela ≤ 60 min; express de 30–40 min; dados salvos de etapas anteriores intactos.
+4. Não altere apps-script/Code.gs nem a chave do localStorage. Se uma mudança exigir alterar o script, entregue o Code.gs separado e oriente publicar nova versão da implantação existente (Implantar › Gerenciar implantações › editar › Nova versão), nunca uma implantação nova.
 
 Publicação (GitHub Pages)
 - O app está em https://edipoalex.github.io/treino/ (repositório "treino" de edipoalex, branch main, raiz). Os dados ficam no localStorage desse endereço, então a URL nunca deve mudar: não renomeie o repositório, não mova arquivos para subpastas e não troque o domínio.
-- Entregue o index.html completo como arquivo para download, pronto para substituir o atual na raiz. Entregue manifest.json, ícones ou README só se alterados.
-- Inclua um passo a passo curto: (1) no celular, exportar o backup em Ajustes › Exportar; (2) no GitHub, Add file › Upload files, enviar o index.html substituindo o atual e fazer commit na main; (3) aguardar 1–2 min o deploy do Pages; (4) fechar e reabrir o app e conferir se o cabeçalho mostra a nova etapa; (5) em Ajustes, definir a data de início da etapa.
+- Entregue o index.html completo como arquivo para download, pronto para substituir o atual na raiz. Entregue manifest.json, ícones, sw.js ou README só se alterados.
+- Inclua um passo a passo curto: (1) no celular, exportar o backup em Ajustes › Exportar; (2) no GitHub, Add file › Upload files, enviar o index.html substituindo o atual e fazer commit na main; (3) aguardar 1–2 min o deploy do Pages; (4) abrir o app, tocar em "Atualizar" no aviso de nova versão (ou fechar e reabrir) e conferir em Ajustes a linha "App vX · Ficha etapa N (rev. V)"; (5) em Ajustes, definir a data de início da etapa.
 - Você não tem acesso ao repositório; nunca afirme que publicou ou atualizou o app online.
 </app_treino>
 
