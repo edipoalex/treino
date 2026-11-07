@@ -398,7 +398,7 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 /* ===================== FICHA ATUAL =====================
    Para uma nova etapa, substitua o objeto FICHA abaixo.
    O histórico e as cargas ficam salvos por etapa.        */
-const APP_VERSAO = "1.13";
+const APP_VERSAO = "1.14";
 const APP_DATA = "2026-11-07";
 const FICHA_EMBUTIDA = {
  "etapa": 19,
@@ -1894,15 +1894,22 @@ function validarFicha(f){
       const t=ts[letra];
       if(!t || !txtOk(t.foco,200) || !Array.isArray(t.itens) || !t.itens.length) return `treino ${letra} inválido`;
       if(!vazio(t.express) && !Array.isArray(t.express)) return `express do treino ${letra} inválido`;
+      if(!vazio(t.express_nota) && !txtOk(t.express_nota)) return `express_nota do treino ${letra} inválida`;
       for(const it of t.itens.concat(t.express||[])){
         if(!it || !it.nome || !txtOk(it.nome,200) || !txtOk(it.prescricao) || !(vazio(it.obs)||txtOk(it.obs))) return `exercício inválido no treino ${letra}`;
         if(![it.series,it.exec,it.descanso,it.bloco].every(v=>num(v)&&v>=0)) return `números inválidos em ${it.nome}`;
         if(!listaInt(it.voltas) || !listaInt(it.semanas)) return `voltas inválidas em ${it.nome}`;
+        if(!vazio(it.metodo) && !(txtOk(it.metodo,200) || (Array.isArray(it.metodo) && it.metodo.every(m=>txtOk(m,200))))) return `método inválido em ${it.nome}`;
+        if(!vazio(it.carga) && typeof it.carga!=="boolean") return `campo carga inválido em ${it.nome}`;
+        if(!vazio(it.janela) && !["almoco","manha","tarde"].includes(it.janela)) return `janela inválida em ${it.nome}`;
       }
     }
   }
   const pares = a => vazio(a) || (Array.isArray(a) && a.every(p=>Array.isArray(p) && p.every(x=>txtOk(x))));
   if(!pares(f.orientacoes) || !pares(f.metodos)) return "orientações ou métodos inválidos";
+  if(!vazio(f.guia) && (typeof f.guia!=="object" || Array.isArray(f.guia) || !Object.entries(f.guia).every(([k,d])=>txtOk(k,200) && Array.isArray(d) && d.every(x=>txtOk(x))))) return "guia inválido";
+  if(!vazio(f.express_dias) && !(Array.isArray(f.express_dias) && f.express_dias.every(d=>Number.isInteger(d) && d>=0 && d<=6))) return "express_dias inválido (0 = domingo … 6 = sábado)";
+  if(!vazio(f.cardio_notas) && !(Array.isArray(f.cardio_notas) && f.cardio_notas.every(x=>txtOk(x)))) return "cardio_notas inválido";
   return /[<>]/.test(JSON.stringify(f)) ? "texto com < ou >" : "";
 }
 /* >0 se a ficha a é mais nova que b (etapa, depois revisão) */
@@ -2000,7 +2007,7 @@ function treino(letra, fase=faseAtual(), v=voltaAtual(), modo="completo"){
   return v==null ? {...t, itens: base} : {...t, itens: base.filter(it=>daSemana(it, v))};
 }
 const temExpress = letra => !!FICHA.fases[faseAtual()]?.[letra]?.express;
-const modoPadrao = () => { const d=new Date().getDay(); return (d===1||d===2) && temExpress(LETRAS[0]) ? "express" : "completo"; };
+const modoPadrao = () => (FICHA.express_dias || [1,2]).includes(new Date().getDay()) && temExpress(LETRAS[0]) ? "express" : "completo"; // padrão: seg e ter
 const UNID = { kg:"kg", placas:"placas", livre:"livre" };
 const unidPadrao = nome => (S.unidades && S.unidades[nome]) || "kg";
 const semTxt = arr => { const u = porVoltas() ? (arr.length>1?"voltas":"volta") : "sem."; return arr.length>1 ? `${u} ${arr.slice(0,-1).join(", ")} e ${arr[arr.length-1]}` : `${u} ${arr[0]}`; };
@@ -2096,15 +2103,22 @@ const GUIA_EX = [
  ["cardio",["Siga a faixa de frequência cardíaca indicada no Guia.","No HIIT, os tiros são quase no máximo; na Zona 2, dá para conversar.","Prefira bike ou esteira inclinada depois de treinar pernas."]]
 ];
 function guiaDe(nome){
+  const daFicha=FICHA.guia?.[nome]; if(daFicha?.length) return daFicha;
   const n=nome.toLowerCase();
   const achadas=GUIA_EX.filter(([k])=>n.includes(k)).flatMap(([,d])=>d);
   return achadas.length ? achadas : ["Mantenha a técnica e a amplitude completa.","Controle a fase de descida (2–3 segundos).","Siga a prescrição de repetições, descanso e esforço da ficha."];
 }
-function metodosDe(presc){
-  const p=presc.toLowerCase();
+function metodosDe(it){
+  const lista=FICHA.metodos||[];
+  const nomes=[].concat(it.metodo||[]);
+  if(nomes.length) return nomes.map(n=>lista.find(x=>x[0].toLowerCase()===n.toLowerCase()) || [n,""]);
+  const p=it.prescricao.toLowerCase();
   const mapa=[["contraste","Contraste de cargas"],["rest-pause","Rest-pause"],["drop","Drop-set"],["micro-pausas","Micro-pausas"],["bi-set","Bi-set"],["pirâmide","Pirâmide"],["+ 2x","Séries por faixa"]];
-  return mapa.filter(([k])=>p.includes(k)).map(([,m])=>FICHA.metodos.find(x=>x[0]===m)).filter(Boolean);
+  return mapa.filter(([k])=>p.includes(k)).map(([,m])=>lista.find(x=>x[0]===m)).filter(Boolean);
 }
+/* Textos que dependem da divisão: vêm da ficha; os padrões valem para fichas antigas (até a etapa 19) */
+const notaExpress = t => t.express_nota ?? (FICHA.etapa<=19 ? "Cardio fora deste treino: faça Zona 2 de 25–30 min de manhã ou no fim da tarde, ou some ao treino E." : "");
+const notasCardio = () => FICHA.cardio_notas || (FICHA.etapa<=19 ? ["Depois de pernas, prefira bike ou esteira inclinada. Não faça o intervalado do treino E na véspera do treino C."] : []);
 function perguntaClaude(it, letra){
   return `Estou fazendo o treino ${letra} da minha ficha de musculação (etapa ${FICHA.etapa}). Exercício: ${it.nome}. Prescrição: ${it.prescricao}${it.series?`, ${it.series} séries, ${it.descanso}s de descanso`:""}${it.obs?`. Observação: ${it.obs}`:""}. Me explique como executar com boa técnica, os erros mais comuns e como escolher a carga.`;
 }
@@ -2224,13 +2238,13 @@ function viewSessao(){
     const timerLbl = forca ? `Descanso ${it.descanso}s` : `Cronômetro ${it.bloco} min`;
     const feitas=(a.series||{})[i]||0;
     if(a.info===i){
-      const mets=metodosDe(it.prescricao);
+      const mets=metodosDe(it);
       return `<li class="item verso" data-item="${i}">
         <button class="info-btn" data-info="${i}" aria-label="Voltar ao exercício">✕</button>
         <div class="verso-body">
           <p class="name" style="font-weight:600;font-size:17px">${esc(it.nome)}</p>
           <h4>Como executar</h4><ul>${guiaDe(it.nome).map(d=>`<li>${esc(d)}</li>`).join("")}</ul>
-          ${mets.length?`<h4>Método</h4>${mets.map(([m,d])=>`<p><strong>${esc(m)}:</strong> ${esc(d)}</p>`).join("")}`:""}
+          ${mets.length?`<h4>Método</h4>${mets.map(([m,d])=>`<p><strong>${esc(m)}</strong>${d?`: ${esc(d)}`:""}</p>`).join("")}`:""}
           <h4>Nesta ficha</h4><p>${esc(it.prescricao)}${it.series?`. ${it.series} ${it.series>1?"séries":"série"}, ${it.descanso}s de descanso`:`. ${it.bloco} min`}.${it.obs?` ${esc(it.obs)}.`:""}</p>
           ${kg?`<p>Última carga: <strong>${esc(kg.v)}${kg.u&&kg.u!=="livre"?" "+UNID[kg.u]:""}</strong> (${relDia(kg.d)}).</p>`:""}
           <div class="verso-acoes">
@@ -2257,7 +2271,7 @@ function viewSessao(){
       </div>` : ""}
       <div class="tools">
         <button class="btn btn-desc" data-timer="${timerSeg}" data-lbl="${esc(it.nome)}" data-idx="${i}" data-forca="${forca?1:0}">${ico.clock}${timerLbl}</button>
-        ${forca && !/abdômen|core/i.test(it.nome) ? `<div class="carga">
+        ${forca && (it.carga ?? !/abdômen|core/i.test(it.nome)) ? `<div class="carga">
           <label class="rot" for="kg-${i}">Carga<b>${kg?relDia(kg.d):"—"}</b></label>
           <input id="kg-${i}" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-kg="${esc(it.nome)}" value="${kg?esc(kg.v):""}" placeholder="—">
           <button class="unit" data-unit="${esc(it.nome)}" aria-label="Unidade da carga de ${esc(it.nome)}">${UNID[(kg&&kg.u)||unidPadrao(it.nome)]}</button>
@@ -2272,7 +2286,7 @@ function viewSessao(){
   </section>
   ${temExpress(a.letra) ? `<div class="seg" role="group" aria-label="Versão do treino" style="margin-top:8px">
     ${["completo","express"].map(m=>`<button data-modo="${m}" aria-pressed="${(a.modo||"completo")===m}">${m==="completo"?"Completo":"Express"} · ${Math.round(totalMin(treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined,m)))} min</button>`).join("")}
-  </div>${(a.modo==="express")?`<p class="meta" style="font-size:13px;margin:6px 2px 0">Cardio fora deste treino: faça Zona 2 de 25–30 min de manhã ou no fim da tarde, ou some ao treino E.</p>`:""}` : ""}
+  </div>${(a.modo==="express" && notaExpress(t))?`<p class="meta" style="font-size:13px;margin:6px 2px 0">${esc(notaExpress(t))}</p>`:""}` : ""}
   <div class="progress L-${a.letra}" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${f}" aria-label="Progresso"><span style="width:${f/n*100}%;background:var(--c)"></span></div>
   <p class="meta">${f} de ${n} concluídos</p>
   <ul class="items">${items}</ul>
@@ -2563,9 +2577,9 @@ function viewGuia(){
   <h1 class="page">Guia</h1>
   <p class="sub">Como executar cada método e como conduzir o cardio.</p>
   <details open><summary>Orientações da etapa</summary><div class="dbody"><dl>
-    ${FICHA.orientacoes.map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
+    ${(FICHA.orientacoes||[]).map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
   <details><summary>Métodos</summary><div class="dbody"><dl>
-    ${FICHA.metodos.map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
+    ${(FICHA.metodos||[]).map(([t,d])=>`<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></div></details>
   <details><summary>Zonas de cardio</summary><div class="dbody">
     <div class="field"><label for="idade">Sua idade</label><input id="idade" type="number" inputmode="numeric" min="14" max="90" value="${esc(S.idade)}" placeholder="Ex.: 38"></div>
     <p class="meta" style="margin-top:8px">${fc?`FC máxima estimada: <strong style="color:var(--ink)">${fc} bpm</strong> (208 − 0,7 × idade).`:"A FC máxima é estimada pela idade."} Um teste de esforço dá o valor real.</p>
@@ -2574,7 +2588,7 @@ function viewGuia(){
       <tr><td>Intervalado longo</td><td>${z(.85,.9)}</td><td>7–8</td></tr>
       <tr><td>HIIT curto</td><td>${z(.9,.95)}</td><td>8–9</td></tr>
     </tbody></table>
-    <p class="meta" style="margin-top:10px">Depois de pernas, prefira bike ou esteira inclinada. Não faça o intervalado do treino E na véspera do treino C.</p>
+    ${notasCardio().map(n=>`<p class="meta" style="margin-top:10px">${esc(n)}</p>`).join("")}
   </div></details>`;
   const inp=$("#idade");
   inp.onchange=()=>{ S.idade = inp.value ? +inp.value : ""; enfileirar({tipo:"setConfig", chave:"idade", valor:S.idade}); const o=document.querySelectorAll("details"); const st=[...o].map(d=>d.open); render(); document.querySelectorAll("details").forEach((d,i)=>d.open=st[i]); };

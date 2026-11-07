@@ -123,6 +123,13 @@ export function checarFicha(f, codigoApp, erros, avisos){
     const uniao = new Set(todas.flatMap(s=>[...s]));
     for(const n of uniao){ const em = fases.filter((fa,i)=>todas[i].has(n)); if(em.length<fases.length) avisos.push(`"${n}" só existe na fase ${em.join(", ")} (cargas são salvas pelo nome exato)`); }
   }
+  // campos que referenciam outras partes da ficha
+  const todosItens = fases.flatMap(fa=>letras.flatMap(l=>f.fases[fa][l].itens.concat(f.fases[fa][l].express||[])));
+  const nomesMetodos = new Set((f.metodos||[]).map(m=>m[0].toLowerCase()));
+  const semDesc = new Set(todosItens.flatMap(it=>[].concat(it.metodo||[])).filter(m=>!nomesMetodos.has(m.toLowerCase())));
+  for(const m of semDesc) avisos.push(`método "${m}" usado em itens, mas sem descrição em "metodos"`);
+  const nomesItens = new Set(todosItens.map(it=>it.nome));
+  for(const k of Object.keys(f.guia||{})) if(!nomesItens.has(k)) avisos.push(`guia: "${k}" não corresponde a nenhum exercício da ficha`);
   return resumo;
 }
 
