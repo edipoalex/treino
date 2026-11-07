@@ -1,13 +1,14 @@
-import { blocoCarga, cargaDe, cargaResumo, digitarCarga, enviarCargasPendentes, partesDe, passoCarga, salvarCarga, temCarga, trocarUnidade } from "../cargas.js";
+import { blocoCarga, cargaDe, cargaResumo, cargasDaSerie, chaveCarga, digitarCarga, enviarCargasPendentes, grupoDaSerie, gruposDe, partesDe, passoCarga, salvarCarga, temCarga, trocarUnidade } from "../cargas.js";
 import { iniciarDescanso, maisTempo, pararDescanso } from "../descanso.js";
 import { E, FICHA, S, save } from "../estado.js";
 import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
 import { nav, render } from "../navegacao.js";
 import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpress, totalMin, treino, voltasDo } from "../progresso.js";
 import { rotSerie, seriesDe } from "../series.js";
+import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSessao } from "../metricas.js";
 import { enfileirar, hora } from "../sync.js";
 import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
-import { $, esc } from "../util.js";
+import { $, esc, fmtNum } from "../util.js";
 
 /* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
 export const ICO = {
@@ -95,8 +96,9 @@ export function viewSessao(){
   $("#view").onclick = cliqueSessao;
   $("#view").onchange = e => {
     const inp=e.target.closest("[data-txt]"); if(!inp) return;
-    const [i,pi]=inp.dataset.txt.split(":").map(Number), p=partesDe(treinoAtual(E.atual).itens[i])[pi];
-    salvarCarga(p.key, inp.value, cargaDe(p.key).u);
+    const [i,pi,gi]=inp.dataset.txt.split(":").map(Number), it=treinoAtual(E.atual).itens[i];
+    const key=chaveCarga(partesDe(it)[pi], gruposDe(it)[gi]||"");
+    salvarCarga(key, inp.value, cargaDe(key).u);
   };
   manterTela(true);
 }
@@ -111,9 +113,9 @@ export function cliqueSessao(e){
   if(d.feito!=null) return alternarFeito(+d.feito);
   if(d.reabrir!=null) return reabrir(+d.reabrir);
   if(d.info!=null) return comoFazer(t.itens[+d.info], a.letra);
-  if(d.passo){ const [i,pi,dir]=par(d.passo); return passoCarga(t.itens[i],pi,dir); }
-  if(d.digitar){ const [i,pi]=par(d.digitar); return digitarCarga(t.itens[i],pi); }
-  if(d.uni){ const [i,pi]=par(d.uni); return trocarUnidade(t.itens[i],pi); }
+  if(d.passo){ const [i,pi,gi,dir]=par(d.passo); return passoCarga(t.itens[i],pi,gi,dir); }
+  if(d.digitar){ const [i,pi,gi]=par(d.digitar); return digitarCarga(t.itens[i],pi,gi); }
+  if(d.uni){ const [i,pi,gi]=par(d.uni); return trocarUnidade(t.itens[i],pi,gi); }
   if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); return rerender(true); }
   if(el.id==="sMenu") return menuSessao();
   if(el.id==="sLista") return listaGeral();
@@ -123,16 +125,18 @@ export function cliqueSessao(e){
 export function registrarSerie(i){
   const a=E.atual, t=treinoAtual(a), it=t.itens[i]; a.series ??= {};
   const f=a.series[i]||0; if(f>=it.series) return;
+  const ser=seriesDe(it);
+  if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerie(it,g) }; }
   a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15);
   const fimEx = a.series[i]===it.series;
   if(fimEx && !a.feitos.includes(i)){ a.feitos.push(i); (a.marcas ??= {})[i]=Date.now(); }
   save();
   desfazer(`Série ${f+1} de ${it.series} registrada`, ()=>{
-    a.series[i]=f; const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
+    a.series[i]=f; if(a.cs?.[i]) a.cs[i].length=Math.min(a.cs[i].length,f); const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
     pararDescanso(false); save(); rerender();
   });
-  const ser=seriesDe(it), seguinte=t.itens[i+1];
-  const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaResumo(it)}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
+  const seguinte=t.itens[i+1];
+  const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaResumo(it, grupoDaSerie(it,f+1))}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
   if(!fimEx || seguinte) iniciarDescanso(i, it.descanso, prox); else rerender();
 }
 export function alternarFeito(i){
@@ -144,6 +148,7 @@ export function alternarFeito(i){
 }
 export function reabrir(i){
   const a=E.atual; a.series ??= {}; a.series[i]=Math.max(0,(a.series[i]||0)-1);
+  if(a.cs?.[i]) a.cs[i].length=Math.min(a.cs[i].length,a.series[i]);
   const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas?.[i]; }
   a.ativo=i; save(); rerender();
 }
@@ -198,8 +203,9 @@ export function trocarVersao(novo){
   const map={}; t.itens.forEach((it,i)=>{ const j=novoT.itens.findIndex(x=>x.nome===it.nome); if(j>=0) map[i]=j; });
   const remap=obj=>{ const o={}; for(const [k,v] of Object.entries(obj||{})) if(map[k]!=null) o[map[k]]=v; return o; };
   a.feitos=a.feitos.filter(i=>map[i]!=null).map(i=>map[i]);
-  a.marcas=remap(a.marcas); a.series=remap(a.series);
+  a.marcas=remap(a.marcas); a.series=remap(a.series); a.cs=remap(a.cs);
   for(const k in a.series) a.series[k]=Math.min(a.series[k], novoT.itens[k].series||0);
+  for(const k in a.cs) a.cs[k].length=Math.min(a.cs[k].length, a.series[k]||0);
   a.ativo = a.ativo!=null && map[a.ativo]!=null ? map[a.ativo] : 0;
   pararDescanso(false); a.modo=novo; save(); rerender(true);
 }
@@ -210,17 +216,29 @@ export function concluir(){
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
   const fim=Date.now();
   const itens = a.feitos.slice().sort((x,y)=>(a.marcas?.[x]||0)-(a.marcas?.[y]||0))
-    .map(i=>({ n:t.itens[i].nome, t: a.marcas?.[i] ? Math.round((a.marcas[i]-a.inicio)/1000) : null, e: Math.round(minutos(t.itens[i])*60), ...(t.itens[i].series ? {s:a.series?.[i]||0, sp:t.itens[i].series} : {}) }));
+    .map(i=>({ n:t.itens[i].nome, t: a.marcas?.[i] ? Math.round((a.marcas[i]-a.inicio)/1000) : null, e: Math.round(minutos(t.itens[i])*60), ...(t.itens[i].series ? {s:a.series?.[i]||0, sp:t.itens[i].series} : {}), ...(a.cs?.[i]?.filter(Boolean).length ? {cs:a.cs[i].filter(Boolean)} : {}) }));
+  // exercícios com séries registradas mas não concluídos entram como parciais (p:1), só para guardar as cargas
+  for(const [k,n] of Object.entries(a.series||{})){ const i=+k, cs=a.cs?.[i]?.filter(Boolean);
+    if(n>0 && !a.feitos.includes(i) && t.itens[i] && cs?.length) itens.push({ n:t.itens[i].nome, t:null, e:Math.round(minutos(t.itens[i])*60), s:n, sp:t.itens[i].series, cs, p:1 }); }
   E.historico.push({ id, letra:a.letra, fase:a.fase, semana:semanaAtual(), data:isoDe(new Date(a.inicio)), // data do início, mesmo se passar da meia-noite
     duracao: Math.round((fim-a.inicio)/6e4), feitos:a.feitos.length, total:t.itens.length,
     inicio: hora(a.inicio), fim: hora(fim), itens, modo: a.modo||"completo", volta: a.volta ?? null, numero: E.historico.length+1 });
   { const x=E.historico[E.historico.length-1]; enfileirar({tipo:"addSessao", etapa:FICHA.etapa, ...x}); }
   const seriesFeitas=Object.values(a.series||{}).reduce((x,y)=>x+y,0), x=E.historico[E.historico.length-1];
   const anterior=E.historico.slice(0,-1).filter(h=>h.letra===a.letra && h.duracao>0).pop();
+  // volume e recordes (só existem nos treinos registrados com carga por série)
+  const vol=volumeSessao(x), antComCarga=E.historico.slice(0,-1).filter(h=>h.letra===a.letra && temCargas(h)).pop();
+  const volAnt=antComCarga?volumeSessao(antComCarga):0, difVol=volAnt?Math.round((vol/volAnt-1)*100):0;
+  const outras=Object.values(S.etapas).flatMap(e=>e.historico||[]).filter(h=>h!==x);
+  const recs=recordesDaSessao(x, outras);
+  const linhasCargas=x.itens.filter(i=>i.cs?.length).map(i=>`<li><span>${esc(i.n)}</span><span>${esc(resumoCargas(i))}</span></li>`).join("");
   E.atual=null; save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false);
   render(); scrollTo(0,0);
   folha(`<div class="L-${esc(a.letra)}" style="display:flex;align-items:center;gap:14px">${plate(a.letra,"sm")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
-    <div class="stats"><div class="stat"><b>${x.duracao}</b><span>min</span></div><div class="stat"><b>${seriesFeitas}</b><span>séries</span></div><div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div></div>
+    <div class="stats"><div class="stat"><b>${x.duracao}</b><span>min</span></div><div class="stat"><b>${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
+    ${vol && volAnt ? `<p class="meta">Volume ${difVol>=0?"+":"−"}${Math.abs(difVol)}% sobre o último treino ${esc(a.letra)}.</p>` : ""}
+    ${recs.length?`<div class="recordes"><b>${ico.trofeu} ${recs.length>1?`${recs.length} recordes`:"Recorde"}</b>${recs.map(r=>`<span>${esc([r.k, r.g].filter(Boolean).join(" · "))}: ${fmtRec(r)} <small>(antes ${fmtNum(r.antes)})</small></span>`).join("")}</div>`:""}
+    ${linhasCargas?`<ul class="r-cargas">${linhasCargas}</ul>`:""}
     ${anterior?`<p class="meta">Último treino ${esc(a.letra)}: ${anterior.duracao} min (${relDia(anterior.data)}).</p>`:""}
     <p class="meta">Próximo da sequência: treino ${esc(proxima())}.</p>
     <button class="btn primary" data-fechar>Fechar</button>`);

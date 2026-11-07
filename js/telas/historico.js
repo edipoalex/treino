@@ -4,6 +4,7 @@ import { DIA, addPeso, fmtData, fmtKg, freqAlvo, hojeISO, minutos, parseISO, par
 import { enfileirar } from "../sync.js";
 import { plate, toast } from "../ui.js";
 import { $, esc } from "../util.js";
+import { fmtRec, fmtVolume, maximos, temCargas, volumeSessao } from "../metricas.js";
 
 export function chartFreq(){
   const alvo=freqAlvo(), atual=semanaAtual();
@@ -67,14 +68,14 @@ export function metricasTempo(){
     if(!(x.duracao>0)) continue;
     const t=treino(x.letra, x.fase, x.volta ?? semanaDaEtapa(x.data) ?? x.semana, x.modo||"completo"); if(!t) continue;
     // estimado só com os itens marcados como feitos
-    const feitosNomes=(x.itens||[]).map(i=>i.n);
+    const feitosNomes=(x.itens||[]).filter(i=>!i.p).map(i=>i.n);
     const est = feitosNomes.length ? t.itens.filter(it=>feitosNomes.includes(it.nome)).reduce((a,it)=>a+minutos(it),0) : totalMin(t)*(x.feitos/x.total||1);
     const L=(porLetra[x.letra] ??= {n:0, real:0, est:0});
     L.n++; L.real+=x.duracao; L.est+=est;
     // por exercício: intervalo entre marcações consecutivas
     let ant=0;
     (x.itens||[]).forEach(i=>{
-      if(i.t==null){ return; }
+      if(i.t==null || i.p){ return; }
       const dur=(i.t-ant)/60; ant=i.t;
       if(dur<=0 || dur>40) return;
       const k=`${x.letra}|${i.n}`; const X=(porEx[k] ??= {letra:x.letra, nome:i.n, n:0, real:0, est:(i.e||0)/60});
@@ -103,6 +104,31 @@ export function painelTempo(){
   return `<section class="panel" aria-labelledby="hTempo"><h3 id="hTempo">Tempo de execução <span class="sub2">real × estimado</span></h3>
     <div class="table" style="margin-top:4px">${linhas}</div>${exHtml}</section>`;
 }
+/* Volume dos últimos treinos com carga registrada por série, na cor da letra */
+export function chartVolume(){
+  const xs=E.historico.filter(temCargas).slice(-10); if(!xs.length) return "";
+  const vs=xs.map(volumeSessao), max=Math.max(...vs,1);
+  const W=340,H=130,B=22,T=16, cw=W/xs.length, bw=Math.min(30,cw*.62);
+  let g="";
+  xs.forEach((x,i)=>{ const h=(H-B-T)*vs[i]/max, px=i*cw+(cw-bw)/2;
+    g+=`<rect x="${px}" y="${H-B-h}" width="${bw}" height="${Math.max(h,2)}" rx="4" fill="var(--p${x.letra})"><title>Treino ${x.letra}, ${fmtData(x.data)}: ${fmtVolume(vs[i])}</title></rect>`;
+    g+=`<text x="${px+bw/2}" y="${H-6}" text-anchor="middle">${x.letra}</text>`;
+    if(i===xs.length-1) g+=`<text x="${px+bw/2}" y="${H-B-h-4}" text-anchor="middle">${fmtVolume(vs[i])}</text>`; });
+  return `<section class="panel" aria-labelledby="hVol"><h3 id="hVol">Volume por treino <span class="sub2">kg × repetições</span></h3>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Volume dos últimos treinos">${g}</svg></section>`;
+}
+/* Recordes de carga de todas as etapas (registradas por série a partir da v1.18) */
+let verRecordes=false;
+export function painelRecordes(){
+  const todas=Object.values(S.etapas).flatMap(e=>e.historico||[]);
+  const rs=Object.values(maximos(todas)).sort((a,b)=>b.data.localeCompare(a.data) || a.k.localeCompare(b.k));
+  if(!rs.length) return `<section class="panel"><h3>Recordes de carga</h3><p class="meta">Os recordes aparecem conforme você registra séries com carga.</p></section>`;
+  const lista=rs.slice(0, verRecordes?rs.length:6);
+  return `<section class="panel" aria-labelledby="hRec" style="padding-bottom:8px"><h3 id="hRec">Recordes de carga</h3>
+    <ul class="r-cargas">${lista.map(r=>`<li><span>${esc([r.k, r.g].filter(Boolean).join(" · "))}</span><span><b style="color:var(--ink)">${fmtRec(r)}</b> · ${r.data===hojeISO()?"hoje":fmtData(r.data)}</span></li>`).join("")}</ul>
+    ${rs.length>6?`<button class="btn ghost block" id="verRecordes">${verRecordes?"Mostrar menos":`Ver todos os ${rs.length} recordes`}</button>`:""}</section>`;
+}
+
 export function viewHistorico(){
   const h=[...E.historico].reverse();
   const durs=E.historico.filter(x=>x.duracao>0).map(x=>x.duracao);
@@ -136,15 +162,18 @@ export function viewHistorico(){
     ${!parseKg(S.meta.kg)?`<p class="meta" style="margin-top:10px;font-size:14px">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
   </section>
 
+  ${painelRecordes()}
+  ${chartVolume()}
   ${painelTempo()}
 
   <section class="panel" aria-labelledby="hSes" style="padding-bottom:8px"><h3 id="hSes">Sessões</h3>
   ${h.length ? `<ul class="hist" style="margin-top:0">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}${x.modo==="express"?" · express":""}, ${fmtData(x.data)}</strong>
-    <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
+    <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens${temCargas(x)&&volumeSessao(x)?`, ${fmtVolume(volumeSessao(x))}`:""}. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
     ${i===0?`<button class="btn" id="undoBtn" style="min-height:44px">Desfazer</button>`:""}</li>`).join("")}</ul>`
   : `<p class="empty" style="padding:16px 8px">Nenhum treino registrado nesta etapa.</p>`}
   ${h.length>8?`<button class="btn ghost block" id="verTodas" style="margin-top:8px">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
   </section>`;
+  $("#verRecordes") && ($("#verRecordes").onclick=()=>{ verRecordes=!verRecordes; const y=scrollY; render(); scrollTo(0,y); });
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
   $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});
   $("#pAdd").onclick=()=>{
