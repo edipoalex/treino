@@ -81,6 +81,9 @@ html[data-dir="tras"]::view-transition-new(tela){animation-name:tela-entra-tras}
 
 /* Entrada de tela (só ao abrir a aba) */
 .entrando :is(.hero,.hoje-card) .plate{animation:anilha .6s var(--e-saida) both}
+/* anilha 3D: chega girando no eixo vertical até o ângulo final */
+.entrando :is(.hero,.hoje-card) .plate.d3,.folha .plate.d3{animation:gira3d .75s var(--e-saida) both}
+@keyframes gira3d{from{transform:perspective(500px) rotateY(-80deg) scale(.8);opacity:0}}
 @keyframes anilha{from{transform:rotate(-160deg) scale(.55);opacity:0}}
 .entrando .week .d{animation:surge .35s var(--e-mola) both}
 .entrando .week .d:nth-child(2){animation-delay:.04s}.entrando .week .d:nth-child(3){animation-delay:.08s}

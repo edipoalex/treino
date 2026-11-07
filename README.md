@@ -19,6 +19,7 @@ js/cargas.js            cargas por exercício (kg, placas, livre; pesado e leve 
 js/metricas.js          volume e recordes a partir das cargas registradas em cada série
 js/movimento.js         transições e microinterações (respeita Ajustes › Animações e "reduzir movimento")
 js/icones.js            ícones Lucide (ISC) guardados no app, para funcionar offline
+js/anilha.js            anilhas em SVG: 3D nas grandes, de frente com a letra no cubo nas pequenas
 js/descanso.js          cronômetro de descanso
 js/sync.js              sincronização com a planilha
 js/navegacao.js         abas e render()

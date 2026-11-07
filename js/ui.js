@@ -1,3 +1,4 @@
+import { anilhaSVG } from "./anilha.js";
 import { arrastarParaFechar, movimentoOk } from "./movimento.js";
 import { icone } from "./icones.js";
 import { E, FICHA, S } from "./estado.js";
@@ -13,7 +14,9 @@ export function applyTheme(){
   document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content = dark ? "#12161B" : "#E8EBEE");
 }
 /* ---------- UI helpers ---------- */
-export const plate = (l, cls="", sub="") => `<div class="plate L-${esc(l)} ${cls}" aria-hidden="true"><b>${esc(l)}</b>${sub?`<i>${esc(sub)}</i>`:""}</div>`;
+/* Anilha do treino: 3D nas grandes ("md" ou "d3"), de frente nas pequenas (js/anilha.js) */
+export const plate = (l, cls="") => { const d3=/\b(md|d3)\b/.test(cls);
+  return `<div class="plate anilha ${d3?"d3":""} L-${esc(l)} ${cls}" aria-hidden="true">${anilhaSVG(l, { d3, detalhada: /\bmd\b/.test(cls) })}</div>`; };
 export let toastT;
 export function toast(msg){ const t=$("#toast"); const dl=document.getElementById("settings"); const host=dl&&dl.open?dl:document.body; if(t.parentNode!==host) host.appendChild(t); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 export const ico = { check:icone("check"), trofeu:icone("trophy"), clock:icone("clock") };
