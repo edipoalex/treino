@@ -26,9 +26,10 @@ export function viewHoje(){
   const seq = proxima();
   const qtd = `${t.itens.length} ${t.itens.length>1?"exercícios":"exercício"}`;
   $("#view").innerHTML = `
-  <section class="hoje-card L-${esc(letra)}" id="cardHoje" role="button" tabindex="0" aria-expanded="${!!verPrevia}"
+  <section class="hoje-card marcado L-${esc(letra)}" id="cardHoje" role="button" tabindex="0" aria-expanded="${!!verPrevia}"
     aria-label="Treino ${esc(letra)}: toque para ${verPrevia?"voltar":"ver os exercícios"}">
-    <div class="face frente" ${verPrevia?"hidden":""}>${plate(letra,"md semtexto")}
+    <div class="marca" aria-hidden="true">${plate(letra,"md semtexto")}</div>
+    <div class="face frente" ${verPrevia?"hidden":""}>
       <div style="flex:1;min-width:0"><p class="meta">${titulo}</p><h2>Treino ${esc(letra)}</h2>
       <p class="meta">${esc(t.foco)} · ~${Math.round(totalMin(t))} min${tEx?` · express ~${Math.round(totalMin(tEx))} min`:""}</p>
       <span class="virar">${icone("list")} ${qtd}</span></div>
@@ -65,10 +66,12 @@ function virarCard(c){
     c.setAttribute("aria-expanded",String(verPrevia)); c.setAttribute("aria-label",`${c.querySelector("h2").textContent}: toque para ${verPrevia?"voltar":"ver os exercícios"}`); };
   if(!movimentoOk() || !c.animate){ trocar(); return; }
   const h0=c.offsetHeight, p="perspective(900px) ";
-  c.animate([{transform:p+"rotateY(0)"},{transform:p+"rotateY(90deg)"}],{duration:150, easing:"ease-in"}).onfinish=()=>{
-    trocar(); const h1=c.offsetHeight;
-    c.animate([{transform:p+"rotateY(-90deg)", height:h0+"px", overflow:"hidden"},{transform:p+"rotateY(0)", height:h1+"px", overflow:"hidden"}],{duration:280, easing:"cubic-bezier(.22,1,.36,1)"});
-  };
+  // a troca de face não pode depender só do fim da animação (em segundo plano ela pode não terminar)
+  let trocou=false;
+  const meio=()=>{ if(trocou) return; trocou=true; trocar(); const h1=c.offsetHeight;
+    c.animate([{transform:p+"rotateY(-90deg)", height:h0+"px", overflow:"hidden"},{transform:p+"rotateY(0)", height:h1+"px", overflow:"hidden"}],{duration:280, easing:"cubic-bezier(.22,1,.36,1)"}); };
+  c.animate([{transform:p+"rotateY(0)"},{transform:p+"rotateY(90deg)"}],{duration:150, easing:"ease-in"}).onfinish=meio;
+  setTimeout(meio, 200);
 }
 export let verPrevia=false;
 export function pesoPanel(){

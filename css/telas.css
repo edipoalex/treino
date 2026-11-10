@@ -134,3 +134,12 @@ h1.page{font-family:var(--display);font-size:30px;margin:8px 0 4px}
 .escolher button[aria-pressed="true"] .plate{outline:3px solid var(--c);outline-offset:3px}
 .escolher button[aria-pressed="true"]{color:var(--ink)}
 .escolher button:active .plate{transform:scale(.82)}
+
+/* Card com a anilha 3D como marca d'água, grande e cortada pela borda direita */
+.hoje-card.marcado{position:relative;overflow:hidden;isolation:isolate;padding:20px 18px}
+.hoje-card.marcado .face{position:relative;z-index:1}
+.hoje-card.marcado h2{font-size:40px}
+.hoje-card.marcado .frente{padding:2px 0}
+.hoje-card .marca{position:absolute;z-index:0;width:300px;height:300px;right:-95px;top:50%;transform:translateY(-50%);opacity:.22;pointer-events:none;transition:opacity .25s}
+.hoje-card .marca .plate.md{--size:300px}
+.hoje-card[aria-expanded="true"] .marca{opacity:.07}
