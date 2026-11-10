@@ -47,8 +47,9 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
 .serie-btn svg{width:24px;height:24px}
 .t-linha{display:grid;grid-template-columns:1fr 96px;gap:16px;margin-top:12px}
 .t-btn{position:relative;overflow:hidden;min-height:68px;font-family:var(--display);font-size:32px}
-.t-btn span{position:relative}
-.t-fill{position:absolute;inset:0;background:rgba(255,255,255,.24);transform-origin:left;transition:transform .25s linear}
+/* Texto e ícone por cima da barra; a barra (tempo restante) encolhe da direita para a esquerda */
+.t-btn #tTxt,.t-btn .ic{position:relative}
+.t-btn .t-fill{position:absolute;inset:0;background:rgba(255,255,255,.28);transform-origin:left;transition:transform .25s linear;pointer-events:none}
 .t-btn.low{background:var(--warn);border-color:var(--warn);color:#fff}
 .t-mais{min-height:68px;font-size:18px}
 .linha2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
