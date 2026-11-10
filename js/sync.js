@@ -1,3 +1,4 @@
+import { envioCarga } from "./cargas.js";
 import { FICHA, S, novaEtapa, save, usarFicha } from "./estado.js";
 import { FICHA_EMBUTIDA } from "./ficha-atual.js";
 import { render } from "./navegacao.js";
@@ -107,6 +108,9 @@ export async function sincronizar(){
     if(extra.length){ S.fila.push(...extra); save(); sincronizando=false; return await sincronizar(); }
     aplicarRemoto(j.estado);
     S.fila.forEach(aplicarOpLocal); // alterações feitas durante a requisição continuam visíveis
+    // cargas ajustadas há menos de 1,2 s ainda não entraram na fila (o envio espera parar de tocar no + / −);
+    // sem isto, a resposta da planilha voltava a carga para o valor anterior no meio do ajuste
+    Object.values(envioCarga).forEach(e=>aplicarOpLocal(e.op));
     if(!S.sync.ultimo) toast("Conectado à planilha");
     S.sync.ultimo=Date.now(); S.sync.erro=""; falhasSync=0;
     save();
