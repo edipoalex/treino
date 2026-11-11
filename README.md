@@ -14,13 +14,14 @@ js/app.js               ponto de entrada: carrega o estado, liga os eventos, des
 js/estado.js            estado salvo no aparelho (localStorage) e ficha em uso
 js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do Apps Script)
 js/progresso.js         datas, sequência, voltas, fases, frequência e peso
-js/series.js            leitura da prescrição em séries ("6 pesado", "20 leve"…)
+js/series.js            leitura da prescrição: séries ("6 pesado", "20 leve"…) e partes com tempo ("45s de prancha")
 js/cargas.js            cargas por exercício (kg, placas, livre; pesado e leve no contraste)
 js/metricas.js          volume e recordes a partir das cargas registradas em cada série
 js/movimento.js         transições e microinterações (respeita Ajustes › Animações e "reduzir movimento")
 js/icones.js            ícones Lucide (ISC) guardados no app, para funcionar offline
 js/anilha.js            anilhas em SVG: 3D nas grandes, de frente com a letra no cubo nas pequenas
-js/descanso.js          cronômetro de descanso
+js/descanso.js          cronômetro de descanso (e a carga da próxima série, na tela cheia)
+js/execucao.js          cronômetro de execução (prancha, por lado, rest-pause, HIIT) e cronômetro livre
 js/sync.js              sincronização com a planilha
 js/navegacao.js         abas e render()
 js/telas/               hoje · sessao · ficha · historico · guia

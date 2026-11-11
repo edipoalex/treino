@@ -32,6 +32,10 @@ export function normalizarEstado(S){
   if(!Array.isArray(S.fila) || !S.sync.url) S.fila = []; // sem planilha não há fila: a 1ª conexão envia tudo pelo migrar()
   if(S.fichaRemota && validarFicha(S.fichaRemota)) S.fichaRemota = null;
   if(S.timer && !(num(S.timer.fim) && num(S.timer.total) && num(S.timer.k))) delete S.timer;
+  // cronômetro de execução, cronômetro livre e exercícios com "variar a carga por série"
+  if(S.exec && !(num(S.exec.k) && num(S.exec.inicio) && Array.isArray(S.exec.etapas) && S.exec.etapas.every(e=>num(e?.seg)))) delete S.exec;
+  if(S.livre && !(num(S.livre.k) && num(S.livre.acum ?? 0))) delete S.livre;
+  if(!S.variar || typeof S.variar!=="object" || Array.isArray(S.variar)) S.variar = {};
   S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas" };
   S.v = ESTADO_V;
   return S;

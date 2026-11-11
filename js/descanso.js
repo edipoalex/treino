@@ -1,7 +1,10 @@
 import { marcar } from "./movimento.js";
 import { E, S, save } from "./estado.js";
 import { render } from "./navegacao.js";
-import { rerender } from "./telas/sessao.js";
+import { rerender, treinoAtual } from "./telas/sessao.js";
+import { cargaPorSerie, cargaResumo, controlesCarga, grupoDaSerie, grupoIdx, passoCarga, trocarUnidade } from "./cargas.js";
+import { rotSerie, seriesDe } from "./series.js";
+import { consumirRepeticao, segurarRepete } from "./movimento.js";
 import { fmtSeg, toast } from "./ui.js";
 import { $, esc } from "./util.js";
 
@@ -42,11 +45,37 @@ export function abrirTelaDescanso(){
     <svg class="anel" viewBox="0 0 240 240" role="timer" aria-label="Tempo de descanso"><circle cx="120" cy="120" r="104" fill="none" stroke="var(--line)" stroke-width="16"/>
     <circle id="dArc" cx="120" cy="120" r="104" fill="none" stroke="var(--c)" stroke-width="16" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
     <text id="dTxt" x="120" y="138" text-anchor="middle" font-size="64">${fmtSeg((T.fim-Date.now())/1000)}</text></svg>
-    ${T.prox?`<p class="meta">Próxima</p><p class="prox">${esc(T.prox)}</p>`:""}
+    ${T.prox?`<p class="meta">Próxima</p><p class="prox" id="dProx">${esc(T.prox)}</p>`:""}
+    <div id="dCarga" style="width:100%;max-width:608px">${cargaProxima()}</div>
     <div class="acoes"><div class="linha2" style="margin:0"><button class="btn" data-d="-15">−15 s</button><button class="btn" data-d="15">+15 s</button></div>
     <button class="btn" data-d="pular">Pular descanso</button></div>`;
-  d.onclick=e=>{ const b=e.target.closest("[data-d]"); if(!b) return; if(b.dataset.d==="pular") return pararDescanso(); maisTempo(+b.dataset.d); };
+  d.onclick=e=>{
+    const p=e.target.closest("[data-passo]"); if(p){ if(consumirRepeticao()) return; return ajustarProxima(p.dataset.passo); }
+    const u=e.target.closest("[data-uni]"); if(u){ const [i,pi,gi]=u.dataset.uni.split(":").map(Number); trocarUnidade(treinoAtual(E.atual).itens[i],pi,gi); return atualizarProxima(); }
+    const b=e.target.closest("[data-d]"); if(!b) return; if(b.dataset.d==="pular") return pararDescanso(); maisTempo(+b.dataset.d); };
+  segurarRepete(d, "[data-passo]", dado=>ajustarProxima(dado.passo));
   document.body.appendChild(d); tick();
+}
+/* Tela cheia: carga da próxima série do mesmo exercício, ajustável durante o descanso */
+function proximaSerie(){
+  const T=S.timer, a=E.atual; if(!T || !a) return null;
+  const it=treinoAtual(a).itens[T.k], f=(a.series||{})[T.k]||0;
+  return it && cargaPorSerie(it) && f<it.series ? { it, i:T.k, f } : null;
+}
+function cargaProxima(){
+  const x=proximaSerie(); if(!x) return "";
+  const g=grupoDaSerie(x.it,x.f);
+  return `<div class="carga-linha"><span class="rotulo">Carga<small>${g||`série ${x.f+1}`}</small></span>${controlesCarga(x.it,x.i,0,grupoIdx(x.it,x.f),{ digitar:false })}</div>`;
+}
+function atualizarProxima(){
+  const x=proximaSerie(), T=S.timer; if(!x || !T) return;
+  T.prox=`Série ${x.f+1} · ${rotSerie(seriesDe(x.it)[x.f])} · ${cargaResumo(x.it, grupoDaSerie(x.it,x.f))}`; save();
+  const el=$("#dProx"); if(el) el.textContent=T.prox;
+  const c=$("#dCarga"); if(c) c.innerHTML=cargaProxima();
+}
+function ajustarProxima(passo){
+  const [i,pi,gi,dir]=passo.split(":").map(Number), a=E.atual; if(!a) return;
+  passoCarga(treinoAtual(a).itens[i],pi,gi,dir); atualizarProxima();
 }
 export function retomarTimer(){
   const T=S.timer; if(!T) return;

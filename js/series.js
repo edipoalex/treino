@@ -23,3 +23,35 @@ export function seriesDe(it){
   return Array.from({length:n},()=>({r:"série", tag:""}));
 }
 export const rotSerie = s => s ? [s.r, s.tag].filter(Boolean).join(" ") : "";
+
+/* Partes com tempo na prescrição, para o cronômetro de execução:
+   - "intervalo": "6x (30s forte / 30s leve) + 2 min de desaquecimento" (HIIT)
+   - "partes": rest-pause e micro-pausas, "(falha / 10s / falha / 10s / falha)"
+   - "segurar": isometria, "45s de prancha", "30s por lado"
+   Devolve null quando não há tempo a cronometrar. */
+const ehPausa = x => /^\d+\s*s$/i.test(x);
+const seg = x => +String(x).match(/\d+/)[0];
+export function tempoDe(it){
+  const p = String(it?.prescricao ?? "");
+  let m = p.match(/(\d+)\s*x\s*\(\s*(\d+)\s*s\s+([^/()]+?)\s*\/\s*(\d+)\s*s\s+([^()]+?)\s*\)/i);
+  if(m){
+    const des = p.match(/(\d+)\s*min(?:utos)?\s+de\s+desaquec/i);
+    return { tipo:"intervalo", rodadas:+m[1], a:{ seg:+m[2], rot:m[3].trim() }, b:{ seg:+m[4], rot:m[5].trim() }, desaquecer: des ? +des[1]*60 : 0 };
+  }
+  if(!(it?.series > 0)) return null;
+  m = p.match(/\(([^()]*)\)/);
+  if(m){
+    const partes = m[1].split("/").map(x=>x.trim()).filter(Boolean);
+    if(partes.length>=3 && partes.some(ehPausa) && partes.some(x=>!ehPausa(x)))
+      return { tipo:"partes", partes: partes.map(x => ehPausa(x) ? { pausa:seg(x) } : { rot:x }) };
+  }
+  for(const mm of p.matchAll(/(\d+)\s*s(?:eg(?:undos)?)?\b\s*(por lado)?/gi)){
+    if(/descanso\s*$|pausa\s*$/i.test(p.slice(0, mm.index))) continue;
+    const s = +mm[1], nome = String(it.nome);
+    const rot = /prancha lateral/i.test(nome) && mm[2] ? "Prancha lateral" : /prancha/i.test(nome) || /prancha/i.test(p) ? "Prancha" : "Tempo";
+    if(mm[2]) return { tipo:"segurar", rotulo:`${s} s por lado`, botao:`${rot} ${s} s × 2`,
+      etapas:[{ seg:s, rot:"Lado esquerdo", tipo:"exec" }, { seg:5, rot:"Troque de lado", tipo:"troca" }, { seg:s, rot:"Lado direito", tipo:"exec" }] };
+    return { tipo:"segurar", rotulo:`${s} s ${rot.toLowerCase()}`, botao:`${rot} ${s} s`, etapas:[{ seg:s, rot, tipo:"exec" }] };
+  }
+  return null;
+}

@@ -101,3 +101,46 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
 .r-cargas{list-style:none;margin:8px 0;padding:0;font-size:15px}
 .r-cargas li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
 .r-cargas li span:last-child{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Cronômetro de execução (js/execucao.js): no botão da série ou em tela cheia */
+.t-btn.prepara{background:var(--ink);border-color:var(--ink);color:var(--bg);background-image:none}
+.t-btn.troca{background:var(--warn);border-color:var(--warn);color:#fff;background-image:none}
+.exec-btn{min-height:68px;font-size:20px}
+.link-btn{display:block;width:100%;background:none;border:0;color:var(--muted);font-weight:600;font-size:15px;min-height:44px;text-decoration:underline;text-underline-offset:3px}
+.microp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:12px 0 8px}
+.microp span{font-size:14px;font-weight:600;padding:6px 10px;border-radius:12px;background:var(--surface-2);color:var(--muted)}
+.microp span.feito{background:var(--ok-bg);color:var(--ok)}
+.microp span.agora{background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--ink);outline:2px solid var(--c)}
+.fase-exec{font:700 30px var(--display);letter-spacing:1px;margin:0;text-align:center}
+.livre{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:8px 8px 8px 14px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.livre b{font:700 30px var(--display);font-variant-numeric:tabular-nums;flex:1}
+.livre .btn{min-height:48px;padding:0 14px}
+.info-btn.on,.f-como.on{border-color:var(--c);color:var(--c)}
+
+/* Carga na linha das séries (foco) e nas bolinhas (lista) */
+.f-serie .reps{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.f-serie .kgcol{text-align:right;line-height:1.15}
+.f-serie .kg{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.f-serie .kg.plan{color:var(--muted);font-weight:600}
+.f-serie .ult{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.f-serie[data-selc]{cursor:pointer}
+.f-serie.edita{flex-wrap:wrap;padding:10px 12px}
+.f-serie.edita .kg{display:none}
+.passo{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px}
+.passo .c-btn{width:56px;height:56px;font-size:28px;border-radius:14px}
+.passo .c-val{height:56px;font-size:34px}
+.passo .c-uni,.passo .c-txt{height:56px}
+.carga-linha{display:flex;align-items:center;gap:8px;margin:12px 0 4px;padding:8px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.carga-linha .rotulo{font-size:15px;color:var(--ink);font-weight:700;padding-left:6px;line-height:1.1;min-width:64px}
+.carga-linha .rotulo small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.carga-linha .c-btn{width:52px;height:52px;font-size:26px;border-radius:14px}
+.carga-linha .c-val{height:52px;font-size:30px}
+.carga-linha .c-uni{height:52px;min-width:56px}
+.carga-linha .c-txt{height:52px}
+.pips-kg{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.pk{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;padding:7px 4px 6px;border-radius:12px;border:1px solid transparent;background:none;color:var(--muted);font:700 14px var(--body);font-variant-numeric:tabular-nums}
+.pk .pip{width:18px;height:18px}
+.pk small{font-weight:600;font-size:11px;opacity:.8}
+.pk.atual{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--ink)}
+.pk.sel{outline:2px dashed var(--c);outline-offset:1px}
+.pk.feita{color:var(--ok)}
