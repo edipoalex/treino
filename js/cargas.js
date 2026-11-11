@@ -55,6 +55,45 @@ export function salvarCarga(key, v, u){
 }
 export function enviarCarga(key){ const e=envioCarga[key]; if(!e) return; clearTimeout(e.t); delete envioCarga[key]; enfileirar(e.op); }
 export const enviarCargasPendentes = () => Object.keys(envioCarga).forEach(enviarCarga);
+/* −, valor, + e unidade da carga da parte pi no grupo gi (ou um campo de texto, na unidade "livre") */
+export function controlesCarga(it,i,pi,gi,{ digitar=true } = {}){
+  const p=partesDe(it)[pi], g=gruposDe(it)[gi]||"", c=cargaDe(chaveCarga(p,g)), n=numCarga(c.v), id=`${i}:${pi}:${gi}`, nome=[p.n, g].filter(Boolean).join(" ");
+  const uni=`<button class="c-uni" data-uni="${id}" aria-label="Unidade da carga de ${esc(nome)}">${UNID[c.u]}</button>`;
+  if(c.u==="livre" || (c.v && n==null))
+    return `<input class="c-txt" data-txt="${id}" value="${esc(c.v)}" placeholder="ex.: 10 / 20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Carga de ${esc(nome)}">${uni}`;
+  return `<button class="c-btn" data-passo="${id}:-1" aria-label="Diminuir carga de ${esc(nome)}">−</button>
+    <button class="c-val ${recente("carga",400)?.id===id?(recente("carga",400).dir>0?"sobe":"desce"):""}" ${digitar?`data-digitar="${id}"`:""} aria-label="${digitar?"Digitar carga":"Carga"} de ${esc(nome)}">${n==null?"—":fmtNum(n)}</button>
+    <button class="c-btn" data-passo="${id}:1" aria-label="Aumentar carga de ${esc(nome)}">+</button>${uni}`;
+}
+
+/* ---------- Carga na linha de cada série (fase 4) ----------
+   Vale para exercícios de uma parte só (os combinados "A + B" continuam com o bloco de cargas).
+   - contraste (pesado/leve) ou "variar por série": cada série mostra a sua carga; a selecionada abre o − e o +.
+     Mudar a carga de uma série muda a do grupo dela, então as próximas do mesmo grupo acompanham.
+   - mesma carga em todas: uma linha compacta só, "Carga · todas as séries".
+   As séries feitas mostram a carga usada (registrada em E.atual.cs). */
+export const cargaPorSerie = it => temCarga(it) && partesDe(it).length===1;
+export const variaPorSerie = it => gruposDe(it).length>1 || !!S.variar?.[it.nome];
+export const grupoIdx = (it,j) => Math.max(0, gruposDe(it).indexOf(grupoDaSerie(it,j)));
+export function serieSelecionada(it,i,a){ const fs=(a.series||{})[i]||0, s=a.selC; return s && s.i===i && s.j>=fs && s.j<it.series ? s.j : fs; }
+export function cargaDaSerie(it,i,j,a){
+  const fs=(a.series||{})[i]||0, feita=a.cs?.[i]?.[j];
+  if(j<fs && feita?.c?.[0]) return fmtCarga(feita.c[0]);
+  return fmtCarga(cargaDe(chaveCarga(partesDe(it)[0], grupoDaSerie(it,j))));
+}
+/* Carga usada na mesma série da última vez que o exercício foi feito */
+export function ultimaDaSerie(it,j){
+  for(let k=E.historico.length-1; k>=0; k--){
+    const x=E.historico[k].itens?.find(y=>y.n===it.nome && y.cs?.length); if(!x) continue;
+    const c=x.cs[j]?.c?.[0]; return c?.v ? fmtCarga(c) : null;
+  }
+  return null;
+}
+export const linhaCargaUnica = (it,i) => `<div class="carga-linha"><span class="rotulo">Carga<small>todas as séries</small></span>${controlesCarga(it,i,0,0)}</div>`;
+export const linhaCargaSerie = (it,i,j,a) => { const [r,t]=[seriesDe(it)[j]?.r??"", grupoDaSerie(it,j)];
+  return `<div class="carga-linha"><span class="rotulo">Série ${j+1}<small>${esc(r)}${t?` ${t}`:""}</small></span>${controlesCarga(it,i,0,grupoIdx(it,j))}</div>`; };
+export const linkVariar = (it,i) => gruposDe(it).length>1 ? "" : `<button class="link-btn" data-variar="${i}">${S.variar?.[it.nome]?"Usar a mesma carga em todas":"Variar a carga por série"}</button>`;
+
 export function blocoCarga(it,i){
   if(!temCarga(it)) return "";
   const ps=partesDe(it), gs=gruposDe(it), legado = ps.length>1 && E.cargas[it.nome];
@@ -63,12 +102,7 @@ export function blocoCarga(it,i){
     const c=cargaDe(chaveCarga(p,g)), n=numCarga(c.v), id=`${i}:${pi}:${gi}`, nome=[p.n, g].filter(Boolean).join(" ");
     const titulo = [ps.length>1?`<b>${esc(p.n)}</b>`:"", g?`<b>${cap(g)}</b>`:""].filter(Boolean).join(" · ") || "Carga";
     const rot=`<div class="c-rot">${titulo}${g && g===gAtual && fs<it.series?` · próxima série`:""}${c.d?` · ${relDia(c.d)}`:""}</div>`;
-    const uni=`<button class="c-uni" data-uni="${id}" aria-label="Unidade da carga de ${esc(nome)}">${UNID[c.u]}</button>`;
-    if(c.u==="livre" || (c.v && n==null))
-      return `${rot}<div class="c-linha"><input class="c-txt" data-txt="${id}" value="${esc(c.v)}" placeholder="ex.: 10 / 20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Carga de ${esc(nome)}">${uni}</div>`;
-    return `${rot}<div class="c-linha"><button class="c-btn" data-passo="${id}:-1" aria-label="Diminuir carga de ${esc(nome)}">−</button>
-      <button class="c-val ${recente("carga",400)?.id===id?(recente("carga",400).dir>0?"sobe":"desce"):""}" data-digitar="${id}" aria-label="Digitar carga de ${esc(nome)}">${n==null?"—":fmtNum(n)}</button>
-      <button class="c-btn" data-passo="${id}:1" aria-label="Aumentar carga de ${esc(nome)}">+</button>${uni}</div>`;
+    return `${rot}<div class="c-linha">${controlesCarga(it,i,pi,gi)}</div>`;
   }).join("");
   return `<div class="cargas">${gs.map((g,gi)=> gs.length>1
       ? `<div class="c-grupo ${g===gAtual?"atual":""}">${linhas(g,gi)}</div>` : linhas(g,gi)).join("")}

@@ -61,8 +61,9 @@ function checarModulos(app, erros){
     if(!a.endsWith(".js")) continue;
     try{ execFileSync(process.execPath, ["--check", path.join(RAIZ, a)], { stdio: ["ignore","ignore","pipe"] }); }
     catch(e){ erros.push(`${a}: erro de sintaxe: ${String(e.stderr).trim().split("\n").slice(0,5).join(" ")}`); }
-    exportsDe[a] = new Set([...src.matchAll(/^export (?:async )?(?:function|const|let) ([^=(;]+)/gm)]
-      .flatMap(m => m[1].split(",").map(s => s.trim().split(/[\s=]/)[0])));
+    // "export function f", "export const a = …" e "export let a=1, b=2" (vários nomes na mesma linha)
+    exportsDe[a] = new Set([...src.matchAll(/^export (?:async )?function\s+([\w$]+)/gm)].map(m => m[1])
+      .concat([...src.matchAll(/^export (?:const|let) ([^;\n]+)/gm)].flatMap(m => [...m[1].matchAll(/(?:^|,)\s*([\w$]+)\s*(?==|,|$)/g)].map(x => x[1]))));
   }
   for(const [a, src] of Object.entries(app.arquivos)){
     if(!a.startsWith("js/")) continue;

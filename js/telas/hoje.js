@@ -5,6 +5,7 @@ import { rerender, viewSessao } from "./sessao.js";
 import { plate, toast } from "../ui.js";
 import { icone } from "../icones.js";
 import { movimentoOk } from "../movimento.js";
+import { limparCronometros } from "../execucao.js";
 import { $, esc } from "../util.js";
 
 /* ---------- Views ---------- */
@@ -130,6 +131,7 @@ export function semanaPanel(){
     ${rodape?`<p class="meta" style="margin-top:12px;font-size:14px">${rodape}</p>`:""}</section>`;
 }
 export function iniciar(letra){
+  limparCronometros();
   E.atual = { letra, fase: faseAtual(), semana: Math.min(semanaAtual(), FICHA.semanas), volta: voltaAtual(), modo: temExpress(letra) ? modoPadrao() : "completo", inicio: Date.now(), feitos: [], marcas: {}, series: {}, ativo: 0 };
   escolha = null; verPrevia=false; save(); render(); scrollTo(0,0);
 }

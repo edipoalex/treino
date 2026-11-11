@@ -7,6 +7,7 @@ import { iniciarAjustes } from "./ajustes.js";
 import { iniciarAtualizacao, checarVersao } from "./atualizacao.js";
 import { enviarCargasPendentes } from "./cargas.js";
 import { retomarTimer, tick } from "./descanso.js";
+import { retomarExec, tickExec } from "./execucao.js";
 import { applyTheme, manterTela } from "./ui.js";
 import { entrada, iniciarMovimento } from "./movimento.js";
 
@@ -15,10 +16,10 @@ iniciarMovimento();
 iniciarSync();
 iniciarNavegacao();
 iniciarAjustes();
-document.addEventListener("visibilitychange",()=>{ if(document.hidden){ enviarCargasPendentes(); return; } render(); tick(); agendarSync(200); if(E.atual) manterTela(true); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ enviarCargasPendentes(); return; } render(); tick(); tickExec(); agendarSync(200); if(E.atual) manterTela(true); });
 iniciarAtualizacao();
 
-applyTheme(); render(); entrada(); retomarTimer(); atualizarSyncUI(); agendarSync(100); checarVersao();
+applyTheme(); render(); entrada(); retomarTimer(); retomarExec(); atualizarSyncUI(); agendarSync(100); checarVersao();
 
 /* Offline */
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
