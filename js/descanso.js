@@ -2,7 +2,7 @@ import { marcar } from "./movimento.js";
 import { E, S, save } from "./estado.js";
 import { render } from "./navegacao.js";
 import { rerender, treinoAtual } from "./telas/sessao.js";
-import { cargaPorSerie, cargaResumo, controlesCarga, grupoDaSerie, grupoIdx, passoCarga, trocarUnidade } from "./cargas.js";
+import { cargaDaSerie, valorPlanejado, variaPorSerie, cargaPorSerie, cargaResumo, controlesCarga, grupoDaSerie, grupoIdx, passoCarga, trocarUnidade } from "./cargas.js";
 import { rotSerie, seriesDe } from "./series.js";
 import { consumirRepeticao, segurarRepete } from "./movimento.js";
 import { fmtSeg, toast } from "./ui.js";
@@ -65,17 +65,18 @@ function proximaSerie(){
 function cargaProxima(){
   const x=proximaSerie(); if(!x) return "";
   const g=grupoDaSerie(x.it,x.f);
-  return `<div class="carga-linha"><span class="rotulo">Carga<small>${g||`série ${x.f+1}`}</small></span>${controlesCarga(x.it,x.i,0,grupoIdx(x.it,x.f),{ digitar:false })}</div>`;
+  return `<div class="carga-linha"><span class="rotulo">Carga<small>${g||`série ${x.f+1}`}</small></span>${controlesCarga(x.it,x.i,0,grupoIdx(x.it,x.f),{ digitar:false, valor:valorPlanejado(x.it,x.i,x.f,E.atual) })}</div>`;
 }
 function atualizarProxima(){
   const x=proximaSerie(), T=S.timer; if(!x || !T) return;
-  T.prox=`Série ${x.f+1} · ${rotSerie(seriesDe(x.it)[x.f])} · ${cargaResumo(x.it, grupoDaSerie(x.it,x.f))}`; save();
+  T.prox=`Série ${x.f+1} · ${rotSerie(seriesDe(x.it)[x.f])} · ${cargaDaSerie(x.it,x.i,x.f,E.atual)}`; save();
   const el=$("#dProx"); if(el) el.textContent=T.prox;
   const c=$("#dCarga"); if(c) c.innerHTML=cargaProxima();
 }
 function ajustarProxima(passo){
   const [i,pi,gi,dir]=passo.split(":").map(Number), a=E.atual; if(!a) return;
-  passoCarga(treinoAtual(a).itens[i],pi,gi,dir); atualizarProxima();
+  const it=treinoAtual(a).itens[i], f=(a.series||{})[i]||0;
+  passoCarga(it,pi,gi,dir, variaPorSerie(it) ? { i, j:f } : {}); atualizarProxima();
 }
 export function retomarTimer(){
   const T=S.timer; if(!T) return;

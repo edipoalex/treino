@@ -56,8 +56,8 @@ export function salvarCarga(key, v, u){
 export function enviarCarga(key){ const e=envioCarga[key]; if(!e) return; clearTimeout(e.t); delete envioCarga[key]; enfileirar(e.op); }
 export const enviarCargasPendentes = () => Object.keys(envioCarga).forEach(enviarCarga);
 /* −, valor, + e unidade da carga da parte pi no grupo gi (ou um campo de texto, na unidade "livre") */
-export function controlesCarga(it,i,pi,gi,{ digitar=true } = {}){
-  const p=partesDe(it)[pi], g=gruposDe(it)[gi]||"", c=cargaDe(chaveCarga(p,g)), n=numCarga(c.v), id=`${i}:${pi}:${gi}`, nome=[p.n, g].filter(Boolean).join(" ");
+export function controlesCarga(it,i,pi,gi,{ digitar=true, valor=null } = {}){
+  const p=partesDe(it)[pi], g=gruposDe(it)[gi]||"", c=valor || cargaDe(chaveCarga(p,g)), n=numCarga(c.v), id=`${i}:${pi}:${gi}`, nome=[p.n, g].filter(Boolean).join(" ");
   const uni=`<button class="c-uni" data-uni="${id}" aria-label="Unidade da carga de ${esc(nome)}">${UNID[c.u]}</button>`;
   if(c.u==="livre" || (c.v && n==null))
     return `<input class="c-txt" data-txt="${id}" value="${esc(c.v)}" placeholder="ex.: 10 / 20" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Carga de ${esc(nome)}">${uni}`;
@@ -79,8 +79,27 @@ export function serieSelecionada(it,i,a){ const fs=(a.series||{})[i]||0, s=a.sel
 export function cargaDaSerie(it,i,j,a){
   const fs=(a.series||{})[i]||0, feita=a.cs?.[i]?.[j];
   if(j<fs && feita?.c?.[0]) return fmtCarga(feita.c[0]);
-  return fmtCarga(cargaDe(chaveCarga(partesDe(it)[0], grupoDaSerie(it,j))));
+  return fmtCarga(valorPlanejado(it,i,j,a));
 }
+/* Carga planejada de uma série ainda não feita: a definida para ela neste treino, ou a do grupo */
+export function valorPlanejado(it,i,j,a){
+  const p=a?.plan?.[i]?.[j]; if(p) return { v:String(p.v), u:p.u };
+  const c=cargaDe(chaveCarga(partesDe(it)[0], grupoDaSerie(it,j))); return { v:c.v, u:c.u };
+}
+/* Mudar a carga da série j vale para ela e para as seguintes do mesmo grupo; as anteriores ainda não feitas
+   ficam com o valor que tinham. A carga salva do exercício (para o próximo treino) passa a ser a nova. */
+export function planejar(it,i,j,v,u){
+  const a=E.atual; if(!a) return;
+  v=String(v).replace(/[<>]/g,"").trim().replace(/\s+/g," ").slice(0,40);
+  const fs=(a.series||{})[i]||0, g=grupoDaSerie(it,j), mesmo = k => grupoDaSerie(it,k)===g;
+  const P=((a.plan ??= {})[i] ??= {});
+  for(let k=fs; k<j; k++) if(mesmo(k) && !P[k]) P[k]=valorPlanejado(it,i,k,a);
+  for(let k=j; k<it.series; k++) if(mesmo(k)) P[k]={ v, u };
+  salvarCarga(chaveCarga(partesDe(it)[0], g), v, u);
+}
+/* Retrato da carga usada na série f: a planejada para ela, se houver */
+export const cargasDaSerieF = (it,i,f,a,g) => a?.plan?.[i]?.[f] && partesDe(it).length===1
+  ? [{ k:partesDe(it)[0].key, ...valorPlanejado(it,i,f,a) }] : cargasDaSerie(it,g);
 /* Carga usada na mesma série da última vez que o exercício foi feito */
 export function ultimaDaSerie(it,j){
   for(let k=E.historico.length-1; k>=0; k--){
@@ -91,7 +110,7 @@ export function ultimaDaSerie(it,j){
 }
 export const linhaCargaUnica = (it,i) => `<div class="carga-linha"><span class="rotulo">Carga<small>todas as séries</small></span>${controlesCarga(it,i,0,0)}</div>`;
 export const linhaCargaSerie = (it,i,j,a) => { const [r,t]=[seriesDe(it)[j]?.r??"", grupoDaSerie(it,j)];
-  return `<div class="carga-linha"><span class="rotulo">Série ${j+1}<small>${esc(r)}${t?` ${t}`:""}</small></span>${controlesCarga(it,i,0,grupoIdx(it,j))}</div>`; };
+  return `<div class="carga-linha"><span class="rotulo">Série ${j+1}<small>${esc(r)}${t?` ${t}`:""}</small></span>${controlesCarga(it,i,0,grupoIdx(it,j),{ valor:valorPlanejado(it,i,j,a) })}</div>`; };
 export const linkVariar = (it,i) => gruposDe(it).length>1 ? "" : `<button class="link-btn" data-variar="${i}">${S.variar?.[it.nome]?"Usar a mesma carga em todas":"Variar a carga por série"}</button>`;
 
 export function blocoCarga(it,i){
@@ -110,16 +129,19 @@ export function blocoCarga(it,i){
 }
 /* Parte pi do exercício no grupo gi: chave e nome para a folha de digitação */
 function alvo(it,pi,gi){ const p=partesDe(it)[pi], g=gruposDe(it)[gi]||""; return { key:chaveCarga(p,g), n:[p.n, g&&cap(g)].filter(Boolean).join(" · ") }; }
-export function passoCarga(it,pi,gi,dir){
+export function passoCarga(it,pi,gi,dir,{ i=null, j=null } = {}){
+  if(j!=null && E.atual){ const c=valorPlanejado(it,i,j,E.atual), u = c.u==="livre" ? "kg" : c.u;
+    planejar(it,i,j, fmtNum(Math.max(0,(numCarga(c.v)??0)+PASSO[u]*dir)), u); return rerender(); }
   const {key}=alvo(it,pi,gi), c=cargaDe(key), u = c.u==="livre" ? "kg" : c.u;
   salvarCarga(key, fmtNum(Math.max(0,(numCarga(c.v)??0)+PASSO[u]*dir)), u); rerender();
 }
-export function digitarCarga(it,pi,gi){
-  const p=alvo(it,pi,gi), c=cargaDe(p.key);
+export function digitarCarga(it,pi,gi,{ i=null, j=null } = {}){
+  const p=alvo(it,pi,gi), porSerie = j!=null && E.atual, c = porSerie ? valorPlanejado(it,i,j,E.atual) : cargaDe(p.key);
+  if(porSerie) p.n += ` · série ${j+1}`;
   folha(`<h3>${esc(p.n)}</h3><input class="dig" id="digIn" inputmode="decimal" value="${esc(c.v)}" aria-label="Carga em ${UNID[c.u]}">
     <p class="meta">Em ${UNID[c.u]}.</p><button class="btn primary cor" data-ok>Salvar</button><button class="btn" data-fechar>Cancelar</button>`,
     s=>{ const inp=s.querySelector("#digIn"); inp.focus(); inp.select();
-      const ok=()=>{ salvarCarga(p.key, inp.value, c.u); fecharFolha(); rerender(); };
+      const ok=()=>{ if(porSerie) planejar(it,i,j, inp.value, c.u); else salvarCarga(p.key, inp.value, c.u); fecharFolha(); rerender(); };
       s.querySelector("[data-ok]").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); }; });
 }
 export function trocarUnidade(it,pi,gi){
