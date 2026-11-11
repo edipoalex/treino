@@ -1,5 +1,5 @@
 import { consumirRepeticao, confete, contar, marcar, recente, segurarRepete } from "../movimento.js";
-import { blocoCarga, cargaDaSerie, cargaDe, cargaPorSerie, cargaResumo, cargasDaSerie, chaveCarga, controlesCarga, digitarCarga, enviarCargasPendentes, grupoDaSerie, grupoIdx, gruposDe, linhaCargaSerie, linhaCargaUnica, linkVariar, partesDe, passoCarga, salvarCarga, serieSelecionada, temCarga, trocarUnidade, ultimaDaSerie, variaPorSerie } from "../cargas.js";
+import { blocoCarga, cargasDaSerieF, valorPlanejado, cargaDaSerie, cargaDe, cargaPorSerie, cargaResumo, cargasDaSerie, chaveCarga, controlesCarga, digitarCarga, enviarCargasPendentes, grupoDaSerie, grupoIdx, gruposDe, linhaCargaSerie, linhaCargaUnica, linkVariar, partesDe, passoCarga, salvarCarga, serieSelecionada, temCarga, trocarUnidade, ultimaDaSerie, variaPorSerie } from "../cargas.js";
 import { iniciarDescanso, maisTempo, pararDescanso } from "../descanso.js";
 import { E, FICHA, S, save } from "../estado.js";
 import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
@@ -50,6 +50,8 @@ export function topoSessao(a,t){
 /* O que acabou de mudar ganha animação na próxima renderização */
 const pop = (i,j) => { const m=recente("serie"); return m && m.i===i && (j===undefined || m.j===j); };
 const recem = i => { const s=recente("serie"), f=recente("feito"); return (s && s.i===i && s.fim) || (f && f.i===i); };
+/* Série que recebe o ajuste de carga: a selecionada, quando a carga varia por série (senão, a carga do exercício) */
+const alvoSerie = (it,i,a) => cargaPorSerie(it) && variaPorSerie(it) && !a.feitos.includes(i) ? { i, j:serieSelecionada(it,i,a) } : {};
 /* Lista: cada bolinha mostra a carga da série; uma linha compacta ajusta a série selecionada (ou todas) */
 const curto = s => s.replace(/ kg$/,"").replace(/ placas$/," pl");
 function pipsComCarga(it,i,a,ser,fs){
@@ -66,7 +68,7 @@ function seriesComCarga(it,i,a,ser,fs,done){
     const kg = varia || feita ? `<span class="kgcol"><span class="kg ${feita?"":"plan"}">${esc(cargaDaSerie(it,i,j,a))}</span>${u?`<span class="ult">última ${esc(u)}</span>`:""}</span>` : "";
     return `<div class="f-serie ${feita?"feita":j===fs?"atual":""} ${ed?"edita":""} ${pop(i,j)?"pop":""}" ${!feita&&varia&&!done?`data-selc="${i}:${j}"`:""}>
       <span class="n">${j+1}${feita?icone("check","ic-sm"):""}</span><span class="reps">${esc(s.r)}${s.tag?` <span class="tag">${esc(s.tag)}</span>`:""}</span>${kg}
-      ${ed?`<div class="passo">${controlesCarga(it,i,0,grupoIdx(it,j))}</div>`:""}</div>`; }).join("");
+      ${ed?`<div class="passo">${controlesCarga(it,i,0,grupoIdx(it,j),{ valor:valorPlanejado(it,i,j,a) })}</div>`:""}</div>`; }).join("");
   return `${!done && !varia ? linhaCargaUnica(it,i) : ""}<div class="f-series">${linhas}</div>${!done ? linkVariar(it,i) : ""}`;
 }
 export function sessaoLista(a,t){
@@ -121,7 +123,7 @@ export function viewSessao(){
   $("#view").innerHTML = `<div class="L-${esc(a.letra)}">${topoSessao(a,t)}${S.pref.modo==="foco" ? sessaoFoco(a,t) : sessaoLista(a,t)}</div>`;
   $("#view").onclick = cliqueSessao;
   segurarRepete($("#view"), "[data-passo]", dado=>{ const b=E.atual; if(!b) return; const [i,pi,gi,dir]=dado.passo.split(":").map(Number);
-    marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); passoCarga(treinoAtual(b).itens[i],pi,gi,dir); });
+    marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); const it=treinoAtual(b).itens[i]; passoCarga(it,pi,gi,dir,alvoSerie(it,i,b)); });
   $("#view").onchange = e => {
     const inp=e.target.closest("[data-txt]"); if(!inp) return;
     const [i,pi,gi]=inp.dataset.txt.split(":").map(Number), it=treinoAtual(E.atual).itens[i];
@@ -150,9 +152,12 @@ export function cliqueSessao(e){
   if(d.feito!=null) return alternarFeito(+d.feito);
   if(d.reabrir!=null) return reabrir(+d.reabrir);
   if(d.info!=null) return comoFazer(t.itens[+d.info], a.letra);
-  if(d.passo){ if(consumirRepeticao()) return; const [i,pi,gi,dir]=par(d.passo); marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); return passoCarga(t.itens[i],pi,gi,dir); }
-  if(d.digitar){ const [i,pi,gi]=par(d.digitar); return digitarCarga(t.itens[i],pi,gi); }
-  if(d.uni){ const [i,pi,gi]=par(d.uni); return trocarUnidade(t.itens[i],pi,gi); }
+  if(d.passo){ if(consumirRepeticao()) return; const [i,pi,gi,dir]=par(d.passo); marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); return passoCarga(t.itens[i],pi,gi,dir,alvoSerie(t.itens[i],i,a)); }
+  if(d.digitar){ const [i,pi,gi]=par(d.digitar); return digitarCarga(t.itens[i],pi,gi,alvoSerie(t.itens[i],i,a)); }
+  if(d.uni){ const [i,pi,gi]=par(d.uni), it=t.itens[i]; trocarUnidade(it,pi,gi);
+    // a unidade vale para o exercício todo, inclusive as cargas planejadas por série
+    if(a.plan?.[i]){ const u=cargaDe(chaveCarga(partesDe(it)[pi], gruposDe(it)[gi]||"")).u; for(const k in a.plan[i]) a.plan[i][k].u=u; save(); rerender(); }
+    return; }
   if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); return rerender(true); }
   if(el.id==="sMenu") return menuSessao();
   if(el.id==="sLista") return listaGeral();
@@ -163,7 +168,7 @@ export function registrarSerie(i){
   const a=E.atual, t=treinoAtual(a), it=t.itens[i]; a.series ??= {};
   const f=a.series[i]||0; if(f>=it.series) return;
   const ser=seriesDe(it);
-  if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerie(it,g) }; }
+  if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerieF(it,i,f,a,g) }; }
   if(a.rp) delete a.rp[i];
   delete a.selC;
   const tl=Math.round(livreDe(i)); if(tl>0){ ((a.tm ??= {})[i] ??= [])[f]=tl; S.livre.acum=0; if(S.livre.ini) S.livre.ini=Date.now(); }
@@ -176,7 +181,7 @@ export function registrarSerie(i){
     pararDescanso(false); save(); rerender();
   });
   const seguinte=t.itens[i+1];
-  const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaResumo(it, grupoDaSerie(it,f+1))}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
+  const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaPorSerie(it) ? cargaDaSerie(it,i,f+1,a) : cargaResumo(it, grupoDaSerie(it,f+1))}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
   if(!fimEx || seguinte) iniciarDescanso(i, it.descanso, prox); else rerender();
 }
 export function alternarFeito(i){
