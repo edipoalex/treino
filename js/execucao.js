@@ -142,13 +142,13 @@ function abrirTelaExec(){
   const regua = X.tipo==="continuo";
   const minutos = regua ? Math.round(X.etapas[1].seg/60) : 0;
   d.innerHTML=`<div class="f-topo L-${esc(a.letra)}">${icone("timer","ic-sm")} ${esc(X.titulo||"")}
-      ${CARDIO.has(X.tipo)?`<button class="x" data-x="min" aria-label="Minimizar" style="margin-left:auto">${icone("minimize-2")}</button>`:""}
-      <button class="x" data-x="parar" aria-label="${X.tipo==="pausa"?"Pular a pausa":"Parar"}" ${CARDIO.has(X.tipo)?"":'style="margin-left:auto"'}>${icone("x")}</button></div>
+      ${CARDIO.has(X.tipo)?`<button class="ml-auto x" data-x="min" aria-label="Minimizar">${icone("minimize-2")}</button>`:""}
+      <button class="x ${CARDIO.has(X.tipo)?"":"ml-auto"}" data-x="parar" aria-label="${X.tipo==="pausa"?"Pular a pausa":"Parar"}">${icone("x")}</button></div>
     <div class="f-centro"><div class="f-ic" id="xIc"></div><p class="f-nome" id="xF"></p><div class="f-tempo" id="xT"></div>
       <div class="f-sub" id="xS"></div><div class="f-dica" id="xD"></div>
       ${X.rodadas?`<div class="f-rodadas" id="xRod">${Array.from({length:X.rodadas},()=>"<span></span>").join("")}</div>`:""}
       <div class="f-prox" id="xP"></div></div>
-    ${regua ? `<div class="f-regua"><b id="xReg"></b>${Array.from({length:Math.max(0,minutos-1)},(_,k)=>(k+1)*2===minutos?"":`<i style="left:${(k+1)/minutos*100}%"></i>`).join("")}<i class="meio" style="left:50%"></i></div>`
+    ${regua ? `<div class="f-regua"><b id="xReg"></b>${Array.from({length:Math.max(0,minutos-1)},(_,k)=>(k+1)*2===minutos?"":`<i style="left:${(k+1)/minutos*100}%"></i>`).join("")}<i class="meio"></i></div>`
       : `<div class="f-linha">${X.etapas.map(e=>`<i class="t-${e.tipo}" style="flex:${e.seg}"><b></b></i>`).join("")}</div>`}
     <div class="f-total"><span id="xDec"></span><span id="xRes"></span></div>
     <div class="f-acoes"><button class="btn" data-x="pausa">Pausar</button><button class="btn" data-x="pular">${icone("skip-forward")} Pular fase</button></div>`;
@@ -181,7 +181,7 @@ export function acaoTempo(it, i, a, cls){
     if(ok) return `<div class="linha2"><button class="btn" data-exec="${i}">${icone("play")} De novo</button><button class="btn" data-feito="${i}">${icone("check")} Feito</button></div>`;
     if(t.tipo==="aquecimento" && a.aq?.[i]!=null){
       const n=a.aq[i];
-      return `<p class="meta" style="margin:12px 0 0">${cap(t.rot)} feita. Agora: ${t.passos} séries de ${esc(t.passoRot)}.</p><div class="passos-aq">${Array.from({length:t.passos},(_,k)=>`<button class="btn ${k===n?cls:""} ${k<n?"ok":""}" ${k===n?`data-aq="${i}"`:"disabled"}>${k<n?icone("check"):""} Série ${k+1} de aproximação</button>`).join("")}</div>`;
+      return `<p class="m-0 mt-3 meta">${cap(t.rot)} feita. Agora: ${t.passos} séries de ${esc(t.passoRot)}.</p><div class="passos-aq">${Array.from({length:t.passos},(_,k)=>`<button class="btn ${k===n?cls:""} ${k<n?"ok":""}" ${k===n?`data-aq="${i}"`:"disabled"}>${k<n?icone("check"):""} Série ${k+1} de aproximação</button>`).join("")}</div>`;
     }
     const rot = t.tipo==="intervalo" ? `${t.rotulo} ${t.rodadas}× · ${minutosDe(t)} min` : t.tipo==="continuo" ? `${t.rot} · ${minutosDe(t)} min` : `${cap(t.rot)} ${minutosDe(t)} min`;
     return `<button class="btn ${cls} exec-btn" data-exec="${i}">${icone("play")}<span>${esc(rot)}</span></button>

@@ -144,13 +144,13 @@ export function atualizarSyncUI(){
   box.innerHTML = con ? `
     <div class="sync-st ${cls}"><i></i>${esc(st)}</div>
     <p class="meta">${S.sync.ultimo?`Última sincronização às ${hora(S.sync.ultimo)}.`:""} ${pend?`${pend} ${pend>1?"alterações pendentes":"alteração pendente"}, enviadas quando a conexão voltar.`:"Tudo salvo."}</p>
-    <div class="row"><button class="btn" id="syncNow" style="flex:1">Sincronizar agora</button><button class="btn" id="syncLink" style="flex:1">Copiar link</button></div>
+    <div class="row"><button class="flex1 btn" id="syncNow">Sincronizar agora</button><button class="flex1 btn" id="syncLink">Copiar link</button></div>
     <button class="btn ghost danger" id="syncOff">Desconectar este aparelho</button>`
   : `<p class="meta">Digite a chave de acesso à planilha (ou cole o link de configuração completo).</p>
     <input id="syncKey" placeholder="Chave ou link" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <details style="border:0;margin:0;background:none"><summary style="padding:4px 0;min-height:0;font-size:14px;font-weight:500;color:var(--muted)">Endereço do script</summary>
-    <input id="syncUrl" value="${esc(SCRIPT_PADRAO)}" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-top:6px"></details>
-    ${syncMsg?`<p class="meta" style="color:var(--warn);font-weight:600">${esc(syncMsg)}</p>`:""}
+    <details class="sem-moldura"><summary class="btn-link">Endereço do script</summary>
+    <input id="syncUrl" value="${esc(SCRIPT_PADRAO)}" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" class="mt-2"></details>
+    ${syncMsg?`<p class="tx-alerta forte meta">${esc(syncMsg)}</p>`:""}
     <button class="btn primary" id="syncCon">Conectar</button>`;
   $("#syncNow") && ($("#syncNow").onclick=()=>sincronizar());
   $("#syncLink") && ($("#syncLink").onclick=async()=>{ try{ await navigator.clipboard.writeText(linkConfig()); toast("Link copiado. Abra-o no outro navegador."); }catch(e){ prompt("Copie o link:", linkConfig()); } });

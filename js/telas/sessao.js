@@ -45,7 +45,7 @@ export function topoSessao(a,t){
     <div class="s-tit">${plate(a.letra,"xs")}<div><b>Treino ${esc(a.letra)}${a.modo==="express"?" · express":""}</b><span class="meta">${a.feitos.length} de ${n} feitos · ${minDesde(a.inicio)} min</span></div></div>
     ${S.pref.modo==="foco"?`<button class="icon-btn s-ic" id="sLista" aria-label="Ver todos os exercícios">${ICO.lista}</button>`:`<span class="s-ic" aria-hidden="true"></span>`}</div>
   <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div>
-  ${a.modo==="express" && notaExpress(t)?`<p class="meta" style="font-size:14px;margin:0 2px 12px">${esc(notaExpress(t))}</p>`:""}`;
+  ${a.modo==="express" && notaExpress(t)?`<p class="tx-sec nota-topo meta">${esc(notaExpress(t))}</p>`:""}`;
 }
 /* O que acabou de mudar ganha animação na próxima renderização */
 const pop = (i,j) => { const m=recente("serie"); return m && m.i===i && (j===undefined || m.j===j); };
@@ -58,7 +58,7 @@ function pipsComCarga(it,i,a,ser,fs){
   const varia=variaPorSerie(it), sel=serieSelecionada(it,i,a);
   return `<div class="pips-kg">${ser.map((s,j)=>{ const feita=j<fs, edita=varia && !feita;
       return `<button class="pk ${feita?"feita":j===fs?"atual":""} ${varia&&j===sel&&!feita?"sel":""} ${pop(i,j)?"pop":""}" ${edita?`data-selc="${i}:${j}" aria-label="Série ${j+1}: ajustar carga"`:`tabindex="-1" aria-hidden="true"`}>
-        <span class="pip ${feita?"on":""}"></span>${varia||feita?esc(curto(cargaDaSerie(it,i,j,a))):""}<small>${esc(s.tag||s.r)}</small></button>`; }).join("")}</div>
+        <span class="pip ${feita?"on":""}"></span>${varia||feita?esc(curto(cargaDaSerie(it,i,j,a))):""}<small>${esc(s.tag || (String(s.r).length<=8 ? s.r : `${j+1}ª série`))}</small></button>`; }).join("")}</div>
     ${varia ? linhaCargaSerie(it,i,sel,a) : linhaCargaUnica(it,i)}${linkVariar(it,i)}`;
 }
 /* Foco: cada linha de série com a carga dela; a selecionada abre o − e o + na própria linha */
@@ -92,8 +92,8 @@ export function sessaoLista(a,t){
     </li>`;
   }).join("");
   return `<ul class="items">${cards}</ul>
-  <section class="panel fim-treino" style="text-align:center">
-    <p class="meta" style="margin:0 0 12px">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
+  <section class="centro panel fim-treino">
+    <p class="m-0 mb-3 meta">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
     <button class="btn primary cor grande block" id="finishBtn">Concluir treino ${esc(a.letra)}</button>
   </section>`;
 }
@@ -102,7 +102,7 @@ export function sessaoFoco(a,t){
   const ser=forca?seriesDe(it):[], prox=t.itens[i+1], emDescanso = S.timer && S.timer.k===i;
   const lista = forca && cargaPorSerie(it) ? seriesComCarga(it,i,a,ser,fs,done)
     : forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""} ${pop(i,j)?"pop":""}"><span class="n">${j+1}${j<fs?icone("check","ic-sm"):""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
-    : `<p class="presc" style="font-size:19px;margin:14px 0 4px">${esc(it.prescricao)}</p>${previaFases(it)}`;
+    : `<p class="tx-destaque presc-grande presc">${esc(it.prescricao)}</p>${previaFases(it)}`;
   return `<h2 class="f-nome">${esc(it.nome)}</h2>
     <div class="chips">${chipsDe(it)}<button class="btn f-como" data-info="${i}">Como fazer</button><button class="btn f-como ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button></div>
     ${livreHtml(i)}
@@ -112,7 +112,7 @@ export function sessaoFoco(a,t){
     <div class="f-rodape">
       ${!done && !cargaPorSerie(it) ? blocoCarga(it,i) : ""}
       ${botaoAcao(it,i,a,true)}
-      ${done && !emDescanso ? `<button class="btn primary cor grande block" data-navega="1" style="margin-top:12px">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
+      ${done && !emDescanso ? `<button class="mt-3 btn primary cor grande block" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
     </div>
     <div class="f-nav"><button class="btn" data-navega="-1" ${i===0?"disabled":""}>${icone("chevron-left")} Anterior</button><button class="btn" data-navega="1">${prox?`Próximo ${icone("chevron-right")}`:"Concluir"}</button></div>`;
 }
@@ -218,8 +218,8 @@ export function menuSessao(){
     <h4>Modo do treino</h4>
     <div class="seg"><button data-m="lista" aria-pressed="${S.pref.modo==="lista"}">Lista</button><button data-m="foco" aria-pressed="${S.pref.modo==="foco"}">Foco</button></div>
     ${tOutro?`<button class="btn" data-versao="${outro}">Trocar para ${outro==="express"?"Express":"Completo"} · ${Math.round(totalMin(tOutro))} min</button>`:""}
-    <div class="linha2" style="margin-top:0"><button class="btn" data-aba="ficha">Ver ficha</button><button class="btn" data-aba="guia">Ver guia</button></div>
-    <div style="height:8px"></div>
+    <div class="mt-0 linha2"><button class="btn" data-aba="ficha">Ver ficha</button><button class="btn" data-aba="guia">Ver guia</button></div>
+    <div class="esp-2"></div>
     <button class="btn danger" data-cancelar>Cancelar treino</button>
     <button class="btn" data-fechar>Fechar</button>`,
     f=>{
@@ -228,7 +228,7 @@ export function menuSessao(){
       f.querySelectorAll("[data-aba]").forEach(b=>b.onclick=()=>{ fecharFolha(); nav.tab=b.dataset.aba; render(); scrollTo(0,0); });
       f.querySelector("[data-cancelar]").onclick=()=>{
         f.querySelector(".corpo").innerHTML=`<h3>Cancelar o treino ${esc(a.letra)}?</h3><p class="meta">As séries marcadas não serão registradas.</p>
-          <button class="btn" data-fechar>Voltar ao treino</button><div style="height:8px"></div><button class="btn danger" data-sim>Sim, cancelar</button>`;
+          <button class="btn" data-fechar>Voltar ao treino</button><div class="esp-2"></div><button class="btn danger" data-sim>Sim, cancelar</button>`;
         f.querySelector("[data-sim]").onclick=()=>{ fecharFolha(); pararDescanso(false); limparCronometros(); E.atual=null; save(); manterTela(false); render(); scrollTo(0,0); };
       };
     });
@@ -284,7 +284,7 @@ export async function concluir(){
   const linhasCargas=x.itens.filter(i=>i.cs?.length).map(i=>`<li><span>${esc(i.n)}</span><span>${esc(resumoCargas(i))}</span></li>`).join("");
   E.atual=null; limparCronometros(); save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
   render(); scrollTo(0,0);
-  folha(`<div class="L-${esc(a.letra)}" style="display:flex;align-items:center;gap:14px">${plate(a.letra,"sm d3")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
+  folha(`<div class="linha-ic L-${esc(a.letra)}">${plate(a.letra,"sm d3")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
     <div class="stats"><div class="stat"><b data-contar="${x.duracao}">${x.duracao}</b><span>min</span></div><div class="stat"><b data-contar="${seriesFeitas}">${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b ${vol>=1000?`data-contar="${Math.round(vol/100)/10}" data-dec="1" data-suf=" t"`:`data-contar="${Math.round(vol)}" data-suf=" kg"`}>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
     ${vol && volAnt ? `<p class="meta">Volume ${difVol>=0?"+":"−"}${Math.abs(difVol)}% sobre o último treino ${esc(a.letra)}.</p>` : ""}
     ${recs.length?`<div class="recordes"><b>${ico.trofeu} ${recs.length>1?`${recs.length} recordes`:"Recorde"}</b>${recs.map(r=>`<span>${esc([r.k, r.g].filter(Boolean).join(" · "))}: ${fmtRec(r)} <small>(antes ${fmtNum(r.antes)})</small></span>`).join("")}</div>`:""}

@@ -126,7 +126,7 @@ export function blocoCarga(it,i){
   }).join("");
   return `<div class="cargas">${gs.map((g,gi)=> gs.length>1
       ? `<div class="c-grupo ${g===gAtual?"atual":""}">${linhas(g,gi)}</div>` : linhas(g,gi)).join("")}
-    ${legado?`<p class="meta" style="font-size:14px">Registro anterior: ${esc(E.cargas[it.nome].v)}</p>`:""}</div>`;
+    ${legado?`<p class="tx-sec meta">Registro anterior: ${esc(E.cargas[it.nome].v)}</p>`:""}</div>`;
 }
 /* Parte pi do exercício no grupo gi: chave e nome para a folha de digitação */
 function alvo(it,pi,gi){ const p=partesDe(it)[pi], g=gruposDe(it)[gi]||""; return { key:chaveCarga(p,g), n:[p.n, g&&cap(g)].filter(Boolean).join(" · ") }; }

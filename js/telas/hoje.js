@@ -31,7 +31,7 @@ export function viewHoje(){
     aria-label="Treino ${esc(letra)}: toque para ${verPrevia?"voltar":"ver os exercícios"}">
     <div class="marca" aria-hidden="true">${plate(letra,"md semtexto")}</div>
     <div class="face frente" ${verPrevia?"hidden":""}>
-      <div style="flex:1;min-width:0"><p class="meta">${titulo}</p><h2>Treino ${esc(letra)}</h2>
+      <div class="flex1"><p class="meta">${titulo}</p><h2>Treino ${esc(letra)}</h2>
       <p class="meta">${esc(t.foco)} · ~${Math.round(totalMin(t))} min${tEx?` · express ~${Math.round(totalMin(tEx))} min`:""}</p>
       <span class="virar">${icone("list")} ${qtd}</span></div>
     </div>
@@ -42,9 +42,9 @@ export function viewHoje(){
     </div>
   </section>
   ${feito ? `<p class="done-today">Treino ${esc(feito.letra)} concluído hoje. Este é o próximo da sequência.</p>` : ""}
-  ${aviso ? `<p class="done-today" style="color:var(--warn)">${aviso}</p>` : ""}
+  ${aviso ? `<p class="tx-alerta done-today">${aviso}</p>` : ""}
   <div class="escolher" role="group" aria-label="Escolher outro treino">${LETRAS.map(l=>`<button aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}<span>${l===seq?"próximo":"&nbsp;"}</span></button>`).join("")}</div>
-  <div class="stack" style="margin-top:12px">
+  <div class="mt-3 stack">
     <button class="btn primary cor grande block L-${esc(letra)}" id="startBtn">${icone("play")} Iniciar treino</button>
   </div>
   ${semanaPanel()}
@@ -82,8 +82,8 @@ export function pesoPanel(){
   if(!atual || pesoEditando){
     return `<section class="panel" aria-label="Peso da semana"><h3>Peso da semana</h3>
       <div class="row"><div class="kgfield"><input id="pesoHoje" inputmode="decimal" placeholder="${ant?fmtKg(ant.kg):"Ex.: 84,0"}" aria-label="Peso em kg"><span>kg</span></div>
-      <button class="btn primary" id="pesoSalvar" style="min-height:56px">Salvar</button></div>
-      <p class="meta" style="margin-top:8px;font-size:14px">De manhã, em jejum, depois de ir ao banheiro.</p></section>`;
+      <button class="alt-m btn primary" id="pesoSalvar">Salvar</button></div>
+      <p class="mt-2 tx-sec meta">De manhã, em jejum, depois de ir ao banheiro.</p></section>`;
   }
   const d = ant ? atual.kg-ant.kg : null;
   const ult = sem.slice(-4);
@@ -94,12 +94,12 @@ export function pesoPanel(){
     spark=`<svg class="spark" viewBox="0 0 240 56" role="img" aria-label="Peso nas últimas ${ult.length} semanas"><polyline points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--ink)"/>`).join("")}</svg>`;
   }
   return `<section class="panel" aria-label="Peso da semana"><h3>Peso da semana${meta?`<span class="sub2">meta ${fmtKg(meta)} kg</span>`:""}</h3>
-    <div style="display:flex;align-items:flex-end;gap:16px">
+    <div class="linha-ic itens-fim">
       <div><div class="big"><b>${fmtKg(atual.kg)} kg</b></div>
-      ${d!==null?`<div class="delta ${d<=0?"down":"up"}" style="margin-top:4px">${d>0?"+":""}${fmtKg(d)} kg na semana</div>`:""}
-      ${meta?`<p class="meta" style="margin-top:2px">${atual.kg>meta?`faltam ${fmtKg(atual.kg-meta)} kg`:"meta atingida"}</p>`:""}</div>
+      ${d!==null?`<div class="delta mt-1 ${d<=0?"down":"up"}">${d>0?"+":""}${fmtKg(d)} kg na semana</div>`:""}
+      ${meta?`<p class="mt-1 meta">${atual.kg>meta?`faltam ${fmtKg(atual.kg-meta)} kg`:"meta atingida"}</p>`:""}</div>
       ${spark}</div>
-    <button class="btn block" id="pesoEditar" style="margin-top:12px;min-height:56px">Registrar peso</button></section>`;
+    <button class="mt-3 alt-m btn block" id="pesoEditar">Registrar peso</button></section>`;
 }
 export let pesoEditando=false;
 export function bindPeso(){
@@ -128,7 +128,7 @@ export function semanaPanel(){
   const media=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):null;
   const rodape=[u?`Último: treino ${esc(u.letra)}, ${relDia(u.data)}`:"", media?`média de ${media} min`:""].filter(Boolean).join(" · ");
   return `<section class="panel" aria-label="Semana atual"><h3>Esta semana<span class="sub2">${feitos} de ${freqAlvo().max} treinos</span></h3><div class="week">${dias}</div>
-    ${rodape?`<p class="meta" style="margin-top:12px;font-size:14px">${rodape}</p>`:""}</section>`;
+    ${rodape?`<p class="mt-3 tx-sec meta">${rodape}</p>`:""}</section>`;
 }
 export function iniciar(letra){
   limparCronometros();

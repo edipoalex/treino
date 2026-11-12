@@ -9,7 +9,7 @@ Depois do primeiro acesso, o app abre também sem internet (`sw.js`).
 ## Estrutura
 ```
 index.html              só a estrutura da página
-css/                    base · componentes · sessao · telas · acabamento · movimento (nessa ordem)
+css/                    tokens · base · componentes · sessao · telas · acabamento · movimento (nessa ordem)
 js/app.js               ponto de entrada: carrega o estado, liga os eventos, desenha a tela
 js/estado.js            estado salvo no aparelho (localStorage) e ficha em uso
 js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do Apps Script)
@@ -41,6 +41,17 @@ Para rodar localmente: `python3 -m http.server` na pasta e abra `http://localhos
 `node scripts/gerar-icone.mjs` gera `icon.svg` e os PNGs (iPhone 180 px, Android 192/512 px e versão
 "maskable") a partir da anilha 3D de `js/anilha.js`. Precisa do Google Chrome instalado para converter em PNG.
 No iPhone, o ícone da tela inicial só muda ao remover o app da tela inicial e adicionar de novo.
+
+## Fundação visual
+`css/tokens.css` define as medidas únicas do app: 7 tamanhos de texto, espaços em múltiplos de 4, 3 raios
+(+ pílula), 3 alturas de controle e 3 sombras; as cores por tema ficam em `css/base.css`. CSS e telas usam
+só esses tokens (nada de tamanho solto nem estilo inline, exceto posições calculadas de dados).
+Componentes reaproveitados: botões (principal, secundário, discreto, perigo), seção com título acima do cartão,
+estado vazio (`ui.js › vazio`), confirmação (`ui.js › confirmar`), stepper de carga e aviso.
+
+Teste visual: `node scripts/capturas.mjs` gera capturas das telas-chave (Hoje, lista, foco, concluir, Ficha,
+Histórico, Guia) nos temas escuro e claro em `capturas/`, a partir de um estado de exemplo
+(`tests/visual/capturar.html`). O CI anexa essas imagens a cada execução para comparar mudanças.
 
 ## Funcionalidades
 O que o app faz e qual formato da ficha ativa cada recurso está em [`FUNCIONALIDADES.md`](FUNCIONALIDADES.md).
