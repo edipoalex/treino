@@ -26,10 +26,22 @@ test("HIIT do cardio vira intervalos", () => {
   const t = tempoDe(it("HIIT: 6x (30s forte / 30s leve) + 2 min de desaquecimento", 0, "Cardio"));
   assert.deepEqual([t.tipo, t.rodadas, t.a.rot, t.b.rot, t.desaquecer], ["intervalo", 6, "forte", "leve", 120]);
 });
+test("intervalado em minutos", () => {
+  const t = tempoDe(it("Intervalado: 3x (4 min forte / 3 min leve)", 0, "Cardio"));
+  assert.deepEqual([t.tipo, t.rodadas, t.a.seg, t.a.tipo, t.b.seg, t.b.tipo, t.rotulo], ["intervalo", 3, 240, "forte", 180, "leve", "Intervalado"]);
+});
+test("cardio contínuo usa o tempo do bloco", () => {
+  const t = tempoDe({ prescricao:"Zona 2 contínuo", series:0, bloco:8, nome:"Cardio" });
+  assert.deepEqual([t.tipo, t.seg, t.rot], ["continuo", 480, "Zona 2"]);
+});
+test("aquecimento com tempo e séries de aproximação", () => {
+  const t = tempoDe({ prescricao:"5 min de esteira leve + 2 séries de aproximação no supino", series:0, bloco:5, nome:"Aquecimento" });
+  assert.deepEqual([t.tipo, t.seg, t.rot, t.passos], ["aquecimento", 300, "esteira leve", 2]);
+});
 test("sem tempo e descanso citado não viram cronômetro", () => {
   assert.equal(tempoDe(it("Contraste: 1x6 / 1x20 / 1x6")), null);
   assert.equal(tempoDe(it("3x12 (descanso 60s)")), null);
-  assert.equal(tempoDe(it("5 min de esteira leve", 0)), null);
+  assert.equal(tempoDe(it("Mobilidade de ombro + 2 séries de aproximação na puxada", 0)), null);
 });
 test("na ficha atual, só exercícios com tempo ganham cronômetro", () => {
   const f = JSON.parse(fs.readFileSync(new URL("../fichas/etapa-19.json", import.meta.url), "utf8"));
@@ -38,5 +50,5 @@ test("na ficha atual, só exercícios com tempo ganham cronômetro", () => {
     const r = tempoDe(x); if(r) achados.add(r.tipo);
     if(r?.tipo==="segurar") assert.match(x.prescricao, /\d+\s*s/);
   }
-  assert.deepEqual([...achados].sort(), ["intervalo","partes","segurar"]);
+  assert.deepEqual([...achados].sort(), ["aquecimento","continuo","intervalo","partes","segurar"]);
 });

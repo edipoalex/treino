@@ -11,7 +11,7 @@ import { enfileirar, hora } from "../sync.js";
 import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
 import { $, esc, fmtNum } from "../util.js";
 import { icone } from "../icones.js";
-import { acaoTempo, alternarLivre, limparCronometros, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
+import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
 
 /* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
 export const ICO = { mais:icone("ellipsis"), lista:icone("list"), copiar:icone("copy") };
@@ -80,7 +80,7 @@ export function sessaoLista(a,t){
       <div class="i-cab"><div class="i-tit"><p class="name">${esc(it.nome)}</p>${ativo&&!done?`<span class="ativo-tag">em execução</span>`:""}</div>
         ${ativo&&!done?`<button class="info-btn ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button>`:""}
         <button class="info-btn" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">${icone("info")}</button></div>
-      <p class="presc">${esc(it.prescricao)}</p>
+      <p class="presc">${esc(it.prescricao)}</p>${!done?previaFases(it):""}
       ${ativo&&!done?livreHtml(i):""}
       <div class="chips">${chipsDe(it)}</div>
       ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
@@ -102,7 +102,7 @@ export function sessaoFoco(a,t){
   const ser=forca?seriesDe(it):[], prox=t.itens[i+1], emDescanso = S.timer && S.timer.k===i;
   const lista = forca && cargaPorSerie(it) ? seriesComCarga(it,i,a,ser,fs,done)
     : forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""} ${pop(i,j)?"pop":""}"><span class="n">${j+1}${j<fs?icone("check","ic-sm"):""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
-    : `<p class="presc" style="font-size:19px;margin:14px 0">${esc(it.prescricao)}</p>`;
+    : `<p class="presc" style="font-size:19px;margin:14px 0 4px">${esc(it.prescricao)}</p>${previaFases(it)}`;
   return `<h2 class="f-nome">${esc(it.nome)}</h2>
     <div class="chips">${chipsDe(it)}<button class="btn f-como" data-info="${i}">Como fazer</button><button class="btn f-como ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button></div>
     ${livreHtml(i)}
@@ -141,6 +141,8 @@ export function cliqueSessao(e){
   if(d.variar!=null){ const nome=t.itens[+d.variar].nome; S.variar ??= {}; if(S.variar[nome]) delete S.variar[nome]; else S.variar[nome]=true; save(); return rerender(); }
   if(d.exec!=null) return iniciarExec(+d.exec);
   if(d.execParar!=null) return pararExec();
+  if(d.execMax!=null) return minimizarExec(false);
+  if(d.aq!=null) return marcarAproximacao(+d.aq);
   if(d.execPausa){ const [i,s]=par(d.execPausa); return iniciarExec(i,{pausa:s}); }
   if(d.rp!=null) return avancarParte(+d.rp);
   if(d.livre!=null) return alternarLivre(+d.livre);

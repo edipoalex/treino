@@ -25,20 +25,34 @@ export function seriesDe(it){
 export const rotSerie = s => s ? [s.r, s.tag].filter(Boolean).join(" ") : "";
 
 /* Partes com tempo na prescrição, para o cronômetro de execução:
-   - "intervalo": "6x (30s forte / 30s leve) + 2 min de desaquecimento" (HIIT)
+   - "intervalo": "6x (30s forte / 30s leve) + 2 min de desaquecimento" (HIIT) ou "3x (4 min forte / 3 min leve)"
+   - "continuo": cardio em zona 2 (o tempo é o do bloco)
+   - "aquecimento": "5 min de esteira leve + 2 séries de aproximação no supino"
    - "partes": rest-pause e micro-pausas, "(falha / 10s / falha / 10s / falha)"
    - "segurar": isometria, "45s de prancha", "30s por lado"
    Devolve null quando não há tempo a cronometrar. */
 const ehPausa = x => /^\d+\s*s$/i.test(x);
 const seg = x => +String(x).match(/\d+/)[0];
+const emSeg = (n, u) => /min/i.test(u) ? +n*60 : +n;
+const ehForte = rot => /forte|r[aá]pid|intens|sprint|acelera/i.test(rot);
 export function tempoDe(it){
-  const p = String(it?.prescricao ?? "");
-  let m = p.match(/(\d+)\s*x\s*\(\s*(\d+)\s*s\s+([^/()]+?)\s*\/\s*(\d+)\s*s\s+([^()]+?)\s*\)/i);
+  const p = String(it?.prescricao ?? ""), nome = String(it?.nome ?? "");
+  // intervalos: "6x (30s forte / 30s leve)" ou "3x (4 min forte / 3 min leve)"
+  let m = p.match(/(\d+)\s*x\s*\(\s*(\d+)\s*(s|seg|min)\w*\s+([^/()]+?)\s*\/\s*(\d+)\s*(s|seg|min)\w*\s+([^()]+?)\s*\)/i);
   if(m){
     const des = p.match(/(\d+)\s*min(?:utos)?\s+de\s+desaquec/i);
-    return { tipo:"intervalo", rodadas:+m[1], a:{ seg:+m[2], rot:m[3].trim() }, b:{ seg:+m[4], rot:m[5].trim() }, desaquecer: des ? +des[1]*60 : 0 };
+    const a = { seg:emSeg(m[2],m[3]), rot:m[4].trim() }, b = { seg:emSeg(m[5],m[6]), rot:m[7].trim() };
+    a.tipo = ehForte(a.rot) || !ehForte(b.rot) ? "forte" : "leve"; b.tipo = a.tipo==="forte" ? "leve" : "forte";
+    return { tipo:"intervalo", rodadas:+m[1], a, b, desaquecer: des ? +des[1]*60 : 0, rotulo: /hiit/i.test(p) ? "HIIT" : "Intervalado" };
   }
-  if(!(it?.series > 0)) return null;
+  if(!(it?.series > 0)){
+    // aquecimento: "5 min de esteira leve + 2 séries de aproximação no supino"
+    m = p.match(/^\s*(\d+)\s*min\s+de\s+([^+]+?)\s*\+\s*(\d+)\s*s[ée]ries?\s+de\s+(.+)$/i);
+    if(m) return { tipo:"aquecimento", seg:+m[1]*60, rot:m[2].trim(), passos:+m[3], passoRot:m[4].trim() };
+    // cardio contínuo (zona 2): o tempo é o do bloco
+    if(/zona\s*2|cont[ií]nuo/i.test(p+" "+nome) && it?.bloco>0) return { tipo:"continuo", seg:it.bloco*60, rot:/zona\s*2/i.test(p) ? "Zona 2" : "Contínuo" };
+    return null;
+  }
   m = p.match(/\(([^()]*)\)/);
   if(m){
     const partes = m[1].split("/").map(x=>x.trim()).filter(Boolean);
