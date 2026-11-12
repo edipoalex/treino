@@ -14,6 +14,18 @@ etapa específica. Ao trocar de ficha nada precisa ser refeito; basta a ficha us
   continuam reconhecidos (e que a ficha publicada não gera avisos). Ao criar uma funcionalidade nova,
   inclua o formato no exemplo e um teste.
 
+## Regra: toda melhoria vale para todos os modos
+Toda melhoria é avaliada e aplicada em **todos os modos do app** sempre que fizer sentido, sem precisar
+pedir de novo. Quando um modo não comportar a mesma solução, ele recebe uma adaptação equivalente, e a
+diferença é registrada aqui. Modos a considerar a cada mudança:
+- **Sessão:** modo lista e modo foco (Ajustes › Modo do treino);
+- **Descanso:** no botão e em tela cheia (Ajustes › Descanso), que também define onde abrem os cronômetros;
+- **Treino:** completo e express;
+- **Aparência:** tema claro e escuro; animações completas e reduzidas (e o "reduzir movimento" do sistema);
+- **Tela:** celular em pé, tamanhos pequenos (anilhas e textos legíveis) e o app recarregado no meio do treino.
+
+Protótipos e testes no navegador cobrem lista, foco e tela cheia; a descrição de cada PR diz como cada modo foi tratado.
+
 ## Sessão de treino
 
 | Funcionalidade | Como a ficha ativa | Onde |
