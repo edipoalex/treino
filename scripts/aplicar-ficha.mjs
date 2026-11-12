@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { RAIZ, appAtual, trechoDaFicha, checarFicha } from "./validar.mjs";
+import { recursosDaFicha } from "../js/recursos.js";
 
 const arq = process.argv[2];
 if(!arq){ console.error("Uso: node scripts/aplicar-ficha.mjs ficha.json"); process.exit(1); }
@@ -26,6 +27,8 @@ if(f.etapa === atual.etapa){
 
 const erros = [], avisos = [];
 checarFicha(f, erros, avisos);
+{ const { cont } = recursosDaFicha(f), lista = o => Object.entries(o).map(([k,v])=>`${k} ${v}`).join(", ") || "nenhum";
+  console.log(`Recursos · cronômetro: ${lista(cont.cronometro)} · carga: ${lista(cont.cargas)}`); }
 for(const a of avisos) console.log(`! ${a}`);
 if(erros.length){ for(const e of erros) console.log(`✗ ${e}`); console.log("\nNada foi alterado."); process.exit(1); }
 

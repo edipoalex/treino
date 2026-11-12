@@ -43,7 +43,8 @@ function zonaFC(){ const id=+S.idade; if(!(id>0)) return ""; const fcm=208-.7*id
 /* Monta as etapas de cada tipo */
 function etapasDe(it, tipoParte){
   const t = tempoDe(it); if(!t) return null;
-  if(tipoParte!=null) return [{ seg:tipoParte, rot:"Pausa", tipo:"pausa" }];
+  if(tipoParte!=null){ const pt = typeof tipoParte==="object" ? tipoParte : { pausa:tipoParte };
+    return [{ seg:pt.pausa, rot: pt.rot ? cap(pt.rot) : "Pausa", tipo:"pausa", nome: pt.rot ? pt.rot.toUpperCase() : undefined }]; }
   const prep = { seg:PREP, rot:"Prepare", tipo:"prep" };
   if(t.tipo==="segurar") return [prep, ...t.etapas.map(e=>({ ...e, nome: e.tipo==="exec" ? e.rot.toUpperCase() : undefined }))];
   if(t.tipo==="intervalo"){
@@ -52,7 +53,7 @@ function etapasDe(it, tipoParte){
     if(t.desaquecer) et.push({ seg:t.desaquecer, rot:"Desaquecer", tipo:"desaq" });
     return et;
   }
-  if(t.tipo==="continuo") return [{ seg:5, rot:"Prepare", tipo:"prep", sub:"Ajuste a velocidade" }, { seg:t.seg, rot:t.rot, tipo:"zona", nome:t.rot.toUpperCase() }];
+  if(t.tipo==="continuo") return [{ seg:5, rot:"Prepare", tipo:"prep", sub:"Ajuste a velocidade" }, { seg:t.seg, rot:t.rot, tipo: t.zona2 ? "zona" : "esteira", nome:t.rot.toUpperCase() }];
   if(t.tipo==="aquecimento") return [prep, { seg:t.seg, rot:t.rot, tipo:"esteira", nome:t.rot.toUpperCase(), sub:`Depois: ${t.passos} séries de ${t.passoRot}` }];
   return null;
 }
@@ -86,7 +87,7 @@ export function tickExec(){
   if(s.j!==ultimaEtapa){ if(ultimaEtapa!=null){ bip(...F.som); if(F.vib) vibra(F.vib); aviso(F.aviso); } ultimaEtapa=s.j; }
   if(seg!==ultimoSeg){ ultimoSeg=seg; if(!pausado && seg<=3 && seg>0 && !["leve","zona","esteira","desaq"].includes(s.e.tipo)) bip(s.e.tipo==="prep"?660:880); }
   const total=totalDe(X), dec=total-(X.etapas.slice(s.j+1).reduce((a,e)=>a+e.seg,0)+s.resta);
-  if(s.e.tipo==="zona"){ // marcas do cardio contínuo
+  if(X.tipo==="continuo"){ // marcas do cardio contínuo
     if(!avisos.meio && dec>=total/2){ avisos.meio=1; aviso("METADE!"); bip(880,.15,2); vibra([150]); }
     if(!avisos.fim && s.resta<=Math.min(60, s.e.seg/6)){ avisos.fim=1; aviso("RETA FINAL"); bip(880,.15,1); } }
   const fr = s.e.tipo==="prep" ? 0 : s.resta/s.e.seg, prox=X.etapas[s.j+1];
@@ -158,6 +159,7 @@ function abrirTelaExec(){
 
 /* ---------- O que aparece no lugar do botão da série ---------- */
 const btnRodando = () => `<button class="btn primary cor t-btn" id="eBtn" data-exec-parar aria-label="${S.exec?.tipo==="pausa"?"Pular a pausa":"Parar o cronômetro"}"><span class="t-fill" id="eFill"></span>${icone("timer")}<span id="eTxt">…</span></button>`;
+const fmtDur = s => s>=60 && s%60===0 ? `${s/60} min` : s>=60 ? fmtSeg(s) : `${s} s`;
 const miniHtml = () => `<button class="mini-fase" id="eMini" data-exec-max aria-label="Abrir o cronômetro em tela cheia"><span class="mf-ic"></span><span class="mf-txt"><b></b><small></small></span><span class="mf-t"></span><span class="mf-barra"><i></i></span></button>`;
 const minutosDe = t => Math.round((t.tipo==="intervalo" ? t.rodadas*(t.a.seg+t.b.seg)+t.desaquecer : t.seg)/60);
 /* Prévia das fases do cardio intervalado: um bloco colorido por fase e a legenda */
@@ -171,7 +173,7 @@ export function previaFases(it){
 export function acaoTempo(it, i, a, cls){
   const t=tempoDe(it); if(!t) return "";
   const chipsPartes = () => { const k=Math.min((a.rp||{})[i]||0, t.partes.length-1);
-    return `<div class="microp" aria-label="Partes da série">${t.partes.map((x,j)=>`<span class="${j<k?"feito":j===k?"agora":""}">${x.pausa?`${x.pausa} s`:esc(x.rot)}</span>`).join("")}</div>`; };
+    return `<div class="microp" aria-label="Partes da série">${t.partes.map((x,j)=>`<span class="${j<k?"feito":j===k?"agora":""}">${x.pausa?`${fmtDur(x.pausa)}${x.rot?` ${esc(x.rot)}`:""}`:esc(x.rot)}</span>`).join("")}</div>`; };
   if(S.exec?.k===i) return (t.tipo==="partes" ? chipsPartes() : "") + (CARDIO.has(S.exec.tipo) || telaCheia(S.exec) ? miniHtml() : btnRodando());
   if(!it.series){
     if(!CARDIO.has(t.tipo)) return "";
@@ -190,7 +192,7 @@ export function acaoTempo(it, i, a, cls){
     <button class="link-btn" data-serie="${i}">Marcar a série sem cronômetro</button>`;
   if(t.tipo==="partes"){
     const k=Math.min((a.rp||{})[i]||0, t.partes.length-1), p=t.partes[k], ultima=k===t.partes.length-1, chips=chipsPartes();
-    if(p.pausa) return chips + `<button class="btn ${cls}" data-exec-pausa="${i}:${p.pausa}">${icone("play")} Pausa ${p.pausa} s</button>`;
+    if(p.pausa) return chips + `<button class="btn ${cls}" data-exec-pausa="${i}:${k}">${icone("play")} ${p.rot?esc(cap(p.rot)):"Pausa"} ${fmtDur(p.pausa)}</button>`;
     return chips + (ultima ? `<button class="btn ${cls} serie-btn" data-serie="${i}">${icone("check")}<span>Série ${f+1} de ${it.series} feita</span></button>`
       : `<button class="btn ${cls} exec-btn" data-rp="${i}">${icone("check")}<span>${p.rot==="falha"?"Cheguei na falha":`Fiz ${esc(p.rot)}`}</span></button>`);
   }
@@ -207,7 +209,7 @@ export function marcarAproximacao(i){
 export function avancarParte(i){
   const a=E.atual, it=treinoAtual(a).itens[i], t=tempoDe(it); if(t?.tipo!=="partes") return;
   const k=((a.rp ??= {})[i]||0)+1; a.rp[i]=k; save();
-  const p=t.partes[k]; if(p?.pausa) return iniciarExec(i, { pausa:p.pausa });
+  const p=t.partes[k]; if(p?.pausa) return iniciarExec(i, { pausa:p });
   rerender();
 }
 

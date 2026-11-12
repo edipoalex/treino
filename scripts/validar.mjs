@@ -70,13 +70,16 @@ function checarModulos(app, erros){
     for(const m of src.matchAll(/^import \{([^}]+)\} from "([^"]+)";/gm)){
       const alvo = path.posix.normalize(path.posix.join(path.posix.dirname(a), m[2]));
       if(!exportsDe[alvo]){ erros.push(`${a}: importa ${m[2]}, que não existe`); continue; }
-      for(const n of m[1].split(",").map(s=>s.trim())) if(!exportsDe[alvo].has(n)) erros.push(`${a}: ${alvo} não exporta "${n}"`);
+      for(const n of m[1].split(",").map(s=>s.trim().split(/\s+as\s+/)[0])) if(!exportsDe[alvo].has(n)) erros.push(`${a}: ${alvo} não exporta "${n}"`);
     }
   }
   const sw = app.arquivos["sw.js"];
   for(const a of Object.keys(app.arquivos)) if(/^(js|css)\//.test(a) && !sw.includes(`"${a}"`)) erros.push(`sw.js: ${a} fora da lista ARQUIVOS (o app não abriria offline)`);
   for(const m of app.arquivos["index.html"].matchAll(/(?:href|src)="((?:css|js)\/[^"]+)"/g)) if(!(m[1] in app.arquivos)) erros.push(`index.html: ${m[1]} não existe`);
 }
+
+/* ---------- Recursos que a ficha ativa (js/recursos.js) ---------- */
+const { recursosDaFicha } = await import("../js/recursos.js");
 
 /* ---------- Validadores reaproveitados ---------- */
 const { validarFicha: validadorDoApp } = await import("../js/validacao.js");
@@ -168,6 +171,8 @@ export function checarFicha(f, erros, avisos){
   for(const m of semDesc) avisos.push(`método "${m}" usado em itens, mas sem descrição em "metodos"`);
   const nomesItens = new Set(todosItens.map(it=>it.nome));
   for(const k of Object.keys(f.guia||{})) if(!nomesItens.has(k)) avisos.push(`guia: "${k}" não corresponde a nenhum exercício da ficha`);
+  // recursos do app: avisa o que não vai ser reconhecido (cronômetro, séries) para não perder funcionalidade
+  for(const av of recursosDaFicha(f).avisos) avisos.push(`recurso · ${av}`);
   return resumo;
 }
 
@@ -218,6 +223,10 @@ function principal(){
       const fx = ([max, min]) => min===max ? `${Math.round(max)} min` : `${Math.round(min)}–${Math.round(max)} min`;
       console.log(`  ${l}: completo ${fx(R.completo)}${R.express[1]<99?` · express ${fx(R.express)}`:""}`);
     }
+  }
+  if(resumo){
+    const { cont } = recursosDaFicha(ficha), lista = o => Object.entries(o).map(([k,v])=>`${k} ${v}`).join(", ") || "nenhum";
+    console.log(`  recursos · cronômetro: ${lista(cont.cronometro)} · carga: ${lista(cont.cargas)}`);
   }
   for(const a of avisos) console.log(`! ${a}`);
   for(const e of erros) console.log(`✗ ${e}`);

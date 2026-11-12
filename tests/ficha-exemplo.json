@@ -1,0 +1,26 @@
+{
+ "etapa": 99, "versao": 1, "semanas": 6, "frequencia": "4–5x por semana",
+ "fases_semanas": { "1": [1,2,3,4,5,6] },
+ "fases": { "1": {
+  "A": { "foco": "Exemplo com todos os formatos de musculação", "itens": [
+   { "nome": "Aquecimento", "prescricao": "5 min de bike + 2 séries de aproximação no agachamento", "series": 0, "exec": 0, "descanso": 0, "bloco": 5, "obs": "" },
+   { "nome": "Supino reto com barra", "prescricao": "Contraste: 1x6 pesado / 1x20 leve / 1x6 / 1x20 / 1x6", "series": 5, "exec": 45, "descanso": 75, "bloco": 1, "obs": "" },
+   { "nome": "Puxada aberta", "prescricao": "Rest-pause 2x (falha / 10s / falha / 10s / falha)", "series": 2, "exec": 70, "descanso": 90, "bloco": 0, "obs": "" },
+   { "nome": "Elevação lateral", "prescricao": "Micro-pausas 2x (1x30 / 20s / 1x20 / 15s / 1x10)", "series": 2, "exec": 90, "descanso": 90, "bloco": 0, "obs": "" },
+   { "nome": "Cadeira abdutora", "prescricao": "3x (20 reps / 20 s isometria / 20 reps)", "series": 3, "exec": 60, "descanso": 60, "bloco": 0, "obs": "" },
+   { "nome": "Leg press + afundo", "prescricao": "1x30+6 / 1 min / 1x20+6 / 1 min / 1x15+6", "series": 1, "exec": 240, "descanso": 0, "bloco": 0, "obs": "" },
+   { "nome": "Agachamento livre", "prescricao": "4x6 (carga alta)", "series": 4, "exec": 30, "descanso": 120, "bloco": 0, "obs": "" },
+   { "nome": "Supino 30° com halteres", "prescricao": "3x8 (na última: drop −20% até a falha)", "series": 3, "exec": 40, "descanso": 75, "bloco": 0, "obs": "" },
+   { "nome": "Rosca direta", "prescricao": "3x12 (30 s de descanso)", "series": 3, "exec": 35, "descanso": 30, "bloco": 0, "obs": "" },
+   { "nome": "Leg press 45°", "prescricao": "Pirâmide: 1x15 / 1x12 / 1x10 / 1x8", "series": 4, "exec": 40, "descanso": 90, "bloco": 0, "obs": "" }
+  ]},
+  "B": { "foco": "Exemplo com core e cardio", "itens": [
+   { "nome": "Abdômen: elevação de pernas + prancha", "prescricao": "3 voltas: 15 reps + 45s de prancha", "series": 3, "exec": 90, "descanso": 45, "bloco": 0, "obs": "" },
+   { "nome": "Core: prancha lateral", "prescricao": "3 voltas: 30s por lado", "series": 3, "exec": 70, "descanso": 45, "bloco": 0, "obs": "" },
+   { "nome": "Cardio", "prescricao": "HIIT: 6x (30s forte / 30s leve) + 2 min de desaquecimento", "series": 0, "exec": 0, "descanso": 0, "bloco": 8, "obs": "" },
+   { "nome": "Cardio intervalado", "prescricao": "Intervalado: 3x (4 min forte / 3 min leve)", "series": 0, "exec": 0, "descanso": 0, "bloco": 21, "obs": "" },
+   { "nome": "Cardio contínuo", "prescricao": "Zona 2 contínuo", "series": 0, "exec": 0, "descanso": 0, "bloco": 20, "obs": "" },
+   { "nome": "Caminhada rápida na esteira", "prescricao": "40 min", "series": 0, "exec": 0, "descanso": 0, "bloco": 40, "obs": "", "janela": "manha" }
+  ]}
+ }}
+}
