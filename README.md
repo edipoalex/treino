@@ -21,7 +21,7 @@ js/movimento.js         transições e microinterações (respeita Ajustes › A
 js/icones.js            ícones Lucide (ISC) guardados no app, para funcionar offline
 js/anilha.js            anilhas em SVG: 3D nas grandes, de frente com a letra no cubo nas pequenas
 js/descanso.js          cronômetro de descanso (e a carga da próxima série, na tela cheia)
-js/execucao.js          cronômetro de execução (prancha, por lado, rest-pause, HIIT) e cronômetro livre
+js/execucao.js          cronômetro de execução e tela de fases (cardio intervalado/zona 2, aquecimento, prancha, rest-pause) e cronômetro livre
 js/sync.js              sincronização com a planilha
 js/navegacao.js         abas e render()
 js/telas/               hoje · sessao · ficha · historico · guia

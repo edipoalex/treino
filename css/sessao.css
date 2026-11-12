@@ -144,3 +144,66 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
 .pk.atual{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--ink)}
 .pk.sel{outline:2px dashed var(--c);outline-offset:1px}
 .pk.feita{color:var(--ok)}
+
+/* ---------- Fases do cronômetro (js/execucao.js): cor por tipo ---------- */
+.t-prep{--fase:#8A94A0}.t-forte{--fase:#D6343B}.t-leve{--fase:#2E9E5B}.t-desaq{--fase:#2F6FDB}.t-zona{--fase:#2A8C8C}
+.t-esteira{--fase:#6B7A8F}.t-exec{--fase:var(--c)}.t-troca{--fase:#E58A4E}.t-pausa{--fase:#6B7A8F}
+/* tela cheia */
+.fases{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);color:#fff;transition:background-color .45s ease;
+  background:linear-gradient(170deg,color-mix(in srgb,var(--fase) 88%,#fff),color-mix(in srgb,var(--fase) 72%,#000))}
+.fases.t-prep{background:var(--bg);color:var(--ink)}
+.fases.t-exec{color:var(--on)}
+.fases.t-forte::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 14px,transparent 14px 28px);pointer-events:none}
+.fases > *{position:relative}
+.fases .f-topo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;opacity:.95}
+.fases .x{width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.12);color:inherit;display:grid;place-items:center}
+.fases.t-prep .x{border-color:var(--line);background:var(--surface-2)}
+.fases .f-centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px}
+.fases .f-ic .ic{width:46px;height:46px}
+.fases .f-nome{font:700 54px/1 var(--display);letter-spacing:2px;margin:6px 0 0}
+.fases .f-tempo{font:700 104px/1 var(--display);font-variant-numeric:tabular-nums;margin:4px 0}
+.fases .f-tempo.final{animation:conta .5s ease-in-out infinite}
+@keyframes conta{50%{transform:scale(1.08)}}
+.fases .f-sub{font-size:17px;font-weight:600;opacity:.92}
+.fases .f-dica{font-size:15px;opacity:.85;max-width:320px;margin-top:6px}
+.fases .f-rodadas{display:flex;gap:8px;margin-top:10px}
+.fases .f-rodadas span{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.3)}
+.fases .f-rodadas span.on{background:#fff}
+.fases.t-prep .f-rodadas span{background:var(--line)}
+.fases .f-prox{display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);font-weight:600;font-size:15px}
+.fases.t-prep .f-prox{background:var(--surface-2)}
+.bol{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--fase);vertical-align:-1px}
+.fases .f-linha{display:flex;gap:3px;height:16px;margin-top:14px}
+.fases .f-linha i{position:relative;border-radius:5px;overflow:hidden;opacity:.75;background:var(--fase);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55)}
+.fases .f-linha i.feita{opacity:.3}
+.fases .f-linha i.agora{opacity:1;outline:2px solid #fff;outline-offset:1px}
+.fases.t-prep .f-linha i.agora{outline-color:var(--ink)}
+.fases .f-linha i b{position:absolute;inset:0;background:rgba(255,255,255,.55);transform-origin:left}
+.fases .f-regua{position:relative;height:16px;margin-top:14px;border-radius:8px;background:rgba(255,255,255,.18);overflow:hidden}
+.fases .f-regua b{position:absolute;inset:0;background:rgba(255,255,255,.6);transform-origin:left;transform:scaleX(0)}
+.fases .f-regua i{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.25)}
+.fases .f-regua i.meio{width:3px;background:#fff}
+.fases .f-total{display:flex;justify-content:space-between;font-size:14px;font-weight:600;opacity:.92;margin-top:6px}
+.fases .f-acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.fases .f-acoes .btn{min-height:58px;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:inherit;box-shadow:none}
+.fases.t-prep .f-acoes .btn{background:var(--surface-2);border-color:var(--line)}
+.f-aviso{position:absolute;left:50%;top:16%;transform:translate(-50%,-50%);padding:12px 20px;border-radius:16px;background:rgba(0,0,0,.35);color:#fff;font:700 28px var(--display);letter-spacing:1px;animation:aviso 1.6s ease forwards;pointer-events:none;white-space:nowrap;z-index:2}
+@keyframes aviso{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+/* indicador compacto (tela cheia minimizada) */
+.mini-fase{position:relative;overflow:hidden;width:100%;display:flex;align-items:center;gap:12px;min-height:76px;margin-top:12px;padding:10px 16px;border-radius:18px;border:0;color:#fff;text-align:left;
+  background:linear-gradient(170deg,color-mix(in srgb,var(--fase,#6B7A8F) 88%,#fff),color-mix(in srgb,var(--fase,#6B7A8F) 72%,#000))}
+.mini-fase.t-prep{background:var(--surface-2);color:var(--ink)}
+.mini-fase .mf-ic .ic{width:30px;height:30px}
+.mini-fase .mf-txt{flex:1;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.mini-fase .mf-txt b{font:700 28px var(--display);letter-spacing:1px}
+.mini-fase .mf-txt small{font-size:13px;font-weight:600;opacity:.92}
+.mini-fase .mf-t{font:700 40px var(--display);font-variant-numeric:tabular-nums}
+.mini-fase .mf-barra{position:absolute;left:0;right:0;bottom:0;height:6px;background:rgba(0,0,0,.2)}
+.mini-fase .mf-barra i{position:absolute;inset:0;background:rgba(255,255,255,.75);transform-origin:left}
+/* prévia das fases no cartão do cardio */
+.pre-fases{display:flex;gap:3px;height:12px;margin-top:10px}
+.pre-fases i{border-radius:4px;background:var(--fase)}
+.pre-leg{font-size:14px;margin:6px 0 0}
+/* séries de aproximação do aquecimento */
+.passos-aq{display:grid;gap:10px;margin-top:10px}
+.passos-aq .btn.ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
