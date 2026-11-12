@@ -4,7 +4,8 @@ import { render } from "./navegacao.js";
 import { rerender, treinoAtual } from "./telas/sessao.js";
 import { cargaDaSerie, valorPlanejado, variaPorSerie, cargaPorSerie, cargaResumo, controlesCarga, grupoDaSerie, grupoIdx, passoCarga, trocarUnidade } from "./cargas.js";
 import { rotSerie, seriesDe } from "./series.js";
-import { consumirRepeticao, segurarRepete } from "./movimento.js";
+import { consumirRepeticao, movimentoOk, segurarRepete } from "./movimento.js";
+import { icone } from "./icones.js";
 import { fmtSeg, toast } from "./ui.js";
 import { $, esc } from "./util.js";
 
@@ -33,10 +34,26 @@ export function pararDescanso(rend=true){
 export function tick(){
   const T=S.timer; if(!T) return;
   const r=(T.fim-Date.now())/1000;
-  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); marcar("fimDescanso",{k:T.k}); pararDescanso(); toast("Descanso encerrado. Próxima série!"); return; }
+  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); marcar("fimDescanso",{k:T.k}); fimDescanso(T); return; }
   const txt=fmtSeg(r), fr=Math.max(0,Math.min(1,r/T.total));
   const tt=$("#tTxt"); if(tt){ tt.textContent=txt; $("#tFill").style.transform=`scaleX(${fr})`; tt.closest(".t-btn")?.classList.toggle("low", r<=10); }
   const dt=$("#dTxt"); if(dt){ dt.textContent=txt; const arc=$("#dArc"), C=2*Math.PI*104; arc.setAttribute("stroke-dashoffset",(C*(1-fr)).toFixed(1)); arc.setAttribute("stroke", r<=10?"var(--warn)":"var(--c)"); }
+}
+/* Fim do descanso: o iPhone não vibra em apps da web e o som some no modo silencioso, então o aviso é visual.
+   Tela cheia: "VAI!" na cor do treino por 1,5 s antes de fechar. Sempre: a tela pisca na cor do treino e um aviso
+   desce no topo com a próxima série (aparece mesmo com o cartão fora da tela, no modo lista); tocar nele leva ao exercício. */
+function fimDescanso(T){
+  const a=E.atual, L=a ? `L-${esc(a.letra)}` : "", d=$("#descanso");
+  if(d && movimentoOk()){ clearInterval(tInt); tInt=null; delete S.timer; save();
+    d.insertAdjacentHTML("beforeend", `<div class="tc-vai"><b>VAI!</b>${T.prox?`<span>${esc(T.prox)}</span>`:""}</div>`);
+    setTimeout(()=>{ d.remove(); rerender(); }, 1500); }
+  else pararDescanso();
+  document.querySelectorAll(".flash-fim, .aviso-fim").forEach(x=>x.remove());
+  if(movimentoOk()){ const f=document.createElement("div"); f.className=`flash-fim ${L}`; document.body.appendChild(f); setTimeout(()=>f.remove(), 2400); }
+  const av=document.createElement("button"); av.className=`aviso-fim ${L}`; av.setAttribute("role","alert");
+  av.innerHTML=`${icone("dumbbell")}<span><b>VAI!</b>${T.prox?`<small>${esc(T.prox)}</small>`:""}</span>`;
+  av.onclick=()=>{ av.remove(); document.querySelector(".item.ativo, .f-nome")?.scrollIntoView({ behavior:"smooth", block:"center" }); };
+  document.body.appendChild(av); setTimeout(()=>av.remove(), 6000);
 }
 export function abrirTelaDescanso(){
   $("#descanso")?.remove(); const T=S.timer, a=E.atual; if(!T || !a) return;

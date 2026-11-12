@@ -22,7 +22,7 @@ export function iniciarNavegacao(){
   const ordem=["hoje","ficha","historico","guia"];
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
     const de=nav.tab, para=b.dataset.tab; if(de===para){ scrollTo({top:0, behavior:"smooth"}); return; }
-    trocarTela(()=>{ nav.tab=para; if(para!=="ficha"){nav.fichaFase=null;nav.fichaLetra=null;} render(); scrollTo(0,0); entrada(); },
+    trocarTela(()=>{ nav.tab=para; if(para!=="ficha"){nav.fichaFase=null;nav.fichaLetra=null;} render(); scrollTo(0,0); entrada(para); },
       ordem.indexOf(para)>ordem.indexOf(de) ? "frente" : "tras");
   });
 }

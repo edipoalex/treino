@@ -41,6 +41,10 @@ Protótipos e testes no navegador cobrem lista, foco e tela cheia; a descrição
 | Carga da última vez | Automático, pelo nome exato do exercício | `cargas.js › ultimaDaSerie` |
 | Volume, recordes, resumo | Automático a partir das cargas registradas | `metricas.js` |
 
+| Fim do descanso visível sem vibração (iPhone) | Sempre: flash na cor do treino, aviso "VAI!" no topo com a próxima série, botão pulsando; em tela cheia, "VAI!" antes de fechar | `descanso.js › fimDescanso` |
+| Confirmações no visual do app | Concluir (com resumo), apagar peso, desfazer treino, recomeçar, importar, desconectar, trocar para express | `ui.js › confirmar` |
+| Destaque da sessão | O cartão em execução usa a cor do treino (sem verde neon); textos lidos na série com 16 px ou mais | `css/sessao.css` |
+
 ## Cronômetros
 
 | Funcionalidade | Formato na prescrição | Tipo |

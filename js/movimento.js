@@ -13,10 +13,19 @@ const marcas = {};
 export const marcar = (nome, dados={}) => { marcas[nome] = { ...dados, t: Date.now() }; };
 export function recente(nome, ms=900){ const m = marcas[nome]; return m && Date.now()-m.t < ms ? m : null; }
 
-/* Entrada de tela: as animações de chegada (anilha, barras…) rodam só ao abrir a aba, não a cada re-render */
+/* Entrada de tela: as animações de chegada (anilha, barras…) rodam só na primeira abertura de cada aba no dia;
+   nas trocas seguintes a aba aparece direto (com o deslize curto da troca de aba) */
 let tEntrada;
-export function entrada(){
-  if(!movimentoOk()) return;
+function primeiraVezHoje(nome){
+  const hoje=new Date().toLocaleDateString("sv"); let v={};
+  try{ v=JSON.parse(localStorage.getItem("treino-entradas")||"{}"); }catch(e){}
+  if(v.d!==hoje) v={ d:hoje, a:[] };
+  if(v.a.includes(nome)) return false;
+  v.a.push(nome); try{ localStorage.setItem("treino-entradas", JSON.stringify(v)); }catch(e){}
+  return true;
+}
+export function entrada(nome="hoje"){
+  if(!movimentoOk() || !primeiraVezHoje(nome)) return;
   const v = document.getElementById("view"); if(!v) return;
   v.classList.remove("entrando"); void v.offsetWidth; v.classList.add("entrando");
   clearTimeout(tEntrada); tEntrada = setTimeout(() => v.classList.remove("entrando"), 1400);
@@ -27,7 +36,9 @@ export function trocarTela(fazer, dir="frente"){
   if(!movimentoOk() || !document.startViewTransition){ fazer(); return; }
   const html = document.documentElement; html.dataset.dir = dir; html.classList.add("vt");
   const vt = document.startViewTransition(fazer);
-  vt.finished.finally(() => html.classList.remove("vt"));
+  // trocar de aba rápido pula a transição anterior: não é erro, então as promessas não podem rejeitar soltas
+  vt.ready.catch(()=>{}); vt.updateCallbackDone.catch(()=>{});
+  vt.finished.catch(()=>{}).finally(() => html.classList.remove("vt"));
 }
 
 /* Números que contam até o valor: <b data-contar="56">56</b>; data-dec="1" e data-suf=" t" opcionais */

@@ -2,7 +2,7 @@ import { envioCarga } from "./cargas.js";
 import { FICHA, S, novaEtapa, save, usarFicha } from "./estado.js";
 import { FICHA_EMBUTIDA } from "./ficha-atual.js";
 import { render } from "./navegacao.js";
-import { toast } from "./ui.js";
+import { confirmar, toast } from "./ui.js";
 import { $, esc } from "./util.js";
 import { RX, cmpFicha, limparSessao, num, pesoOk, unidOk, validarFicha, vazio } from "./validacao.js";
 
@@ -154,7 +154,7 @@ export function atualizarSyncUI(){
     <button class="btn primary" id="syncCon">Conectar</button>`;
   $("#syncNow") && ($("#syncNow").onclick=()=>sincronizar());
   $("#syncLink") && ($("#syncLink").onclick=async()=>{ try{ await navigator.clipboard.writeText(linkConfig()); toast("Link copiado. Abra-o no outro navegador."); }catch(e){ prompt("Copie o link:", linkConfig()); } });
-  $("#syncOff") && ($("#syncOff").onclick=()=>{ if(confirm(`Desconectar este aparelho da planilha? Os dados continuam na planilha.${S.fila.length?`\n\nAtenção: ${S.fila.length} ${S.fila.length>1?"alterações ainda não enviadas serão perdidas":"alteração ainda não enviada será perdida"}. Sincronize antes, se puder.`:""}`)){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
+  $("#syncOff") && ($("#syncOff").onclick=async()=>{ if(await confirmar({ titulo:"Desconectar este aparelho da planilha?", texto:`Desconectar este aparelho da planilha? Os dados continuam na planilha.${S.fila.length?`\n\nAtenção: ${S.fila.length} ${S.fila.length>1?"alterações ainda não enviadas serão perdidas":"alteração ainda não enviada será perdida"}. Sincronize antes, se puder.`:""}`, sim:"Desconectar", nao:"Manter conectado", perigo:true })){ S.sync={url:"",k:"",migrado:false,ultimo:0,erro:""}; save(); atualizarSyncUI(); } });
   $("#syncCon") && ($("#syncCon").onclick=()=>{
     const limpa=v=>String(v||"").replace(/[\s\u200B-\u200D\uFEFF]/g,"");
     let k=limpa($("#syncKey").value), url=limpa($("#syncUrl").value)||SCRIPT_PADRAO;

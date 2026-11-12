@@ -2,7 +2,7 @@ import { E, FICHA, LETRAS, S, save } from "../estado.js";
 import { render } from "../navegacao.js";
 import { DIA, addPeso, fmtData, fmtKg, freqAlvo, hojeISO, minutos, parseISO, parseKg, pesoSemanal, segundaDe, semanaAtual, semanaDaEtapa, totalMin, treino } from "../progresso.js";
 import { enfileirar } from "../sync.js";
-import { plate, toast } from "../ui.js";
+import { confirmar, plate, toast } from "../ui.js";
 import { $, esc } from "../util.js";
 import { icone } from "../icones.js";
 import { fmtRec, fmtVolume, maximos, temCargas, volumeSessao } from "../metricas.js";
@@ -176,13 +176,13 @@ export function viewHistorico(){
   </section>`;
   $("#verRecordes") && ($("#verRecordes").onclick=()=>{ verRecordes=!verRecordes; const y=scrollY; render(); scrollTo(0,y); });
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
-  $("#undoBtn") && ($("#undoBtn").onclick=()=>{ if(confirm("Remover o último registro?")){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});
+  $("#undoBtn") && ($("#undoBtn").onclick=async()=>{ if(await confirmar({ titulo:"Remover o último treino registrado?", texto:"Some também da planilha.", sim:"Remover", nao:"Manter", perigo:true })){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});
   $("#pAdd").onclick=()=>{
     const kg=parseKg($("#pKg").value), d=$("#pData").value || hojeISO();
     if(!kg){ toast("Informe um peso válido, ex.: 83,4"); $("#pKg").focus(); return; }
     addPeso(d,kg); toast(`Peso registrado: ${fmtKg(kg)} kg`); const y=scrollY; render(); scrollTo(0,y);
   };
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(confirm(`Apagar o peso de ${fmtData(b.dataset.del)}?`)){ S.peso=S.peso.filter(p=>p.d!==b.dataset.del); enfileirar({tipo:"delPeso", data:b.dataset.del}); const y=scrollY; render(); scrollTo(0,y); }
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+    if(await confirmar({ titulo:`Apagar o peso de ${fmtData(b.dataset.del)}?`, texto:"Some também da planilha.", sim:"Apagar", nao:"Manter", perigo:true })){ S.peso=S.peso.filter(p=>p.d!==b.dataset.del); enfileirar({tipo:"delPeso", data:b.dataset.del}); const y=scrollY; render(); scrollTo(0,y); }
   });
 }

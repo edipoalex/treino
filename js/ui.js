@@ -43,10 +43,24 @@ export async function manterTela(on){
 /* ---------- Folhas: menus, confirmações, "Como fazer" ---------- */
 export function folha(html, depois){
   fecharFolha();
-  const f=document.createElement("div"); f.className="folha"; f.id="folha"; f.innerHTML=`<div class="corpo" role="dialog" aria-modal="true">${html}</div>`;
+  const f=document.createElement("div"); f.className=`folha ${E?.atual?.letra?`L-${esc(E.atual.letra)}`:""}`; f.id="folha"; f.innerHTML=`<div class="corpo" role="dialog" aria-modal="true">${html}</div>`;
   f.addEventListener("click", e=>{ if(e.target===f || e.target.closest("[data-fechar]")) fecharFolha(); });
-  document.body.appendChild(f); depois?.(f);
+  // com Ajustes aberto (dialog modal), a folha precisa ficar dentro dele para aparecer por cima
+  const dl=document.getElementById("settings"); (dl && dl.open ? dl : document.body).appendChild(f); depois?.(f);
   arrastarParaFechar(f, fecharFolha);
+}
+/* Confirmação no visual do app (no lugar do confirm() do navegador). Devolve uma Promise<boolean>.
+   html: conteúdo extra (resumo); perigo: o botão de confirmar em laranja, para apagar */
+export function confirmar({ titulo, texto="", html="", sim="Confirmar", nao="Cancelar", perigo=false }){
+  return new Promise(resolve=>{
+    let respondeu=false; const fim = v => { if(respondeu) return; respondeu=true; fecharFolha(); resolve(v); };
+    folha(`<h3>${esc(titulo)}</h3>${texto?`<p class="meta">${esc(texto)}</p>`:""}${html}
+      <button class="btn ${perigo?"grande perigo":"primary cor grande"}" data-sim>${perigo?icone("x"):icone("check")} ${esc(sim)}</button>
+      <button class="btn" data-nao>${esc(nao)}</button>`,
+      f=>{ f.querySelector("[data-sim]").onclick=()=>fim(true); f.querySelector("[data-nao]").onclick=()=>fim(false);
+        // fechar tocando fora ou arrastando para baixo = não
+        new MutationObserver((_,o)=>{ if(!f.id){ o.disconnect(); if(!respondeu){ respondeu=true; resolve(false); } } }).observe(f,{ attributes:true, attributeFilter:["id"] }); });
+  });
 }
 /* Fecha descendo; o id sai na hora, para uma folha nova poder abrir enquanto a antiga ainda desce */
 export function fecharFolha(){
