@@ -8,7 +8,7 @@ import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpre
 import { rotSerie, seriesDe, tempoDe } from "../series.js";
 import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSessao } from "../metricas.js";
 import { enfileirar, hora } from "../sync.js";
-import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
+import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
 import { $, esc, fmtNum } from "../util.js";
 import { icone } from "../icones.js";
 import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
@@ -34,7 +34,7 @@ export function botaoAcao(it,i,a,destaque){
   }
   const f=(a.series||{})[i]||0;
   if(f>=it.series) return `<button class="btn reabrir" data-reabrir="${i}">${ico.check} Concluído · ${it.series}/${it.series} · desfazer</button>`;
-  return `<button class="btn ${cls} serie-btn ${recente("fimDescanso",2600)?.k===i?"acende":""}" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
+  return `<button class="btn ${cls} serie-btn ${recente("fimDescanso",120000)?.k===i?"vai":""}" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
 }
 export const chipsDe = it => (it.series>0
   ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`].concat(voltasDo(it)&&voltasDo(it).length?[semTxt(voltasDo(it))]:[])
@@ -172,7 +172,7 @@ export function registrarSerie(i){
   const ser=seriesDe(it);
   if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerieF(it,i,f,a,g) }; }
   if(a.rp) delete a.rp[i];
-  delete a.selC;
+  delete a.selC; marcar("fimDescanso",{k:null});
   const tl=Math.round(livreDe(i)); if(tl>0){ ((a.tm ??= {})[i] ??= [])[f]=tl; S.livre.acum=0; if(S.livre.ini) S.livre.ini=Date.now(); }
   a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15); marcar("serie",{i, j:f, fim:f+1===it.series});
   const fimEx = a.series[i]===it.series;
@@ -241,11 +241,11 @@ export function listaGeral(){
     <button class="btn" data-fechar>Fechar</button>`,
     f=>f.querySelectorAll("[data-ir]").forEach(b=>b.onclick=()=>{ a.ativo=+b.dataset.ir; save(); fecharFolha(); rerender(true); }));
 }
-export function trocarVersao(novo){
+export async function trocarVersao(novo){
   const a=E.atual, t=treinoAtual(a);
   if(novo===(a.modo||"completo")) return;
   const temAlgo = a.feitos.length || Object.values(a.series||{}).some(v=>v>0);
-  if(temAlgo && !confirm(`Trocar para ${novo==="express"?"Express":"Completo"}? Os exercícios que existem nas duas versões mantêm as marcações e séries.`)) return;
+  if(temAlgo && !(await confirmar({ titulo:`Trocar para ${novo==="express"?"Express":"Completo"}?`, texto:"Os exercícios que existem nas duas versões mantêm as marcações e as séries.", sim:"Trocar" }))) return;
   const novoT=treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined,novo);
   const map={}; t.itens.forEach((it,i)=>{ const j=novoT.itens.findIndex(x=>x.nome===it.nome); if(j>=0) map[i]=j; });
   const remap=obj=>{ const o={}; for(const [k,v] of Object.entries(obj||{})) if(map[k]!=null) o[map[k]]=v; return o; };
@@ -256,9 +256,12 @@ export function trocarVersao(novo){
   a.ativo = a.ativo!=null && map[a.ativo]!=null ? map[a.ativo] : 0;
   pararDescanso(false); a.modo=novo; save(); rerender(true);
 }
-export function concluir(){
+export async function concluir(){
   const a=E.atual, t=treino(a.letra,a.fase,a.volta ?? a.semana ?? undefined, a.modo||"completo"), falt=t.itens.length-a.feitos.length;
-  if(!confirm(falt>0 ? `Faltam ${falt} ${falt>1?"itens":"item"} sem marcar. Concluir o treino ${a.letra} assim mesmo?` : `Concluir o treino ${a.letra} e registrar ${Math.round((Date.now()-a.inicio)/6e4)} min?`)) return;
+  { const series=Object.values(a.series||{}).reduce((x,y)=>x+y,0), faltam=t.itens.filter((_,i)=>!a.feitos.includes(i)).map(x=>x.nome);
+    const resumo=`<div class="conf-resumo"><div><b>${Math.round((Date.now()-a.inicio)/6e4)}</b><span>min</span></div><div><b>${a.feitos.length}/${t.itens.length}</b><span>itens</span></div><div><b>${series}</b><span>séries</span></div></div>
+      ${faltam.length?`<p class="conf-falta">${faltam.length>3 ? `Faltam ${faltam.length} itens, entre eles ${esc(faltam.slice(0,2).join(" e "))}.` : `Faltam: ${esc(faltam.join(", "))}.`}</p>`:""}`;
+    if(!(await confirmar({ titulo:`Concluir o treino ${a.letra}?`, html:resumo, sim: faltam.length ? "Concluir assim mesmo" : "Concluir treino", nao:"Continuar treinando" }))) return; }
   if(!E.inicio){ E.inicio = hojeISO(); enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
   const fim=Date.now();

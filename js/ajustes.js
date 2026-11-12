@@ -4,7 +4,7 @@ import { E, FICHA, KEY, S, normalizarEstado, novaEtapa, save } from "./estado.js
 import { render } from "./navegacao.js";
 import { fmtKg, hojeISO, parseKg } from "./progresso.js";
 import { atualizarSyncUI, enfileirar } from "./sync.js";
-import { applyTheme, toast } from "./ui.js";
+import { applyTheme, confirmar, toast } from "./ui.js";
 import { $ } from "./util.js";
 
 /* ---------- Ajustes ---------- */
@@ -27,7 +27,7 @@ export function iniciarAjustes(){
   $("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.faseModo`, valor:E.faseModo}); render(); };
   $("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; enfileirar({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg}); render(); };
   $("#metaData").onchange=e=>{ S.meta.data=e.target.value; enfileirar({tipo:"setConfig", chave:"meta.data", valor:S.meta.data}); render(); };
-  $("#resetBtn").onclick=()=>{ if(confirm(`Apagar as sessões e a data de início da etapa ${FICHA.etapa}${S.sync.url?" também na planilha":""}? As cargas registradas na planilha continuam como histórico.`)){
+  $("#resetBtn").onclick=async()=>{ if(await confirmar({ titulo:"Recomeçar os dados da etapa?", texto:`Apagar as sessões e a data de início da etapa ${FICHA.etapa}${S.sync.url?" também na planilha":""}? As cargas registradas na planilha continuam como histórico.`, sim:"Apagar", nao:"Manter", perigo:true })){
     E.historico.forEach(x=>{ if(x.id) enfileirar({tipo:"delSessao", id:x.id}); });
     enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:""});
     S.etapas[FICHA.etapa]=novaEtapa(); save(); location.reload(); } };
@@ -41,7 +41,7 @@ export function iniciarAjustes(){
     try{
       const d=JSON.parse(await f.text());
       if(!d || typeof d!=="object" || !d.etapas || typeof d.etapas!=="object" || Array.isArray(d.etapas)) throw 0;
-      if(!confirm("Substituir os dados deste aparelho pelo backup?")) return;
+      if(!(await confirmar({ titulo:"Substituir os dados deste aparelho pelo backup?", sim:"Substituir", nao:"Cancelar", perigo:true }))) return;
       // a conexão e a fila deste aparelho são mantidas; o backup é limpo e validado como o estado salvo
       const novo=normalizarEstado({...d, sync:{...S.sync, migrado:false}, fila:S.fila});
       localStorage.setItem(KEY,JSON.stringify(novo)); location.reload();
