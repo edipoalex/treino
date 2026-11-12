@@ -24,6 +24,8 @@ export function normalizarEstado(S){
     if(!["auto","1","2"].includes(st.faseModo)) st.faseModo="auto";
     st.atual ??= null;
     if(st.atual){ st.atual.series ??= {}; st.atual.feitos ??= []; st.atual.marcas ??= {}; }
+    // fechamento da etapa (fase 3): já mostrado uma vez / pessoa escolheu continuar treinando
+    for(const k of ["fechoVisto","fechoDispensado"]) if(st[k]!==true) delete st[k];
   }
   S.peso = (Array.isArray(S.peso)?S.peso:[]).filter(pesoOk);
   S.idade = num(+S.idade) && +S.idade>0 ? +S.idade : "";
@@ -36,6 +38,7 @@ export function normalizarEstado(S){
   if(S.exec && !(num(S.exec.k) && num(S.exec.inicio) && Array.isArray(S.exec.etapas) && S.exec.etapas.every(e=>num(e?.seg)))) delete S.exec;
   if(S.livre && !(num(S.livre.k) && num(S.livre.acum ?? 0))) delete S.livre;
   if(!S.variar || typeof S.variar!=="object" || Array.isArray(S.variar)) S.variar = {};
+  if(!RX.data.test(S.revisaoVista||"")) delete S.revisaoVista; // última revisão da semana vista (segunda-feira)
   S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas" };
   S.v = ESTADO_V;
   return S;

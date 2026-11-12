@@ -10,6 +10,7 @@ import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSes
 import { enfileirar, hora } from "../sync.js";
 import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
 import { $, esc, fmtNum } from "../util.js";
+import { ligarSentir, marcoDoTreino, sentirHtml } from "./habito.js";
 import { icone } from "../icones.js";
 import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
 
@@ -283,6 +284,7 @@ export async function concluir(){
   const recs=recordesDaSessao(x, outras);
   const linhasCargas=x.itens.filter(i=>i.cs?.length).map(i=>`<li><span>${esc(i.n)}</span><span>${esc(resumoCargas(i))}</span></li>`).join("");
   E.atual=null; limparCronometros(); save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
+  const marco=marcoDoTreino(); // meta da semana, semana perfeita, metade da etapa... (depois de registrar a sessão)
   render(); scrollTo(0,0);
   folha(`<div class="linha-ic L-${esc(a.letra)}">${plate(a.letra,"sm d3")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
     <div class="stats"><div class="stat"><b data-contar="${x.duracao}">${x.duracao}</b><span>min</span></div><div class="stat"><b data-contar="${seriesFeitas}">${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b ${vol>=1000?`data-contar="${Math.round(vol/100)/10}" data-dec="1" data-suf=" t"`:`data-contar="${Math.round(vol)}" data-suf=" kg"`}>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
@@ -290,8 +292,11 @@ export async function concluir(){
     ${recs.length?`<div class="recordes"><b>${ico.trofeu} ${recs.length>1?`${recs.length} recordes`:"Recorde"}</b>${recs.map(r=>`<span>${esc([r.k, r.g].filter(Boolean).join(" · "))}: ${fmtRec(r)} <small>(antes ${fmtNum(r.antes)})</small></span>`).join("")}</div>`:""}
     ${linhasCargas?`<ul class="r-cargas">${linhasCargas}</ul>`:""}
     ${anterior?`<p class="meta">Último treino ${esc(a.letra)}: ${anterior.duracao} min (${relDia(anterior.data)}).</p>`:""}
+    ${marco.html}
+    ${sentirHtml(x.sen||"")}
     <p class="meta">Próximo da sequência: treino ${esc(proxima())}.</p>
     <button class="btn primary" data-fechar>Fechar</button>`);
-  const fr=$("#folha"); if(fr) contar(fr);
-  if(recs.length) setTimeout(confete, 450);
+  const fr=$("#folha"); if(fr){ contar(fr); ligarSentir(fr, x.id); }
+  if(recs.length || marco.m?.tipo==="perfeita") // na etapa concluída, o confete vem com o fechamento na Hoje
+    setTimeout(confete, 450);
 }

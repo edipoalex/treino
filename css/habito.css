@@ -1,0 +1,118 @@
+/* ---------- Hábito (fase 3): meta da semana, sequência, etapa, sensação, revisão e fechamento ---------- */
+
+/* Painel "Sua semana": anel da meta + sequência, dias da semana embaixo */
+.habito{display:grid;grid-template-columns:auto 1fr;gap:var(--e4);align-items:center}
+.anel-meta{position:relative;width:88px;height:88px;flex:none}
+.anel-meta > svg{width:100%;height:100%;display:block}
+.anel-meta .fundo{stroke:var(--surface-3)}
+.anel-meta .arco{stroke:var(--ink);transition:stroke-dashoffset .9s var(--e-saida)}
+.anel-meta.batida .arco{stroke:var(--ok)}
+.anel-meta .num{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
+.anel-meta .num b{font:700 var(--t-titulo) var(--display);font-variant-numeric:tabular-nums}
+.anel-meta .num small{font-size:var(--t-legenda);color:var(--muted);margin-top:2px}
+.anel-meta.batida .num b{color:var(--ok)}
+.seq{display:grid;gap:2px;min-width:0}
+.seq .linha-ic{gap:var(--e2);align-items:center}
+.seq .linha-ic .ic{width:22px;height:22px;color:var(--warn)}
+.seq.zero .linha-ic .ic{color:var(--muted)}
+.seq b{font:700 var(--t-destaque) var(--display);line-height:1.1}
+.seq p{margin:0;font-size:var(--t-sec);color:var(--muted);line-height:1.35}
+.seq p.ok{color:var(--ok)}.seq p.risco{color:var(--warn)}
+.habito + .week{margin-top:var(--e5);padding-top:var(--e4);border-top:1px solid var(--line)}
+/* chama das semanas: uma por semana, as últimas 8 */
+.chamas{display:flex;gap:3px;margin-top:var(--e2)}
+.chamas i{width:14px;height:6px;border-radius:3px;background:var(--surface-3)}
+.chamas i.sim{background:var(--warn)}
+.chamas i.agora{background:transparent;box-shadow:inset 0 0 0 1.5px var(--warn)}
+
+/* Barra da etapa: um segmento por volta (ou semana), um traço por treino; fases rotuladas em cima */
+.etapa-barra{display:grid;gap:var(--e2)}
+.etapa-barra .fases-rot{display:grid;gap:4px;font-size:var(--t-legenda);color:var(--muted)}
+.etapa-barra .fases-rot span{border-left:2px solid var(--line);padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etapa-barra .fases-rot span.atual{color:var(--ink);font-weight:600;border-color:var(--ink)}
+.etapa-barra .voltas{display:grid;gap:4px}
+.etapa-barra .volta{display:flex;gap:2px}
+.etapa-barra .volta i{flex:1;height:12px;background:var(--surface-3);border-radius:2px}
+.etapa-barra .volta i:first-child{border-radius:6px 2px 2px 6px}.etapa-barra .volta i:last-child{border-radius:2px 6px 6px 2px}
+.etapa-barra .volta i.f{background:var(--c,var(--ink))}
+.etapa-barra .volta i.prox{background:transparent;box-shadow:inset 0 0 0 2px var(--c,var(--ink));animation:prox-pulsa 1.6s ease-in-out infinite}
+@keyframes prox-pulsa{50%{opacity:.35}}
+.etapa-barra .rodape{display:flex;justify-content:space-between;gap:var(--e3);font-size:var(--t-sec);color:var(--muted)}
+.etapa-barra .rodape b{color:var(--ink);font-weight:600}
+
+/* Cartão de revisão da semana (topo da Hoje, na primeira abertura da semana) */
+.revisao{display:flex;align-items:center;gap:var(--e3);padding:var(--e2) var(--e2) var(--e2) var(--e4);border-radius:var(--r-m);background:var(--surface);box-shadow:var(--sombra-1);margin-bottom:var(--e4);color:var(--ink)}
+.revisao > .ic{width:28px;height:28px;flex:none;color:var(--ok)}
+.revisao.nao > .ic{color:var(--muted)}
+.revisao > button.flex1{min-width:0;min-height:var(--h-p);background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.revisao b{display:block;font-size:var(--t-corpo)}
+.revisao span{font-size:var(--t-sec);color:var(--muted)}
+.revisao .fechar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--muted);flex:none}
+.entrando .revisao{animation:painel .4s var(--e-saida) both}
+
+/* Como foi: 1 toque, 3 opções com um medidor de 1 a 3 barras */
+.sentir{display:grid;gap:var(--e2)}
+.sentir > p{font-weight:600}
+.sentir .ops{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--e2)}
+.sentir button{min-height:var(--h-g);border-radius:var(--r-m);border:0;background:var(--surface-2);color:var(--ink);font:600 var(--t-sec) var(--body);display:grid;justify-items:center;align-content:center;gap:6px;cursor:pointer;transition:background .2s,transform .15s}
+.sentir button[aria-pressed="true"]{background:var(--c,var(--ink));color:var(--on,var(--bg))}
+.sentir button[aria-pressed="true"] .med i.on{background:currentColor}
+.sentir .salvo{font-size:var(--t-legenda);color:var(--muted);min-height:1.2em}
+.med{display:flex;align-items:flex-end;gap:3px;height:18px}
+.med i{width:6px;border-radius:2px;background:var(--line)}
+.med i:nth-child(1){height:7px}.med i:nth-child(2){height:12px}.med i:nth-child(3){height:18px}
+.med i.on{background:var(--ink)}
+.med.facil i.on{background:var(--ok)}.med.pesado i.on{background:var(--warn)}
+
+/* Marco no resumo do treino: meta batida, sequência, metade da etapa */
+.marco{display:flex;align-items:center;gap:var(--e3);padding:var(--e3) var(--e4);border-radius:var(--r-m);background:var(--ok-bg);color:var(--ink)}
+.marco .anel-meta{width:56px;height:56px}
+.marco .anel-meta .num b{font-size:var(--t-destaque)}
+.marco b{display:block;color:var(--ok);font-size:var(--t-corpo)}
+.marco span{font-size:var(--t-sec)}
+.folha .marco{animation:zoom-entra .45s .2s var(--e-mola) both}
+
+/* Revisão da semana e fechamento da etapa (folha e tela) */
+.rev-letras{display:flex;gap:6px;flex-wrap:wrap}
+.lista-num{display:grid;margin:0;padding:0;list-style:none}
+.folha .lista-num{padding:0}
+.lista-num li{display:flex;justify-content:space-between;align-items:baseline;gap:var(--e3);padding:10px 0;border-bottom:1px solid var(--line);margin:0}
+.lista-num li:last-child{border-bottom:0}
+.lista-num li span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lista-num li span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+.lista-num li span:last-child b{color:var(--ink)}
+.lista-num .sobe{color:var(--ok)!important}
+.dist{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px}
+.dist i{display:block;min-width:4px}
+.dist .facil{background:var(--ok)}.dist .ponto{background:var(--ink-2)}.dist .pesado{background:var(--warn)}
+.dist-leg{display:flex;gap:var(--e4);flex-wrap:wrap;font-size:var(--t-legenda);color:var(--muted);margin-top:6px}
+.dist-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+
+.fecho{text-align:center;padding:var(--e6) 0 var(--e2)}
+.fecho .pilha{display:flex;justify-content:center;margin-bottom:var(--e4)}
+.fecho .pilha .plate{margin:0 -10px}
+.fecho h1{font:700 var(--t-display) var(--display);line-height:1;margin:0}
+.fecho p{color:var(--muted);margin:var(--e2) 0 0}
+.fecho-stats{grid-template-columns:repeat(2,1fr)}
+.entrando .fecho .pilha .plate{animation:pilha-cai .55s var(--e-mola) both}
+.entrando .fecho .pilha .plate:nth-child(2){animation-delay:.07s}.entrando .fecho .pilha .plate:nth-child(3){animation-delay:.14s}
+.entrando .fecho .pilha .plate:nth-child(4){animation-delay:.21s}.entrando .fecho .pilha .plate:nth-child(5){animation-delay:.28s}
+@keyframes pilha-cai{from{transform:translateY(-40px) scale(.7);opacity:0}}
+.anel-meta .num b .ic{width:30px;height:30px;stroke-width:3;display:block;margin:0 auto}
+.marco .anel-meta .num b .ic{width:22px;height:22px}
+.marco > .ic{width:32px;height:32px;color:var(--warn);flex:none}
+.marco .anel-meta .num small{display:none}
+.lista-num li{flex-wrap:wrap;row-gap:2px}
+.lista-num li span:first-child{white-space:normal;flex:1 1 9em}
+.lista-num li span:last-child{margin-left:auto}
+
+/* Histórico: sensação de cada sessão e atalhos para a revisão das semanas */
+.hist li .sen-hist{flex:none;margin-top:var(--e2);min-height:36px;min-width:40px;padding:0 10px;border-radius:var(--r-total);border:0;background:var(--surface-2);color:var(--muted);font:600 var(--t-legenda) var(--body);display:flex;width:max-content;align-items:center;gap:6px;cursor:pointer}
+.hist li .sen-hist .med{height:14px}.hist li .sen-hist .med i:nth-child(1){height:5px}.hist li .sen-hist .med i:nth-child(2){height:9px}.hist li .sen-hist .med i:nth-child(3){height:14px}
+.semanas-rev{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--e3)}
+.semanas-rev button{min-height:40px;min-width:48px;padding:0 12px;border-radius:var(--r-total);border:0;background:var(--surface-2);color:var(--ink);font:600 var(--t-legenda) var(--body);cursor:pointer}
+.semanas-rev button.ok{box-shadow:inset 0 0 0 2px var(--ok)}
+:is(.sentir button,.revisao button,.semanas-rev button,.hist li .sen-hist):focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.revisao .fechar{border:0;background:transparent;cursor:pointer}
+.anel-meta.batida .num small{font-size:11px;margin-top:1px}
+.anel-meta.batida .num b .ic{width:26px;height:26px}
