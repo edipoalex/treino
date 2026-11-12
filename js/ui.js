@@ -11,10 +11,12 @@ export function applyTheme(){
   if(S.theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",S.theme);
   document.querySelectorAll("[data-theme-opt]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.themeOpt===S.theme)));
   const dark = S.theme==="dark" || (S.theme==="auto" && matchMedia("(prefers-color-scheme: dark)").matches);
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content = dark ? "#12161B" : "#E8EBEE");
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content = dark ? "#0F1317" : "#EDEFF2");
 }
 /* ---------- UI helpers ---------- */
 /* Anilha do treino: 3D nas grandes ("md" ou "d3"), de frente nas pequenas (js/anilha.js) */
+/* Estado vazio: ícone, título curto e o que fazer (texto) */
+export const vazio = (ic, titulo, texto="") => `<div class="vazio">${icone(ic)}<b>${esc(titulo)}</b>${texto?`<p>${esc(texto)}</p>`:""}</div>`;
 export const plate = (l, cls="") => { const d3=/\b(md|d3)\b/.test(cls);
   return `<div class="plate anilha ${d3?"d3":""} L-${esc(l)} ${cls}" aria-hidden="true">${anilhaSVG(l, { d3, detalhada: /\bmd\b/.test(cls), texto: !/\bsemtexto\b/.test(cls) })}</div>`; };
 export let toastT;
@@ -26,10 +28,11 @@ export function header(){
   $("#brandTxt").textContent = `Etapa ${FICHA.etapa}`;
   if(porVoltas()){
     const n=Math.min(feitosEtapa()+1, totalTreinos());
-    $("#weekLbl").textContent = `treino ${n}/${totalTreinos()} · volta ${E.atual?.volta ?? voltaAtual()} · fase ${E.atual?.fase ?? faseAtual()}`;
+    // volta e fase continuam na Ficha e no Guia; no topo, só o avanço na etapa
+    $("#weekLbl").textContent = `treino ${n} de ${totalTreinos()}`;
   } else {
     const sem = semanaAtual();
-    $("#weekLbl").textContent = sem>FICHA.semanas ? `semana ${sem} de ${FICHA.semanas}` : `semana ${sem} de ${FICHA.semanas}, fase ${faseAtual()}`;
+    $("#weekLbl").textContent = `semana ${sem} de ${FICHA.semanas}`;
   }
 }
 /* ---------- Tela sempre ligada durante o treino ---------- */

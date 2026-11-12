@@ -64,6 +64,11 @@ Tela de fases (cardio e, com descanso em tela cheia, isometria): cor por fase (f
 leve verde, desaquecimento azul, zona 2 verde-azulado), avisos ACELERE!/DESACELERE com bipes e vibração,
 pausar, pular fase e minimizar (o cartão ou o botão vira o indicador da fase).
 
+## Fundação visual
+- Medidas e cores só por tokens (`css/tokens.css`, cores em `css/base.css`); nada de tamanho solto nem estilo inline.
+- Seções com título forte acima do cartão; estados vazios com ícone, frase e próximo passo; botões em 4 variantes.
+- Toda mudança visual confere as capturas (`scripts/capturas.mjs`) nos dois temas e nos modos lista e foco.
+
 ## Tela Hoje, visual e dados
 - Card do treino com anilha 3D em marca d'água; tocar vira e mostra os exercícios; anilhas A–E para escolher.
 - Anilhas: 3D nas grandes, de frente com a letra no cubo nas pequenas (`anilha.js`); ícone do app gerado por `scripts/gerar-icone.mjs`.

@@ -58,13 +58,13 @@ function fimDescanso(T){
 export function abrirTelaDescanso(){
   $("#descanso")?.remove(); const T=S.timer, a=E.atual; if(!T || !a) return;
   const C=2*Math.PI*104, d=document.createElement("div"); d.className=`descanso L-${a.letra}`; d.id="descanso";
-  d.innerHTML=`<p class="meta" style="align-self:flex-start;font-size:18px">Descanso</p>
+  d.innerHTML=`<p class="auto-inicio tx-destaque meta">Descanso</p>
     <svg class="anel" viewBox="0 0 240 240" role="timer" aria-label="Tempo de descanso"><circle cx="120" cy="120" r="104" fill="none" stroke="var(--line)" stroke-width="16"/>
     <circle id="dArc" cx="120" cy="120" r="104" fill="none" stroke="var(--c)" stroke-width="16" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
     <text id="dTxt" x="120" y="138" text-anchor="middle" font-size="64">${fmtSeg((T.fim-Date.now())/1000)}</text></svg>
     ${T.prox?`<p class="meta">Próxima</p><p class="prox" id="dProx">${esc(T.prox)}</p>`:""}
-    <div id="dCarga" style="width:100%;max-width:608px">${cargaProxima()}</div>
-    <div class="acoes"><div class="linha2" style="margin:0"><button class="btn" data-d="-15">−15 s</button><button class="btn" data-d="15">+15 s</button></div>
+    <div id="dCarga" class="largura-max">${cargaProxima()}</div>
+    <div class="acoes"><div class="m-0 linha2"><button class="btn" data-d="-15">−15 s</button><button class="btn" data-d="15">+15 s</button></div>
     <button class="btn" data-d="pular">Pular descanso</button></div>`;
   d.onclick=e=>{
     const p=e.target.closest("[data-passo]"); if(p){ if(consumirRepeticao()) return; return ajustarProxima(p.dataset.passo); }

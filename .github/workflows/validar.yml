@@ -23,3 +23,10 @@ jobs:
         run: node --test tests/*.test.js
       - name: Testes do Apps Script (planilha simulada)
         run: node scripts/testar-planilha.mjs
+      - name: Capturas das telas (teste visual)
+        run: node scripts/capturas.mjs capturas
+      - name: Guardar as capturas
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-das-telas
+          path: capturas/*.png

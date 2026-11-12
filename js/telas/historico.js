@@ -2,7 +2,7 @@ import { E, FICHA, LETRAS, S, save } from "../estado.js";
 import { render } from "../navegacao.js";
 import { DIA, addPeso, fmtData, fmtKg, freqAlvo, hojeISO, minutos, parseISO, parseKg, pesoSemanal, segundaDe, semanaAtual, semanaDaEtapa, totalMin, treino } from "../progresso.js";
 import { enfileirar } from "../sync.js";
-import { confirmar, plate, toast } from "../ui.js";
+import { confirmar, plate, toast, vazio } from "../ui.js";
 import { $, esc } from "../util.js";
 import { icone } from "../icones.js";
 import { fmtRec, fmtVolume, maximos, temCargas, volumeSessao } from "../metricas.js";
@@ -49,7 +49,7 @@ export function chartPeso(){
   <div class="legend"><span><i class="l"></i>Média semanal</span>${meta?`<span><i></i>Meta ${fmtKg(meta)} kg</span>`:""}${meta&&mData?`<span><i class="p"></i>Ritmo necessário</span>`:""}</div>`;
 }
 export function resumoPeso(){
-  const sem=pesoSemanal(); if(!sem.length) return `<p class="meta">Registre o peso uma vez por semana para ver a evolução.</p>`;
+  const sem=pesoSemanal(); if(!sem.length) return vazio("calendar-days","A evolução do peso aparece aqui","Registre o peso uma vez por semana.");
   const ult=sem[sem.length-1], pri=sem[0], meta=parseKg(S.meta.kg);
   const semanas=(parseISO(ult.semana)-parseISO(pri.semana))/DIA/7;
   const ritmo= semanas>0 ? (ult.kg-pri.kg)/semanas : null;
@@ -59,7 +59,7 @@ export function resumoPeso(){
     if(S.meta.data){ const rest=(parseISO(S.meta.data)-parseISO(hojeISO()))/DIA/7; if(rest>0) falta+=`. Ritmo necessário: ${fmtKg((ult.kg-meta)/rest)} kg/semana`; }
   } else if(meta) falta=`Meta atingida`;
   return `<div class="big"><b>${fmtKg(ult.kg)} kg</b>${sem.length>1?`<span class="delta ${ult.kg<=pri.kg?"down":"up"}">${ult.kg>pri.kg?"+":""}${fmtKg(ult.kg-pri.kg)} kg no total</span>`:""}</div>
-    <p class="meta" style="margin-top:6px">${ritmo!==null?`Média de ${ritmo>0?"+":""}${fmtKg(ritmo)} kg/semana. `:""}${falta}</p>`;
+    <p class="mt-2 meta">${ritmo!==null?`Média de ${ritmo>0?"+":""}${fmtKg(ritmo)} kg/semana. `:""}${falta}</p>`;
 }
 export let verTodas=false;
 /* Métricas de tempo: real x estimado, por treino e por exercício */
@@ -88,22 +88,22 @@ export function metricasTempo(){
 export function painelTempo(){
   const {porLetra, porEx}=metricasTempo();
   const letras=LETRAS.filter(l=>porLetra[l]);
-  if(!letras.length) return `<section class="panel"><h3>Tempo de execução</h3><p class="meta">Conclua treinos marcando os exercícios para ver o tempo real comparado ao estimado.</p></section>`;
-  const dif=(r,e)=>{ const d=r-e; return `<span class="delta ${d>2?"up":d<-2?"down":""}" style="${Math.abs(d)<=2?"color:var(--muted)":""}">${d>0?"+":""}${Math.round(d)} min</span>`; };
+  if(!letras.length) return `<section class="panel"><h3>Tempo de execução</h3>${vazio("clock","Tempo real × estimado","Conclua treinos marcando os exercícios.")}</section>`;
+  const dif=(r,e)=>{ const d=r-e; return `<span class="delta ${d>2?"up":d<-2?"down":"neutro"}">${d>0?"+":""}${Math.round(d)} min</span>`; };
   const linhas=letras.map(l=>{ const L=porLetra[l], r=L.real/L.n, e=L.est/L.n;
-    return `<div class="trow"><span class="t" style="display:flex;align-items:center;gap:10px">${plate(l,"xs")} ${L.n} ${L.n>1?"sessões":"sessão"}</span><span class="min">${Math.round(r)} min</span>
+    return `<div class="trow"><span class="linha-ic t">${plate(l,"xs")} ${L.n} ${L.n>1?"sessões":"sessão"}</span><span class="min">${Math.round(r)} min</span>
       <span class="m">Estimado ${Math.round(e)} min · ${dif(r,e)}</span></div>`; }).join("");
   const ordem=(l,n)=>{ for(const f of Object.keys(FICHA.fases)){ const i=(FICHA.fases[f][l]?.itens||[]).findIndex(it=>it.nome===n); if(i>=0) return i; } return 99; };
   const fmt1=v=>v.toFixed(1).replace(".",",");
   const exHtml = letras.map(l=>{
     const exs=Object.values(porEx).filter(x=>x.letra===l && x.n>0).map(x=>({...x, r:x.real/x.n})).sort((a,b)=>ordem(l,a.nome)-ordem(l,b.nome));
     if(!exs.length) return "";
-    return `<details style="margin-top:10px;border:1px solid var(--line)"><summary style="font-size:15px;gap:10px;justify-content:flex-start">${plate(l,"xs")}<span style="flex:1">Treino ${l} por exercício</span></summary><div class="dbody">
-      ${exs.map(x=>`<div class="trow" style="padding:10px 0"><span class="t" style="font-weight:500">${esc(x.nome)}</span><span class="min" style="font-size:16px">${fmt1(x.r)} min</span>
+    return `<details class="mt-3 com-linha"><summary class="tx-sec resumo-ini">${plate(l,"xs")}<span class="flex1">Treino ${l} por exercício</span></summary><div class="dbody">
+      ${exs.map(x=>`<div class="py-3 trow"><span class="normal t">${esc(x.nome)}</span><span class="tx-corpo min">${fmt1(x.r)} min</span>
         <span class="m">Estimado ${fmt1(x.est)} min · ${dif(x.r,x.est).replace(/ min</," min<")} · ${x.n} ${x.n>1?"sessões":"sessão"}</span></div>`).join("")}</div></details>`;
-  }).join("") + (Object.keys(porEx).length?`<p class="meta" style="font-size:13px;margin-top:10px">Por exercício: tempo entre a marcação anterior (ou o início do treino) e a deste, incluindo descansos e trocas de aparelho.</p>`:"");
+  }).join("") + (Object.keys(porEx).length?`<p class="tx-legenda mt-3 meta">Por exercício: tempo entre a marcação anterior (ou o início do treino) e a deste, incluindo descansos e trocas de aparelho.</p>`:"");
   return `<section class="panel" aria-labelledby="hTempo"><h3 id="hTempo">Tempo de execução <span class="sub2">real × estimado</span></h3>
-    <div class="table" style="margin-top:4px">${linhas}</div>${exHtml}</section>`;
+    <div class="mt-1 table">${linhas}</div>${exHtml}</section>`;
 }
 /* Volume dos últimos treinos com carga registrada por série, na cor da letra */
 export function chartVolume(){
@@ -123,10 +123,10 @@ let verRecordes=false;
 export function painelRecordes(){
   const todas=Object.values(S.etapas).flatMap(e=>e.historico||[]);
   const rs=Object.values(maximos(todas)).sort((a,b)=>b.data.localeCompare(a.data) || a.k.localeCompare(b.k));
-  if(!rs.length) return `<section class="panel"><h3>Recordes de carga</h3><p class="meta">Os recordes aparecem conforme você registra séries com carga.</p></section>`;
+  if(!rs.length) return `<section class="panel"><h3>Recordes de carga</h3>${vazio("trophy","Seus recordes aparecem aqui","Registre as cargas das séries no próximo treino.")}</section>`;
   const lista=rs.slice(0, verRecordes?rs.length:6);
-  return `<section class="panel" aria-labelledby="hRec" style="padding-bottom:8px"><h3 id="hRec">Recordes de carga</h3>
-    <ul class="r-cargas">${lista.map(r=>`<li><span>${esc([r.k, r.g].filter(Boolean).join(" · "))}</span><span><b style="color:var(--ink)">${fmtRec(r)}</b> · ${r.data===hojeISO()?"hoje":fmtData(r.data)}</span></li>`).join("")}</ul>
+  return `<section class="pb-2 panel" aria-labelledby="hRec"><h3 id="hRec">Recordes de carga</h3>
+    <ul class="r-cargas">${lista.map(r=>`<li><span>${esc([r.k, r.g].filter(Boolean).join(" · "))}</span><span><b class="tx-tinta">${fmtRec(r)}</b> · ${r.data===hojeISO()?"hoje":fmtData(r.data)}</span></li>`).join("")}</ul>
     ${rs.length>6?`<button class="btn ghost block" id="verRecordes">${verRecordes?"Mostrar menos":`Ver todos os ${rs.length} recordes`}</button>`:""}</section>`;
 }
 
@@ -148,7 +148,7 @@ export function viewHistorico(){
   </div>
 
   <section class="panel" aria-labelledby="hFreq"><h3 id="hFreq">Frequência por semana <span class="sub2">meta ${alvo.min}–${alvo.max}</span></h3>
-    ${E.historico.length||E.inicio ? chartFreq() : `<p class="meta">Conclua treinos na aba Hoje para ver a frequência.</p>`}
+    ${E.historico.length||E.inicio ? chartFreq() : vazio("calendar-days","A frequência aparece aqui","Conclua o primeiro treino na aba Hoje.")}
   </section>
 
   <section class="panel" aria-labelledby="hPeso"><h3 id="hPeso">Peso</h3>
@@ -160,19 +160,19 @@ export function viewHistorico(){
       <button class="btn primary" id="pAdd">Registrar</button>
     </div>
     ${ultimos.length?`<ul class="weigh-list">${ultimos.map(p=>`<li><span>${fmtData(p.d)}</span><strong>${fmtKg(p.kg)} kg</strong><button data-del="${esc(p.d)}" aria-label="Apagar registro de ${fmtData(p.d)}">${icone("x")}</button></li>`).join("")}</ul>`:""}
-    ${!parseKg(S.meta.kg)?`<p class="meta" style="margin-top:10px;font-size:14px">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
+    ${!parseKg(S.meta.kg)?`<p class="mt-3 tx-sec meta">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
   </section>
 
   ${painelRecordes()}
   ${chartVolume()}
   ${painelTempo()}
 
-  <section class="panel" aria-labelledby="hSes" style="padding-bottom:8px"><h3 id="hSes">Sessões</h3>
-  ${h.length ? `<ul class="hist" style="margin-top:0">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}${x.modo==="express"?" · express":""}, ${fmtData(x.data)}</strong>
+  <section class="pb-2 panel" aria-labelledby="hSes"><h3 id="hSes">Sessões</h3>
+  ${h.length ? `<ul class="mt-0 hist">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}${x.modo==="express"?" · express":""}, ${fmtData(x.data)}</strong>
     <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens${temCargas(x)&&volumeSessao(x)?`, ${fmtVolume(volumeSessao(x))}`:""}. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
-    ${i===0?`<button class="btn" id="undoBtn" style="min-height:44px">Desfazer</button>`:""}</li>`).join("")}</ul>`
-  : `<p class="empty" style="padding:16px 8px">Nenhum treino registrado nesta etapa.</p>`}
-  ${h.length>8?`<button class="btn ghost block" id="verTodas" style="margin-top:8px">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
+    ${i===0?`<button class="alt-p btn" id="undoBtn">Desfazer</button>`:""}</li>`).join("")}</ul>`
+  : vazio("dumbbell","Nenhum treino nesta etapa ainda","Os treinos concluídos aparecem aqui.")}
+  ${h.length>8?`<button class="mt-2 btn ghost block" id="verTodas">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
   </section>`;
   $("#verRecordes") && ($("#verRecordes").onclick=()=>{ verRecordes=!verRecordes; const y=scrollY; render(); scrollTo(0,y); });
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });

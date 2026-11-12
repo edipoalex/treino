@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- Usado por scripts/capturas.mjs: prepara um estado de exemplo, abre o app num iframe do tamanho de um
+     celular e leva a uma tela. Parâmetros: ?tela=hoje|ficha|historico|guia|lista|foco|concluir&tema=dark|light -->
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#000}iframe{width:390px;height:844px;border:0;display:block}</style></head>
+<body><iframe id="app"></iframe><script>
+const q=new URLSearchParams(location.search), tela=q.get("tela")||"hoje", tema=q.get("tema")||"dark";
+const hoje=new Date(), iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10), dia=n=>iso(new Date(hoje.getTime()-n*864e5));
+const sessao=(n,letra,id)=>({id, letra, fase:"2", semana:2, data:dia(n), duracao:52, feitos:8, total:8, inicio:"12:05", fim:"12:57", modo:"completo", volta:2, numero:id.length,
+  itens:[{n:"Supino reto com barra", t:600, e:660, s:5, sp:5, cs:[{r:"6",g:"pesado",c:[{k:"Supino reto com barra",v:"80",u:"kg"}]},{r:"20",g:"leve",c:[{k:"Supino reto com barra",v:"50",u:"kg"}]}]}]});
+const estado={ v:2, theme:tema, pref:{modo: tela==="foco"?"foco":"lista", descanso:"botao", animacoes:"reduzidas"}, peso:[{d:dia(14),kg:84.6},{d:dia(7),kg:84.1},{d:dia(1),kg:83.7}], meta:{kg:80,data:""}, idade:40,
+  sync:{url:"",k:"",migrado:false,ultimo:0,erro:""}, fila:[], variar:{},
+  etapas:{ "19":{ inicio:dia(16), faseModo:"auto", cargas:{"Supino reto com barra · pesado":{v:"80",u:"kg",d:dia(4)},"Supino reto com barra · leve":{v:"50",u:"kg",d:dia(4)}},
+    historico:[sessao(9,"D","s1"),sessao(6,"E","s2"),sessao(4,"A","s3"),sessao(2,"B","s4")], atual:null } } };
+localStorage.setItem("treino-app-v1", JSON.stringify(estado));
+localStorage.setItem("treino-entradas", JSON.stringify({d:new Date().toLocaleDateString("sv"), a:["hoje","ficha","historico","guia"]}));
+const f=document.getElementById("app"); f.src="../../index.html?captura=1";
+f.onload=()=>{ const w=f.contentWindow, d=w.document, $=s=>d.querySelector(s), passo=(ms,fn)=>setTimeout(fn,ms);
+  passo(400,()=>{
+    if(["ficha","historico","guia"].includes(tela)) $(`.tab[data-tab="${tela}"]`)?.click();
+    if(["lista","foco","concluir"].includes(tela)){ $("#startBtn")?.click();
+      passo(300,()=>{ const it=[...d.querySelectorAll("[data-item]")][1]; it?.click();
+        if(tela==="foco") [...d.querySelectorAll('[data-navega="1"]')][0]?.click();
+        if(tela==="concluir") passo(200,()=>$("#finishBtn")?.click()); }); }
+  });
+};
+</script></body></html>

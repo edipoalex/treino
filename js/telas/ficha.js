@@ -17,11 +17,11 @@ export function viewFicha(){
   <div class="seg" role="group" aria-label="Fase">
     ${Object.keys(FICHA.fases).map(f=>`<button data-fase="${f}" aria-pressed="${f===nav.fichaFase}">Fase ${f} (${sem[f].length>1?`${un[1]} ${sem[f][0]}–${sem[f][sem[f].length-1]}`:`${un[0]} ${sem[f][0]}`})</button>`).join("")}
   </div>
-  ${FICHA.fases[nav.fichaFase][nav.fichaLetra].express?`<div class="seg" role="group" aria-label="Versão" style="margin-top:10px">${["completo","express"].map(m=>`<button data-fmodo="${m}" aria-pressed="${fichaModo===m}">${m==="completo"?"Completo":"Express"}</button>`).join("")}</div>`:""}
+  ${FICHA.fases[nav.fichaFase][nav.fichaLetra].express?`<div class="mt-3 seg" role="group" aria-label="Versão">${["completo","express"].map(m=>`<button data-fmodo="${m}" aria-pressed="${fichaModo===m}">${m==="completo"?"Completo":"Express"}</button>`).join("")}</div>`:""}
   <div class="letters" role="group" aria-label="Treino">${LETRAS.map(l=>`<button data-l="${l}" aria-pressed="${l===nav.fichaLetra}" aria-label="Treino ${l}">${plate(l,"sm")}</button>`).join("")}</div>
-  <p class="meta" style="margin-top:8px"><strong style="color:var(--ink)">Treino ${nav.fichaLetra}:</strong> ${esc(t.foco)}</p>
+  <p class="mt-2 meta"><strong class="tx-tinta">Treino ${nav.fichaLetra}:</strong> ${esc(t.foco)}</p>
   <div class="table">
-    ${t.itens.map(it=>`<div class="trow"><span class="t">${esc(it.nome)}${voltasDo(it)&&voltasDo(it).length?` <span class="chip" style="margin-left:4px">${semTxt(voltasDo(it))}</span>`:""}</span><span class="min">${fmtMin(minutos(it))}</span>
+    ${t.itens.map(it=>`<div class="trow"><span class="t">${esc(it.nome)}${voltasDo(it)&&voltasDo(it).length?` <span class="ml-1 chip">${semTxt(voltasDo(it))}</span>`:""}</span><span class="min">${fmtMin(minutos(it))}</span>
       <span class="m">${esc(it.prescricao)}${it.series?`. Descanso ${it.descanso}s`:""}${it.obs?`. ${esc(it.obs)}`:""}</span></div>`).join("")}
     <div class="total"><span>Tempo estimado da sessão</span><span class="min">${fmtMin(totalMin(t))}</span></div>
   </div>`;
