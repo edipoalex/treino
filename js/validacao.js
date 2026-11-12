@@ -1,4 +1,5 @@
 /* ---------- Validação (dados vindos da planilha ou de backup) ---------- */
+import { sensacaoOk } from "./habito.js";
 export const RX = { data:/^\d{4}-\d{2}-\d{2}$/, letra:/^[A-Z]$/, fase:/^\d{1,2}$/, hora:/^\d{1,2}[:h]\d{2}$/, id:/^[\w.-]{1,64}$/ };
 export const UNIDS = ["kg","placas","livre"];
 export const num = v => typeof v==="number" && isFinite(v);
@@ -49,6 +50,7 @@ export function limparSessao(x){
   for(const k of ["semana","duracao","volta","numero"]) if(!vazio(s[k]) && !num(s[k])) delete s[k];
   for(const k of ["feitos","total"]) if(!num(s[k])) s[k]=0;
   if(s.modo!=="completo" && s.modo!=="express") delete s.modo;
+  if(!sensacaoOk(s.sen)) delete s.sen; // "como foi" (fase 3)
   if(!Array.isArray(s.itens)) delete s.itens; else s.itens=s.itens.filter(i=>i && typeof i.n==="string");
   return s;
 }

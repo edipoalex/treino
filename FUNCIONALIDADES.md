@@ -64,6 +64,24 @@ Tela de fases (cardio e, com descanso em tela cheia, isometria): cor por fase (f
 leve verde, desaquecimento azul, zona 2 verde-azulado), avisos ACELERE!/DESACELERE com bipes e vibração,
 pausar, pular fase e minimizar (o cartão ou o botão vira o indicador da fase).
 
+## Hábito (fase 3)
+
+Tudo vem da ficha e do histórico; nada é fixo de uma etapa. Cálculos em `js/habito.js` (testados em
+`tests/habito.test.js`), telas em `js/telas/habito.js`, estilos em `css/habito.css`.
+
+| Funcionalidade | O que ativa | Onde |
+|---|---|---|
+| Meta da semana (anel) | `frequencia` da ficha ("4–5x" → mínimo 4, máximo 5; os gomos além do mínimo são bônus) | Hoje › Sua semana |
+| Sequência de semanas | Semanas seguidas (seg a dom) com a meta mínima, contando entre etapas. A semana em andamento só quebra quando não dá mais (em pausa); "em risco" quando faltam tantos treinos quanto dias | Hoje › Sua semana |
+| Barra da etapa | `progressao` (um bloco por volta) ou `semanas` × máximo da frequência (um bloco por semana); fases de `fases_voltas` ou `fases_semanas` | Hoje › Etapa N |
+| Como foi (leve, no ponto, pesado) | Um toque no resumo do treino; opcional, pode ser marcado ou trocado depois no Histórico. Vai para a planilha como `setConfig` `sensacao.<id da sessão>` (aba Config), sem mudar o Apps Script | Resumo do treino, Histórico |
+| Marco ao concluir | Meta batida, semana perfeita, metade da etapa, última volta (só fichas por voltas), etapa concluída | Resumo do treino |
+| Revisão da semana | Cartão na Hoje na semana seguinte (uma vez; tocar abre, X dispensa) e pílulas S1, S2… no Histórico | Folha da revisão |
+| Fechamento da etapa | Etapa completa ou prazo (`limite_semanas`, ou `semanas`) passado: a Hoje mostra resultados, evolução de carga, como foi e peso; copia um resumo para o agente; "Treinar enquanto a nova ficha não chega" volta à Hoje normal | Hoje |
+
+Em todos os modos: o resumo do treino é o mesmo em lista e foco; treino express conta igual para a meta; com
+animações reduzidas não há confete nem o traço do próximo treino piscando; em 320 px nada rola para o lado.
+
 ## Fundação visual
 - Medidas e cores só por tokens (`css/tokens.css`, cores em `css/base.css`); nada de tamanho solto nem estilo inline.
 - Seções com título forte acima do cartão; estados vazios com ícone, frase e próximo passo; botões em 4 variantes.

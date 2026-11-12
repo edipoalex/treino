@@ -6,6 +6,8 @@ import { confirmar, plate, toast, vazio } from "../ui.js";
 import { $, esc } from "../util.js";
 import { icone } from "../icones.js";
 import { fmtRec, fmtVolume, maximos, temCargas, volumeSessao } from "../metricas.js";
+import { abrirSensacao, ligarRevisao, medidorSen, semanasRevisao } from "./habito.js";
+import { SENSACOES } from "../habito.js";
 
 export function chartFreq(){
   const alvo=freqAlvo(), atual=semanaAtual();
@@ -148,7 +150,7 @@ export function viewHistorico(){
   </div>
 
   <section class="panel" aria-labelledby="hFreq"><h3 id="hFreq">Frequência por semana <span class="sub2">meta ${alvo.min}–${alvo.max}</span></h3>
-    ${E.historico.length||E.inicio ? chartFreq() : vazio("calendar-days","A frequência aparece aqui","Conclua o primeiro treino na aba Hoje.")}
+    ${E.historico.length||E.inicio ? chartFreq() + semanasRevisao() : vazio("calendar-days","A frequência aparece aqui","Conclua o primeiro treino na aba Hoje.")}
   </section>
 
   <section class="panel" aria-labelledby="hPeso"><h3 id="hPeso">Peso</h3>
@@ -169,11 +171,17 @@ export function viewHistorico(){
 
   <section class="pb-2 panel" aria-labelledby="hSes"><h3 id="hSes">Sessões</h3>
   ${h.length ? `<ul class="mt-0 hist">${h.slice(0, verTodas?h.length:8).map((x,i)=>`<li>${plate(x.letra,"sm")}<div class="info"><strong>Treino ${x.letra}${x.modo==="express"?" · express":""}, ${fmtData(x.data)}</strong>
-    <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens${temCargas(x)&&volumeSessao(x)?`, ${fmtVolume(volumeSessao(x))}`:""}. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span></div>
+    <span>${x.inicio&&x.fim?`${esc(x.inicio)}–${esc(x.fim)}, `:""}${x.duracao?`${x.duracao} min, `:""}${x.feitos} de ${x.total} itens${temCargas(x)&&volumeSessao(x)?`, ${fmtVolume(volumeSessao(x))}`:""}. Fase ${esc(x.fase)}, ${x.volta?`volta ${esc(x.volta)}`:`semana ${semanaDaEtapa(x.data) ?? x.semana}`}</span>
+    <button class="sen-hist" data-sen-id="${esc(x.id||"")}" aria-label="Como foi: ${x.sen?SENSACOES[x.sen]:"não marcado"}. Tocar para marcar">${x.sen?`${medidorSen(x.sen)}${SENSACOES[x.sen]}`:"Como foi?"}</button></div>
     ${i===0?`<button class="alt-p btn" id="undoBtn">Desfazer</button>`:""}</li>`).join("")}</ul>`
   : vazio("dumbbell","Nenhum treino nesta etapa ainda","Os treinos concluídos aparecem aqui.")}
   ${h.length>8?`<button class="mt-2 btn ghost block" id="verTodas">${verTodas?"Mostrar menos":`Ver todas as ${h.length} sessões`}</button>`:""}
   </section>`;
+  ligarRevisao($("#view"));
+  document.querySelectorAll("[data-sen-id]").forEach(b=>b.onclick=()=>{
+    const x=E.historico.find(y=>y.id===b.dataset.senId); if(!x) return toast("Este treino ainda não tem identificação; sincronize e tente de novo");
+    abrirSensacao(x, ()=>{ const y=scrollY; render(); scrollTo(0,y); });
+  });
   $("#verRecordes") && ($("#verRecordes").onclick=()=>{ verRecordes=!verRecordes; const y=scrollY; render(); scrollTo(0,y); });
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
   $("#undoBtn") && ($("#undoBtn").onclick=async()=>{ if(await confirmar({ titulo:"Remover o último treino registrado?", texto:"Some também da planilha.", sim:"Remover", nao:"Manter", perigo:true })){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});

@@ -19,7 +19,7 @@
 .ml-auto{margin-left:auto}.flex1{flex:1;min-width:0}.centro{text-align:center}
 .linha-ic{display:flex;align-items:center;gap:var(--e3)}
 .tx-legenda{font-size:var(--t-legenda)}.tx-sec{font-size:var(--t-sec)}.tx-corpo{font-size:var(--t-corpo)}.tx-destaque{font-size:var(--t-destaque)}
-.tx-tinta{color:var(--ink)}.tx-alerta{color:var(--warn)}.forte{font-weight:600}.normal{font-weight:500}
+.tx-tinta{color:var(--ink)}.tx-alerta{color:var(--warn)}.tx-ok{color:var(--ok)}.forte{font-weight:600}.normal{font-weight:500}
 .ml-1{margin-left:var(--e1)}.mb-3{margin-bottom:var(--e3)}.pb-2{padding-bottom:var(--e2)}.py-3{padding:var(--e3) 0}
 .itens-fim{align-items:flex-end;gap:var(--e4)}.auto-inicio{align-self:flex-start}.largura-max{width:100%;max-width:608px}
 .alt-p{min-height:var(--h-p)}.alt-m{min-height:var(--h-m)}.esp-2{height:var(--e2)}

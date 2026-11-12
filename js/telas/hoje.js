@@ -7,11 +7,15 @@ import { icone } from "../icones.js";
 import { movimentoOk } from "../movimento.js";
 import { limparCronometros } from "../execucao.js";
 import { $, esc } from "../util.js";
+import { cartaoRevisao, etapaEncerrada, ligarFechamento, ligarRevisao, painelEtapa, painelSemana, viewFechamento } from "./habito.js";
 
 /* ---------- Views ---------- */
 let escolha = null;
 export function viewHoje(){
   if(E.atual) return viewSessao();
+  const encerrada = etapaEncerrada();
+  // fim da etapa: a Hoje vira o fechamento até a pessoa escolher continuar treinando
+  if(encerrada && !E.fechoDispensado){ $("#view").innerHTML = viewFechamento(); ligarFechamento(); return; }
   const feito = feitoHoje();
   const letra = escolha || proxima();
   const t = treino(letra);
@@ -26,7 +30,7 @@ export function viewHoje(){
   const titulo = feito && !escolha ? "Próximo treino" : (escolha && escolha!==proxima() ? "Treino escolhido" : "Treino de hoje");
   const seq = proxima();
   const qtd = `${t.itens.length} ${t.itens.length>1?"exercícios":"exercício"}`;
-  $("#view").innerHTML = `
+  $("#view").innerHTML = `${cartaoRevisao()}
   <section class="hoje-card marcado L-${esc(letra)}" id="cardHoje" role="button" tabindex="0" aria-expanded="${!!verPrevia}"
     aria-label="Treino ${esc(letra)}: toque para ${verPrevia?"voltar":"ver os exercícios"}">
     <div class="marca" aria-hidden="true">${plate(letra,"md semtexto")}</div>
@@ -42,14 +46,16 @@ export function viewHoje(){
     </div>
   </section>
   ${feito ? `<p class="done-today">Treino ${esc(feito.letra)} concluído hoje. Este é o próximo da sequência.</p>` : ""}
-  ${aviso ? `<p class="tx-alerta done-today">${aviso}</p>` : ""}
+  ${aviso ? `<p class="tx-alerta done-today">${aviso}${encerrada?` <button class="btn-link" id="verFecho">Ver o fechamento</button>`:""}</p>` : ""}
   <div class="escolher" role="group" aria-label="Escolher outro treino">${LETRAS.map(l=>`<button aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}<span>${l===seq?"próximo":"&nbsp;"}</span></button>`).join("")}</div>
   <div class="mt-3 stack">
     <button class="btn primary cor grande block L-${esc(letra)}" id="startBtn">${icone("play")} Iniciar treino</button>
   </div>
-  ${semanaPanel()}
+  ${painelSemana()}
+  ${painelEtapa()}
   ${pesoPanel()}`;
-  bindPeso();
+  bindPeso(); ligarRevisao($("#view"));
+  $("#verFecho") && ($("#verFecho").onclick = () => { E.fechoDispensado=false; save(); render(); scrollTo(0,0); });
   $("#startBtn").onclick = () => iniciar(letra);
   const card=$("#cardHoje");
   card.onclick = () => virarCard(card);
@@ -110,25 +116,6 @@ export function bindPeso(){
     addPeso(hojeISO(), kg); pesoEditando=false; toast(`Peso registrado: ${fmtKg(kg)} kg`); render();
   };
   if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") bt.click(); };
-}
-export function semanaPanel(){
-  const hoje = parseISO(hojeISO());
-  const dow = (hoje.getDay()+6)%7; // segunda=0
-  const seg = new Date(hoje - dow*DIA);
-  const nomes = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
-  let feitos = 0;
-  const dias = nomes.map((n,i)=>{
-    const d = new Date(seg.getTime()+i*DIA); d.setHours(0,0,0,0);
-    const iso = new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
-    const h = E.historico.filter(x=>x.data===iso).pop();
-    if(h) feitos++;
-    return `<div class="d ${i===dow?"today":""}">${h?plate(h.letra,"xs"):`<span class="slot"></span>`}<span>${n}</span></div>`;
-  }).join("");
-  const u=ultimo(), durs=E.historico.filter(x=>x.duracao>0).map(x=>x.duracao);
-  const media=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):null;
-  const rodape=[u?`Último: treino ${esc(u.letra)}, ${relDia(u.data)}`:"", media?`média de ${media} min`:""].filter(Boolean).join(" · ");
-  return `<section class="panel" aria-label="Semana atual"><h3>Esta semana<span class="sub2">${feitos} de ${freqAlvo().max} treinos</span></h3><div class="week">${dias}</div>
-    ${rodape?`<p class="mt-3 tx-sec meta">${rodape}</p>`:""}</section>`;
 }
 export function iniciar(letra){
   limparCronometros();

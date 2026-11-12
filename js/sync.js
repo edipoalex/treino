@@ -4,6 +4,7 @@ import { FICHA_EMBUTIDA } from "./ficha-atual.js";
 import { render } from "./navegacao.js";
 import { confirmar, toast } from "./ui.js";
 import { $, esc } from "./util.js";
+import { chaveSen, sensacaoOk } from "./habito.js";
 import { RX, cmpFicha, limparSessao, num, pesoOk, unidOk, validarFicha, vazio } from "./validacao.js";
 
 /* ---------- Sincronização com a planilha ---------- */
@@ -20,6 +21,7 @@ export function migrar(rem){
     (st.historico||[]).forEach((x,i)=>{
       x.id ??= `${x.data}-${x.letra}-${String(x.inicio||i).replace(/\W/g,"")}`; // estável entre aparelhos quando há horário
       if(!ids.has(x.id)) ops.push({tipo:"addSessao", etapa:+et, ...x});
+      if(x.sen && rem.config[chaveSen(x.id)]!==x.sen) ops.push({tipo:"setConfig", chave:chaveSen(x.id), valor:x.sen});
     });
     for(const [nome,c] of Object.entries(st.cargas||{})){
       const r=rem.cargas.find(y=>y.etapa==et && y.nome===nome);
@@ -69,6 +71,9 @@ export function aplicarConfig(chave, valor){
   } else if(chave==="meta.kg") S.meta.kg = num(+valor) && +valor>0 ? +valor : "";
   else if(chave==="meta.data") S.meta.data = RX.data.test(valor||"") ? valor : "";
   else if(chave==="idade") S.idade = num(+valor) && +valor>0 ? +valor : "";
+  else if(chave.startsWith("sensacao.")){ // "como foi" de uma sessão: sensacao.<id da sessão>
+    for(const st of Object.values(S.etapas)) for(const x of st.historico||[]) if(x.id && chaveSen(x.id)===chave){ if(sensacaoOk(valor)) x.sen=valor; else delete x.sen; }
+  }
 }
 /* Reaplica no estado local uma alteração que ainda está na fila (não chegou à planilha),
    para o estado remoto não "desfazer" na tela o que foi feito durante a sincronização. */

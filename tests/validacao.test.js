@@ -29,3 +29,9 @@ test("unidades e peso", () => {
   assert.equal(unidOk("placas"), "placas"); assert.equal(unidOk("lb"), "kg");
   assert.ok(pesoOk({ d:"2026-11-07", kg:83.4 })); assert.ok(!pesoOk({ d:"07/11", kg:83.4 }));
 });
+test("sessão: mantém o 'como foi' válido e descarta o inválido", () => {
+  const base = { id:"abc", letra:"A", fase:"1", data:"2026-11-12", feitos:1, total:1 };
+  assert.equal(limparSessao({ ...base, sen:"pesado" }).sen, "pesado");
+  assert.equal("sen" in limparSessao({ ...base, sen:"cansado" }), false);
+  assert.equal("sen" in limparSessao({ ...base, sen:{} }), false);
+});
