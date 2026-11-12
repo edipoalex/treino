@@ -6,6 +6,8 @@ import { fmtKg, hojeISO, parseKg } from "./progresso.js";
 import { atualizarSyncUI, enfileirar } from "./sync.js";
 import { applyTheme, confirmar, toast } from "./ui.js";
 import { $ } from "./util.js";
+import { falar, desbloquear } from "./voz.js";
+import { icsLembrete, primeiraData } from "./inteligente.js";
 
 /* ---------- Ajustes ---------- */
 export const dlg=$("#settings");
@@ -13,6 +15,9 @@ export function marcarPref(){
   document.querySelectorAll("[data-pref-modo]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefModo===S.pref.modo)));
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefDesc===S.pref.descanso)));
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefAnim===S.pref.animacoes)));
+  document.querySelectorAll("[data-pref-voz]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefVoz===S.pref.voz)));
+  const ld=$("#lembDias"); if(ld) ld.innerHTML=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map((d,i)=>`<button data-lemb-dia="${i}" aria-pressed="${S.lembrete.dias.includes(i)}">${d}</button>`).join("");
+  const lh=$("#lembHora"); if(lh) lh.value=S.lembrete.hora;
 }
 
 export function iniciarAjustes(){
@@ -23,6 +28,17 @@ export function iniciarAjustes(){
   document.querySelectorAll("[data-pref-modo]").forEach(b=>b.onclick=()=>{ S.pref.modo=b.dataset.prefModo; save(); marcarPref(); render(); });
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.onclick=()=>{ S.pref.animacoes=b.dataset.prefAnim; save(); marcarPref(); aplicarMovimento(); });
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.onclick=()=>{ S.pref.descanso=b.dataset.prefDesc; save(); marcarPref(); $("#descanso")?.remove(); render(); });
+  document.querySelectorAll("[data-pref-voz]").forEach(b=>b.onclick=()=>{ S.pref.voz=b.dataset.prefVoz; save(); marcarPref(); });
+  $("#ouvirVoz").onclick=()=>{ if(S.pref.voz==="off"){ toast("A voz está desligada"); return; } desbloquear(); falar("Forte, 30 segundos. Três, dois, um. Leve."); };
+  $("#lembDias").onclick=e=>{ const b=e.target.closest("[data-lemb-dia]"); if(!b) return; const d=+b.dataset.lembDia, ds=S.lembrete.dias;
+    S.lembrete.dias = ds.includes(d) ? ds.filter(x=>x!==d) : [...ds, d].sort(); save(); marcarPref(); };
+  $("#lembHora").onchange=e=>{ if(/^\d{2}:\d{2}$/.test(e.target.value)){ S.lembrete.hora=e.target.value; save(); } };
+  $("#lembBtn").onclick=()=>{
+    const {dias, hora}=S.lembrete; if(!dias.length){ toast("Escolha pelo menos um dia"); return; }
+    const url=location.origin+location.pathname, txt=icsLembrete({ dias, hora, inicio:primeiraData(hojeISO(), dias), url });
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"text/calendar"})); a.download="treino-lembrete.ics"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast("Abra o arquivo para adicionar ao Calendário");
+  };
   $("#startDate").onchange=e=>{ E.inicio=e.target.value; enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.inicio`, valor:E.inicio}); render(); };
   $("#phaseMode").onchange=e=>{ E.faseModo=e.target.value; enfileirar({tipo:"setConfig", chave:`etapa.${FICHA.etapa}.faseModo`, valor:E.faseModo}); render(); };
   $("#metaKg").onchange=e=>{ const v=e.target.value.trim(); const kg=parseKg(v); if(v && !kg){ toast("Meta inválida"); return; } S.meta.kg = kg ?? ""; enfileirar({tipo:"setConfig", chave:"meta.kg", valor:S.meta.kg}); render(); };

@@ -10,7 +10,9 @@ import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSes
 import { enfileirar, hora } from "../sync.js";
 import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
 import { $, esc, fmtNum } from "../util.js";
-import { ligarSentir, marcoDoTreino, sentirHtml } from "./habito.js";
+import { ligarSentir, marcoDoTreino, semanasSeguidas, sentirHtml } from "./habito.js";
+import { abrirCompartilhar, dataCurta, urlApp } from "../compartilhar.js";
+import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "../dicas.js";
 import { icone } from "../icones.js";
 import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
 
@@ -59,19 +61,22 @@ function pipsComCarga(it,i,a,ser,fs){
   const varia=variaPorSerie(it), sel=serieSelecionada(it,i,a);
   return `<div class="pips-kg">${ser.map((s,j)=>{ const feita=j<fs, edita=varia && !feita;
       return `<button class="pk ${feita?"feita":j===fs?"atual":""} ${varia&&j===sel&&!feita?"sel":""} ${pop(i,j)?"pop":""}" ${edita?`data-selc="${i}:${j}" aria-label="Série ${j+1}: ajustar carga"`:`tabindex="-1" aria-hidden="true"`}>
-        <span class="pip ${feita?"on":""}"></span>${varia||feita?esc(curto(cargaDaSerie(it,i,j,a))):""}<small>${esc(s.tag || (String(s.r).length<=8 ? s.r : `${j+1}ª série`))}</small></button>`; }).join("")}</div>
-    ${varia ? linhaCargaSerie(it,i,sel,a) : linhaCargaUnica(it,i)}${linkVariar(it,i)}`;
+        <span class="pip ${feita?"on":""}"></span>${varia||feita?esc(curto(cargaDaSerie(it,i,j,a))):""}<small>${esc(s.tag || (String(s.r).length<=8 ? s.r : `${j+1}ª série`))}</small>${!feita && recordeSerie(it,i,j)?`<span class="rec-pip" title="Recorde ao alcance">${icone("trophy")}</span>`:""}</button>`; }).join("")}</div>
+    ${varia ? linhaCargaSerie(it,i,sel,a) : linhaCargaUnica(it,i)}${recordeTxt(recordeSerie(it,i,sel))}${sugestaoHtml(it,i,0,grupoDaSerie(it,sel))}${linkVariar(it,i)}`;
 }
 /* Foco: cada linha de série com a carga dela; a selecionada abre o − e o + na própria linha */
 function seriesComCarga(it,i,a,ser,fs,done){
   const varia=variaPorSerie(it), sel=serieSelecionada(it,i,a);
   const linhas=ser.map((s,j)=>{ const feita=j<fs, ed=!done && varia && j===sel && !feita, u=ultimaDaSerie(it,j);
-    const kg = varia || feita ? `<span class="kgcol"><span class="kg ${feita?"":"plan"}">${esc(cargaDaSerie(it,i,j,a))}</span>${u?`<span class="ult">última ${esc(u)}</span>`:""}</span>` : "";
+    const rec = !feita && !done ? recordeSerie(it,i,j) : null;
+    const kg = varia || feita || rec ? `<span class="kgcol"><span class="kg ${feita?"":"plan"}">${esc(cargaDaSerie(it,i,j,a))}</span>${rec?`<span class="rec-tag">${icone("trophy")} recorde</span>`:u?`<span class="ult">última ${esc(u)}</span>`:""}</span>` : "";
     return `<div class="f-serie ${feita?"feita":j===fs?"atual":""} ${ed?"edita":""} ${pop(i,j)?"pop":""}" ${!feita&&varia&&!done?`data-selc="${i}:${j}"`:""}>
       <span class="n">${j+1}${feita?icone("check","ic-sm"):""}</span><span class="reps">${esc(s.r)}${s.tag?` <span class="tag">${esc(s.tag)}</span>`:""}</span>${kg}
       ${ed?`<div class="passo">${controlesCarga(it,i,0,grupoIdx(it,j),{ valor:valorPlanejado(it,i,j,a) })}</div>`:""}</div>`; }).join("");
-  return `${!done && !varia ? linhaCargaUnica(it,i) : ""}<div class="f-series">${linhas}</div>${!done ? linkVariar(it,i) : ""}`;
+  return `${!done && !varia ? linhaCargaUnica(it,i) : ""}<div class="f-series">${linhas}</div>${!done ? sugestaoHtml(it,i,0,grupoDaSerie(it,sel)) + linkVariar(it,i) : ""}`;
 }
+/* Exercícios sem carga por série (combinados): uma sugestão por parte, no grupo da próxima série */
+const sugestoesBloco = (it,i,a) => temCarga(it) ? partesDe(it).map((_,pi)=>sugestaoHtml(it,i,pi,grupoDaSerie(it,(a.series||{})[i]||0))).join("") : "";
 export function sessaoLista(a,t){
   const n=t.itens.length, f=a.feitos.length;
   const cards=t.itens.map((it,i)=>{
@@ -88,7 +93,7 @@ export function sessaoLista(a,t){
       ${forca && ativo && !done && cargaPorSerie(it) ? pipsComCarga(it,i,a,ser,fs) : forca?`<div class="i-pips"><div class="pips" aria-hidden="true">${ser.map((_,j)=>`<span class="pip ${j<fs?"on":""} ${pop(i,j)?"pop":""}"></span>`).join("")}</div><b class="cnt ${pop(i)?"pop":""}">${fs}/${it.series}</b>
         ${fs<it.series?`<span class="meta prox-serie">próxima: ${esc(rotSerie(ser[fs]))}</span>`:""}</div>`:""}
       ${done && a.marcas?.[i] ? `<p class="done-at">${ico.check} Feito às ${hora(a.marcas[i])}</p>` : ""}
-      ${ativo && !done ? (cargaPorSerie(it) ? "" : blocoCarga(it,i)) : (temCarga(it)?`<p class="meta c-resumo">Carga: ${esc(cargaResumo(it))}</p>`:"")}
+      ${ativo && !done ? (cargaPorSerie(it) ? "" : blocoCarga(it,i) + sugestoesBloco(it,i,a)) : (temCarga(it)?`<p class="meta c-resumo">Carga: ${esc(cargaResumo(it))}</p>`:"")}
       ${done && !emDescanso ? (forca?botaoAcao(it,i,a,false):"") : botaoAcao(it,i,a,ativo)}
     </li>`;
   }).join("");
@@ -111,7 +116,7 @@ export function sessaoFoco(a,t){
     ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
     ${lista}
     <div class="f-rodape">
-      ${!done && !cargaPorSerie(it) ? blocoCarga(it,i) : ""}
+      ${!done && !cargaPorSerie(it) ? blocoCarga(it,i) + sugestoesBloco(it,i,a) : ""}
       ${botaoAcao(it,i,a,true)}
       ${done && !emDescanso ? `<button class="mt-3 btn primary cor grande block" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
     </div>
@@ -138,6 +143,8 @@ export function cliqueSessao(e){
   const t=treinoAtual(a), el=e.target.closest("button,a,input,[data-selc],[data-item]"); if(!el || el.matches("a,input")) return;
   const d=el.dataset, par = v => v.split(":").map(Number);
   if(d.serie!=null) return registrarSerie(+d.serie);
+  if(d.sug){ const [i,pi,...g]=d.sug.split(":"); return usarSugestao(t.itens[+i], +i, +pi, g.join(":")); }
+  if(d.sugX) return dispensarSugestao(d.sugX);
   if(d.selc){ const [i,j]=par(d.selc); a.selC={i,j}; save(); return rerender(); }
   if(d.variar!=null){ const nome=t.itens[+d.variar].nome; S.variar ??= {}; if(S.variar[nome]) delete S.variar[nome]; else S.variar[nome]=true; save(); return rerender(); }
   if(d.exec!=null) return iniciarExec(+d.exec);
@@ -295,8 +302,14 @@ export async function concluir(){
     ${marco.html}
     ${sentirHtml(x.sen||"")}
     <p class="meta">Próximo da sequência: treino ${esc(proxima())}.</p>
-    <button class="btn primary" data-fechar>Fechar</button>`);
-  const fr=$("#folha"); if(fr){ contar(fr); ligarSentir(fr, x.id); }
+    <div class="linha2"><button class="btn" data-compartilhar>${icone("share")} Compartilhar</button><button class="btn primary" data-fechar>Fechar</button></div>`);
+  const fr=$("#folha"); if(fr){ contar(fr); ligarSentir(fr, x.id);
+    const seq=semanasSeguidas();
+    fr.querySelector("[data-compartilhar]").onclick=()=>abrirCompartilhar({ nome:`treino-${a.letra}-${x.data}.png`, temRec:recs.length>0, temVol:vol>0,
+      monta: op => ({ letra:a.letra, cab:`Treino · ${dataCurta(x.data)}`, titulo:[`Treino ${a.letra}`,"concluído"],
+        sub:[t.foco, seq?`${seq} ${seq>1?"semanas seguidas":"semana seguida"}`:""].filter(Boolean).join(" · "),
+        nums:[[x.duracao,"min"],[seriesFeitas,"séries"], op.vol && vol ? [fmtVolume(vol),"volume"] : [`${x.feitos}/${x.total}`,"exercícios"]],
+        recs: op.rec ? recs.map(r=>`Recorde: ${[r.k, r.g].filter(Boolean).join(" ")} ${fmtRec(r)}`) : [], url:urlApp() }) }); }
   if(recs.length || marco.m?.tipo==="perfeita") // na etapa concluída, o confete vem com o fechamento na Hoje
     setTimeout(confete, 450);
 }

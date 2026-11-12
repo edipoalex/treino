@@ -11,6 +11,7 @@ import { fecharFolha, folha, plate, toast } from "../ui.js";
 import { icone } from "../icones.js";
 import { confete, contar, movimentoOk } from "../movimento.js";
 import { copiarTexto } from "../guia-exercicios.js";
+import { abrirCompartilhar, urlApp } from "../compartilhar.js";
 import { esc, fmtNum } from "../util.js";
 
 const pl = (n, um, varios) => n===1 ? um : varios;
@@ -34,6 +35,7 @@ export function anelMeta(feitos, { min, max }, cls=""){
     <div class="num" aria-hidden="true"><b>${batida?icone("check"):feitos}</b><small>${batida?`${feitos} ${pl(feitos,"treino","treinos")}`:`de ${min}`}</small></div></div>`;
 }
 
+export const semanasSeguidas = () => sequencia(todasSessoes().map(x => x.data), freqAlvo(), hojeISO()).seq;
 /* ---------- Hoje: Sua semana ---------- */
 export function painelSemana(){
   const alvo=freqAlvo(), hoje=hojeISO(), todas=todasSessoes();
@@ -189,12 +191,18 @@ export function viewFechamento(){
     ${d.dist.total?`<section class="panel" aria-label="Como foi"><h3>Como foi<span class="sub2">${d.dist.total} ${pl(d.dist.total,"treino marcado","treinos marcados")}</span></h3>${distHtml(d.dist)}</section>`:""}
     ${d.peso?`<section class="panel" aria-label="Peso"><h3>Peso</h3><p>${fmtKg(d.peso.de)} → <b>${fmtKg(d.peso.ate)} kg</b> · <span class="${d.peso.ate<=d.peso.de?"tx-ok":""}">${d.peso.ate>d.peso.de?"+":"−"}${fmtKg(Math.abs(d.peso.ate-d.peso.de))} kg</span> na etapa</p></section>`:""}
     <div class="mt-4 stack"><button class="btn primary cor grande block L-${esc(LETRAS[0])}" id="copiarResumo">${icone("copy")} Copiar resumo para o agente</button>
+      <button class="btn block" id="compartilharEtapa">${icone("share")} Compartilhar</button>
       <button class="btn block" id="treinarMesmo">${icone("play")} Treinar enquanto a nova ficha não chega</button></div>
     <p class="mt-2 tx-legenda meta">O resumo vai pronto para colar na conversa com o agente e pedir a próxima ficha.</p>`;
 }
 export function ligarFechamento(){
   const d=dadosFechamento();
   document.getElementById("copiarResumo").onclick=async () => toast(await copiarTexto(textoFechamento(d)) ? "Resumo copiado. Cole na conversa com o agente." : "Não foi possível copiar");
+  document.getElementById("compartilharEtapa").onclick=() => abrirCompartilhar({ nome:`treino-etapa-${d.etapa}.png`, temRec:d.evol.length>0, temVol:false,
+    monta: op => ({ letra:LETRAS[0], cab:`Treino · etapa ${d.etapa}`, titulo:[`Etapa ${d.etapa}`, d.feitos>=d.total?"concluída":"encerrada"],
+      sub:`${d.feitos} treinos em ${d.semanas} ${pl(d.semanas,"semana","semanas")}`,
+      nums:[[fmtNum(d.porSemana),"por semana"],[fmtHoras(d.minutos),"treinando"],[d.recordes, pl(d.recordes,"recorde","recordes")]],
+      recs: op.rec ? d.evol.slice(0,3).map(e => `${[e.k, e.g].filter(Boolean).join(" ")} ${fmtNum(e.de)} → ${fmtNum(e.ate)} kg`) : [], url:urlApp() }) });
   document.getElementById("treinarMesmo").onclick=() => { E.fechoDispensado=true; save(); render(); scrollTo(0,0); };
   const v=document.getElementById("view"); if(v) contar(v);
   if(!E.fechoVisto){ E.fechoVisto=true; save(); if(movimentoOk()) setTimeout(confete, 500); }
