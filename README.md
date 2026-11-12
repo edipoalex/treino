@@ -16,6 +16,7 @@ js/validacao.js         regras dos dados vindos da planilha/backup (as mesmas do
 js/progresso.js         datas, sequência, voltas, fases, frequência e peso
 js/series.js            leitura da prescrição: séries ("6 pesado", "20 leve"…) e partes com tempo ("45s de prancha")
 js/cargas.js            cargas por exercício (kg, placas, livre; pesado e leve no contraste)
+js/recursos.js          o que cada item da ficha ativa (regra única para app, validador e testes)
 js/metricas.js          volume e recordes a partir das cargas registradas em cada série
 js/movimento.js         transições e microinterações (respeita Ajustes › Animações e "reduzir movimento")
 js/icones.js            ícones Lucide (ISC) guardados no app, para funcionar offline
@@ -41,6 +42,11 @@ Para rodar localmente: `python3 -m http.server` na pasta e abra `http://localhos
 "maskable") a partir da anilha 3D de `js/anilha.js`. Precisa do Google Chrome instalado para converter em PNG.
 No iPhone, o ícone da tela inicial só muda ao remover o app da tela inicial e adicionar de novo.
 
+## Funcionalidades
+O que o app faz e qual formato da ficha ativa cada recurso está em [`FUNCIONALIDADES.md`](FUNCIONALIDADES.md).
+As regras ficam em `js/series.js` e `js/recursos.js`, e `tests/recursos.test.js` garante que continuam valendo
+para qualquer ficha.
+
 ## Nova ficha
 A ficha vem do agente do projeto como JSON. Para aplicar:
 
@@ -50,6 +56,8 @@ node scripts/aplicar-ficha.mjs caminho/etapa-20.json
 
 O script valida a ficha (com erro, não altera nada), grava `fichas/etapa-NN.json`, regera
 `js/ficha-atual.js`, ajusta o `versao` da ficha e sobe `APP_VERSAO`/`APP_DATA` em `js/versao.js`.
+Ele também mostra os recursos que a ficha ativa (cronômetros, cargas) e avisa o que não vai ser reconhecido;
+nesse caso, ajuste a prescrição no formato de `FUNCIONALIDADES.md` antes de publicar.
 Histórico, cargas e ajustes ficam separados por número de etapa, então trocar a ficha não apaga o histórico anterior.
 
 ## Validação

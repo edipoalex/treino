@@ -31,8 +31,9 @@ export const rotSerie = s => s ? [s.r, s.tag].filter(Boolean).join(" ") : "";
    - "partes": rest-pause e micro-pausas, "(falha / 10s / falha / 10s / falha)"
    - "segurar": isometria, "45s de prancha", "30s por lado"
    Devolve null quando não há tempo a cronometrar. */
-const ehPausa = x => /^\d+\s*s$/i.test(x);
-const seg = x => +String(x).match(/\d+/)[0];
+const ehPausa = x => /^\d+\s*(s|seg|min)(?![a-zà-ú])/i.test(x);
+const seg = x => { const n=+String(x).match(/\d+/)[0]; return /min/i.test(x) ? n*60 : n; };
+const CARDIO_RX = /cardio|caminhada|corrida|esteira|bike|bicicleta|el[ií]ptico|escada|remo erg|zona\s*2|cont[ií]nuo/i;
 const emSeg = (n, u) => /min/i.test(u) ? +n*60 : +n;
 const ehForte = rot => /forte|r[aá]pid|intens|sprint|acelera/i.test(rot);
 export function tempoDe(it){
@@ -49,23 +50,34 @@ export function tempoDe(it){
     // aquecimento: "5 min de esteira leve + 2 séries de aproximação no supino"
     m = p.match(/^\s*(\d+)\s*min\s+de\s+([^+]+?)\s*\+\s*(\d+)\s*s[ée]ries?\s+de\s+(.+)$/i);
     if(m) return { tipo:"aquecimento", seg:+m[1]*60, rot:m[2].trim(), passos:+m[3], passoRot:m[4].trim() };
-    // cardio contínuo (zona 2): o tempo é o do bloco
-    if(/zona\s*2|cont[ií]nuo/i.test(p+" "+nome) && it?.bloco>0) return { tipo:"continuo", seg:it.bloco*60, rot:/zona\s*2/i.test(p) ? "Zona 2" : "Contínuo" };
+    // cardio contínuo (zona 2, caminhada, "40 min"…): o tempo é o do bloco
+    if(CARDIO_RX.test(p+" "+nome) && it?.bloco>0){
+      const zona2=/zona\s*2/i.test(p+" "+nome), aquec=/aquec/i.test(nome);
+      return { tipo:"continuo", seg:it.bloco*60, zona2, rot: zona2 ? "Zona 2" : aquec ? "Aquecimento" : "Cardio contínuo" };
+    }
     return null;
   }
-  m = p.match(/\(([^()]*)\)/);
-  if(m){
-    const partes = m[1].split("/").map(x=>x.trim()).filter(Boolean);
+  // partes entre parênteses, ou a prescrição inteira separada por "/" (ex.: "1x30+6 / 1 min / 1x20+6")
+  const grupos = [...p.matchAll(/\(([^()]*)\)/g)].map(x=>x[1]).concat([p.replace(/^[^:]*:\s*/,"")]);
+  for(const g of grupos){
+    const partes = g.split("/").map(x=>x.trim()).filter(Boolean);
     if(partes.length>=3 && partes.some(ehPausa) && partes.some(x=>!ehPausa(x)))
-      return { tipo:"partes", partes: partes.map(x => ehPausa(x) ? { pausa:seg(x) } : { rot:x }) };
+      return { tipo:"partes", partes: partes.map(x => { if(!ehPausa(x)) return { rot:x };
+        const resto=x.replace(/^\d+\s*(s|seg|min)\w*\s*(de\s+)?/i,"").trim(); return resto ? { pausa:seg(x), rot:resto } : { pausa:seg(x) }; }) };
   }
-  for(const mm of p.matchAll(/(\d+)\s*s(?:eg(?:undos)?)?\b\s*(por lado)?/gi)){
-    if(/descanso\s*$|pausa\s*$/i.test(p.slice(0, mm.index))) continue;
-    const s = +mm[1], nome = String(it.nome);
-    const rot = /prancha lateral/i.test(nome) && mm[2] ? "Prancha lateral" : /prancha/i.test(nome) || /prancha/i.test(p) ? "Prancha" : "Tempo";
-    if(mm[2]) return { tipo:"segurar", rotulo:`${s} s por lado`, botao:`${rot} ${s} s × 2`,
+  for(const mm of p.matchAll(/(\d+)\s*(s|seg|segundos?|min|minutos?)(?![a-zà-ú])\s*(por lado)?/gi)){
+    // cadência ("3s na descida", "2 s de pausa no topo") não é cronômetro
+    if(/^\s*(na|no|de)\s+(descida|subida|exc[êe]ntric|conc[êe]ntric|pausa|cad[êe]ncia|topo)/i.test(p.slice(mm.index+mm[0].length))) continue;
+    if(/(descanso|pausa|intervalo)(\s+de)?\s*$/i.test(p.slice(0, mm.index))) continue;
+    if(/^\s*(de\s+)?(descanso|pausa|intervalo)/i.test(p.slice(mm.index+mm[0].length))) continue;
+    const abre=p.lastIndexOf("(", mm.index), fecha=p.indexOf(")", mm.index);   // dentro de "(descanso de 45 s …, 90 s entre …)"
+    if(abre>=0 && abre>p.lastIndexOf(")", mm.index) && /descanso|pausa|intervalo/i.test(p.slice(abre, fecha<0?undefined:fecha))) continue;
+    const s = /min/i.test(mm[2]) ? +mm[1]*60 : +mm[1], nome = String(it.nome), lado = mm[3];
+    const rot = /prancha lateral/i.test(nome) && lado ? "Prancha lateral" : /prancha/i.test(nome) || /prancha/i.test(p) ? "Prancha" : /isometr/i.test(nome+" "+p) ? "Isometria" : "Tempo";
+    const dur = s>=60 && s%60===0 ? `${s/60} min` : `${s} s`;
+    if(lado) return { tipo:"segurar", rotulo:`${dur} por lado`, botao:`${rot} ${dur} × 2`,
       etapas:[{ seg:s, rot:"Lado esquerdo", tipo:"exec" }, { seg:5, rot:"Troque de lado", tipo:"troca" }, { seg:s, rot:"Lado direito", tipo:"exec" }] };
-    return { tipo:"segurar", rotulo:`${s} s ${rot.toLowerCase()}`, botao:`${rot} ${s} s`, etapas:[{ seg:s, rot, tipo:"exec" }] };
+    return { tipo:"segurar", rotulo:`${dur} ${rot.toLowerCase()}`, botao:`${rot} ${dur}`, etapas:[{ seg:s, rot, tipo:"exec" }] };
   }
   return null;
 }

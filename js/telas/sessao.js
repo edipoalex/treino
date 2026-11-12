@@ -5,7 +5,7 @@ import { E, FICHA, S, save } from "../estado.js";
 import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
 import { nav, render } from "../navegacao.js";
 import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpress, totalMin, treino, voltasDo } from "../progresso.js";
-import { rotSerie, seriesDe } from "../series.js";
+import { rotSerie, seriesDe, tempoDe } from "../series.js";
 import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSessao } from "../metricas.js";
 import { enfileirar, hora } from "../sync.js";
 import { desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
@@ -143,7 +143,7 @@ export function cliqueSessao(e){
   if(d.execParar!=null) return pararExec();
   if(d.execMax!=null) return minimizarExec(false);
   if(d.aq!=null) return marcarAproximacao(+d.aq);
-  if(d.execPausa){ const [i,s]=par(d.execPausa); return iniciarExec(i,{pausa:s}); }
+  if(d.execPausa){ const [i,k]=par(d.execPausa), pt=tempoDe(t.itens[i])?.partes?.[k]; if(pt?.pausa) return iniciarExec(i,{pausa:pt}); return; }
   if(d.rp!=null) return avancarParte(+d.rp);
   if(d.livre!=null) return alternarLivre(+d.livre);
   if(d.livrePlay!=null) return playLivre();

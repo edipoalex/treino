@@ -6,6 +6,7 @@ import { PASSO, rerender } from "./telas/sessao.js";
 import { fecharFolha, folha } from "./ui.js";
 import { esc, fmtNum, numCarga } from "./util.js";
 import { seriesDe } from "./series.js";
+import { temCarga as temCargaFicha } from "./recursos.js";
 
 /* Cargas: kg (passo 2,5), placas (passo 1) ou texto livre. Exercícios combinados ("A + B")
    têm uma carga por parte, salva como "A + B › A". */
@@ -14,7 +15,7 @@ export function partesDe(it){
   const cap = n => n.charAt(0).toUpperCase()+n.slice(1);
   return nomes.length>1 ? nomes.map(n=>({n:cap(n), key:`${it.nome} › ${n}`})) : [{n:it.nome, key:it.nome}];
 }
-export const temCarga = it => it.series>0 && (it.carga ?? !/abdômen|core/i.test(it.nome));
+export const temCarga = it => temCargaFicha(it);   // regra única em js/recursos.js
 /* Grupos de carga: no contraste, séries "pesado" e "leve" têm cargas separadas, salvas como "Nome · pesado".
    Nos demais exercícios há um grupo só (""), salvo pelo nome. */
 const GRUPOS = ["pesado","leve"];
