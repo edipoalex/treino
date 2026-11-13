@@ -82,6 +82,21 @@ Tudo vem da ficha e do histórico; nada é fixo de uma etapa. Cálculos em `js/h
 Em todos os modos: o resumo do treino é o mesmo em lista e foco; treino express conta igual para a meta; com
 animações reduzidas não há confete nem o traço do próximo treino piscando; em 320 px nada rola para o lado.
 
+## Treino inteligente e progresso (fase 4)
+
+Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sessão, `js/dicas.js`; telas em
+`js/telas/progresso.js` e `js/telas/guia.js`; cartão em `js/compartilhar.js`; voz em `js/voz.js`; estilos em `css/progresso.css`.
+
+| Funcionalidade | O que ativa | Onde |
+|---|---|---|
+| Sugestão de carga | Mesma carga nas 2 últimas vezes da parte e do grupo (pesado/leve), todas as séries feitas e nenhum treino marcado como pesado: sobe 1 passo (2,5 kg ou 1 placa). Faltou série ou foi pesado: "mantenha". Nunca sugere baixar. Só antes da 1ª série do grupo; "Usar" aplica, o X dispensa até o fim do treino (`E.atual.sugOff`) | Lista, foco, descanso em tela cheia; combinados: uma por parte |
+| Recorde ao alcance | Carga planejada maior que o melhor registrado da parte, grupo e unidade, em qualquer etapa (kg ou placas). Combinados ficam sem troféu | Bolinha da série (lista), linha da série (foco), descanso em tela cheia |
+| Aba Progresso | Toda parte com carga registrada (`cs`): busca sem acento, filtro por treino, mini gráfico, variação desde o início da etapa; detalhe com gráfico por grupo, recorde, últimos treinos e como fazer. Recordes e Volume saíram do Histórico | Aba Progresso |
+| Guia consultável | Busca em orientações, métodos, cardio e exercícios da fase atual (dicas de `guia` da ficha ou da base), com atalho para o progresso | Aba Guia |
+| Cartão para compartilhar | Imagem 1080×1350 desenhada no aparelho; sem peso e sem cargas por padrão; recordes e volume opcionais | Resumo do treino, fechamento da etapa |
+| Lembretes | Dias e horário em Ajustes viram um evento semanal (.ics) com alerta 15 min antes | Ajustes › Lembretes |
+| Voz | Ajustes › Voz: desligada, cardio (fases do cardio e dos cronômetros, "3, 2, 1", metade, reta final) ou cardio e descanso (também "Vai! Série…"). Alto-falante na tela de fases silencia na hora | Tela de fases, fim do descanso |
+
 ## Fundação visual
 - Medidas e cores só por tokens (`css/tokens.css`, cores em `css/base.css`); nada de tamanho solto nem estilo inline.
 - Seções com título forte acima do cartão; estados vazios com ícone, frase e próximo passo; botões em 4 variantes.

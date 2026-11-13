@@ -95,3 +95,5 @@ mark{background:color-mix(in srgb,var(--warn) 30%,transparent);color:inherit;bor
 .guia-tit .normal{text-transform:none;letter-spacing:0;font-weight:500}
 .guia-tit .plate{width:20px;height:20px}
 .share-prev{display:block;width:100%;max-width:360px;margin:0 auto;border-radius:var(--r-g);box-shadow:var(--sombra-2);aspect-ratio:4/5;background:var(--surface-2)}
+.prog-lista .det{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:359px){.prog-lista .mini{display:none}}

@@ -15,6 +15,9 @@ import { icone } from "../icones.js";
 import { $, esc, fmtNum } from "../util.js";
 
 const un = u => u==="kg" ? "kg" : "placas";
+/* Partes de combinados ("A + B › b") aparecem pelo nome da parte; o exercício completo vai na linha de baixo */
+const nomeEx = k => { const p=k.split(" › "); return p.length>1 ? p[1].charAt(0).toUpperCase()+p[1].slice(1) : k; };
+const deCombinado = k => k.includes(" › ") ? `parte de ${k.split(" › ")[0]}` : "";
 const nomeGrupo = G => G.g || (G.u==="placas" ? "placas" : "carga");
 const corGrupo = (k, letra) => k===0 ? `var(--p${letra})` : k===1 ? "var(--muted)" : "var(--warn)";
 let busca="", filtro="todos";
@@ -32,8 +35,8 @@ function lista(){
   const lim=somarDias(hojeISO(), -14);
   return `<div class="filtros" role="group" aria-label="Filtrar por treino">${["todos",...letras].map(k=>`<button data-filtro="${esc(k)}" aria-pressed="${k===filtro}">${k==="todos"?"Todos":`${plate(k,"xs")}${esc(k)}`}</button>`).join("")}</div>
     ${xs.length?`<ul class="prog-lista">${xs.map(e => { const P=e.principal, l=e.letras.includes(filtro)?filtro:e.letras[e.letras.length-1];
-      const det = [P.g, P.recData>=lim && P.pts.length>1 && P.recorde===P.atual ? `<span class="rec-tag">${icone("trophy")} recorde recente</span>` : `treino ${e.letras.map(esc).join(", ")}`].filter(Boolean).join(" · ");
-      return `<li><button data-ex="${esc(e.k)}"><span class="nome">${destacar(esc(e.k), busca)}</span><span class="det">${det}</span>
+      const det = [e.k.includes(" › ") ? "combinado" : "", P.g, P.recData>=lim && P.pts.length>1 && P.recorde===P.atual ? `<span class="rec-tag">${icone("trophy")} recorde recente</span>` : `treino ${e.letras.map(esc).join(", ")}`].filter(Boolean).join(" · ");
+      return `<li><button data-ex="${esc(e.k)}"><span class="nome">${destacar(esc(nomeEx(e.k)), busca)}</span><span class="det">${det}</span>
         <span class="dir">${mini(P.pts, l)}<span class="kg">${fmtNum(P.atual)}${P.u==="placas"?" pl":""}<small class="${P.pct?"":"neutro"}">${P.pct?`${P.pct>0?"+":""}${P.pct}%`:"estável"}</small></span></span></button></li>`; }).join("")}</ul>`
       : vazio("search",`Nada encontrado${busca?` para "${esc(busca)}"`:""}`,"Tente outro nome ou limpe o filtro.")}`;
 }
@@ -58,7 +61,7 @@ function detalhe(k){
   const ult=todasSessoes().filter(x => (x.itens||[]).some(it => it.cs?.some(s => s.c?.some(c => c.k===k)))).slice(-5).reverse();
   const dicas=guiaDe(e.item);
   return `<button class="btn-link" data-voltar>${icone("chevron-left")} Progresso</button>
-    <h1 class="page">${esc(e.k)}</h1><p class="sub">Treino ${e.letras.map(esc).join(", ")}${e.grupos.length>1?` · ${e.grupos.map(nomeGrupo).map(esc).join(" / ")}`:""}</p>
+    <h1 class="page">${esc(nomeEx(e.k))}</h1><p class="sub">${deCombinado(k)?`${esc(deCombinado(k))} · `:""}Treino ${e.letras.map(esc).join(", ")}${e.grupos.length>1?` · ${e.grupos.map(nomeGrupo).map(esc).join(" / ")}`:""}</p>
     <div class="stats"><div class="stat"><b>${fmtNum(P.atual)}</b><span>atual · ${un(P.u)}</span></div><div class="stat"><b>${fmtNum(P.recorde)}</b><span>recorde · ${un(P.u)}</span></div>
       <div class="stat"><b>${P.pct>0?"+":""}${P.pct}%</b><span>${E.inicio?"na etapa":"no total"}</span></div></div>
     <section class="panel" aria-label="Carga por treino"><h3>Carga por treino<span class="sub2">maior da sessão</span></h3>${grafico(e, letra)}</section>

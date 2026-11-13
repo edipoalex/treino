@@ -28,9 +28,9 @@ export async function desenharCartao(d){
   anilha(g, W-170, 230, 330, cl);
   g.fillStyle="rgba(255,255,255,.75)"; g.font=`600 34px ${BODY}`; g.fillText(d.cab.toUpperCase(), 80, 130);
   g.fillStyle="#fff"; g.font=`700 150px ${DISPLAY}`;
-  d.titulo.forEach((t,i)=>g.fillText(cortar(g,t,W-160), 80, 560+i*140));
-  g.fillStyle="rgba(255,255,255,.8)"; g.font=`500 38px ${BODY}`; g.fillText(cortar(g,d.sub,W-160), 80, 560+d.titulo.length*140-40);
-  const y0=820, bw=(W-160-2*28)/3;
+  d.titulo.forEach((t,i)=>g.fillText(cortar(g,t,W-160), 80, 480+i*140));
+  g.fillStyle="rgba(255,255,255,.8)"; g.font=`500 38px ${BODY}`; g.fillText(cortar(g,d.sub,W-160), 80, 480+(d.titulo.length-1)*140+90);
+  const y0=800, bw=(W-160-2*28)/3;
   d.nums.forEach(([v,r],i)=>{ const x=80+i*(bw+28); g.fillStyle="rgba(255,255,255,.08)"; caixa(g,x,y0,bw,190,32); g.fill();
     g.fillStyle="#fff"; g.textAlign="center"; g.font=`700 84px ${DISPLAY}`; g.fillText(String(v), x+bw/2, y0+108);
     g.fillStyle="rgba(255,255,255,.75)"; g.font=`500 30px ${BODY}`; g.fillText(r, x+bw/2, y0+158); g.textAlign="left"; });

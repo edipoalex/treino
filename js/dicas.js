@@ -29,9 +29,9 @@ export function sugestaoDe(it, i, pi, g){
 }
 export function sugestaoHtml(it, i, pi, g){
   const s=sugestaoDe(it,i,pi,g); if(!s) return "";
-  const parte = partesDe(it).length>1 ? `${partesDe(it)[pi].n}: ` : "";
+  const rot = [partesDe(it).length>1 ? partesDe(it)[pi].n : "", g && gruposDe(it).length>1 ? g : ""].filter(Boolean).join(" · ");
   return `<div class="sugestao ${s.tipo==="manter"?"manter":""}" role="status">${icone(s.tipo==="manter"?"info":"trending-up")}
-    <div><b>${esc(parte+s.titulo)}${g && gruposDe(it).length>1?` <small class="grupo">${esc(g)}</small>`:""}</b><small>${esc(s.motivo)}</small></div>
+    <div><b>${esc(s.titulo)}${rot?` <small class="grupo">${esc(rot)}</small>`:""}</b><small>${esc(s.motivo)}</small></div>
     ${s.tipo==="subir"?`<button class="btn primary cor" data-sug="${idSug(i,pi,g)}" aria-label="Usar ${esc(fmtNum(s.v))} ${s.u==="kg"?"kg":"placas"}">Usar</button>`:""}
     <button class="fechar" data-sug-x="${idSug(i,pi,g)}" aria-label="Dispensar a sugestão">${icone("x")}</button></div>`;
 }
