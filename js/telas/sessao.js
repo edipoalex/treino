@@ -12,7 +12,6 @@ import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTel
 import { $, esc, fmtNum } from "../util.js";
 import { ligarSentir, marcoDoTreino, semanasSeguidas, sentirHtml } from "./habito.js";
 import { abrirCompartilhar, dataCurta, urlApp } from "../compartilhar.js";
-import { desativarSomSilencioso } from "../voz.js";
 import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "../dicas.js";
 import { icone } from "../icones.js";
 import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
@@ -238,7 +237,7 @@ export function menuSessao(){
       f.querySelector("[data-cancelar]").onclick=()=>{
         f.querySelector(".corpo").innerHTML=`<h3>Cancelar o treino ${esc(a.letra)}?</h3><p class="meta">As séries marcadas não serão registradas.</p>
           <button class="btn" data-fechar>Voltar ao treino</button><div class="esp-2"></div><button class="btn danger" data-sim>Sim, cancelar</button>`;
-        f.querySelector("[data-sim]").onclick=()=>{ fecharFolha(); pararDescanso(false); limparCronometros(); desativarSomSilencioso(); E.atual=null; save(); manterTela(false); render(); scrollTo(0,0); };
+        f.querySelector("[data-sim]").onclick=()=>{ fecharFolha(); pararDescanso(false); limparCronometros(); E.atual=null; save(); manterTela(false); render(); scrollTo(0,0); };
       };
     });
 }
@@ -291,7 +290,7 @@ export async function concluir(){
   const outras=Object.values(S.etapas).flatMap(e=>e.historico||[]).filter(h=>h!==x);
   const recs=recordesDaSessao(x, outras);
   const linhasCargas=x.itens.filter(i=>i.cs?.length).map(i=>`<li><span>${esc(i.n)}</span><span>${esc(resumoCargas(i))}</span></li>`).join("");
-  E.atual=null; limparCronometros(); desativarSomSilencioso(); save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
+  E.atual=null; limparCronometros(); save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
   const marco=marcoDoTreino(); // meta da semana, semana perfeita, metade da etapa... (depois de registrar a sessão)
   render(); scrollTo(0,0);
   folha(`<div class="linha-ic L-${esc(a.letra)}">${plate(a.letra,"sm d3")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
