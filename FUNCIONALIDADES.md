@@ -103,7 +103,15 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Toda mudança visual confere as capturas (`scripts/capturas.mjs`) nos dois temas e nos modos lista e foco.
 
 ## Tela Hoje, visual e dados
-- Card do treino com anilha 3D em marca d'água; tocar vira e mostra os exercícios; anilhas A–E para escolher.
-- Anilhas: 3D nas grandes, de frente com a letra no cubo nas pequenas (`anilha.js`); ícone do app gerado por `scripts/gerar-icone.mjs`.
+- Cabeçalho com a data do dia acima da etapa; na Hoje o "treino N de M" vai para dentro do card (nas outras abas continua no topo).
+- Card do treino (`.hero2`): texto numa coluna fixa à esquerda que nunca passa por baixo da anilha; anilha 3D à direita;
+  duração, express e número de exercícios em etiquetas com ícone; "N exercícios" abre a lista dentro do card; "Iniciar treino" dentro do card.
+- Trocar treino: botões iguais com a anilha plana e a letra; o próximo da sequência tem um ponto verde.
+- Revisão da semana passada abaixo do treino do dia; semana com bolinhas planas na cor da letra.
+- Anilhas (`js/anilha.js`): 3D realista nos tamanhos grandes (`plate(l,"d3")`: card, resumo, fechamento), em pé e girada
+  no eixo vertical, borda iluminada pela esquerda, aço escovado com reflexo, furo vazado e brilho na entrada; plana nos
+  pequenos (`plate(l,"sm"|"xs")`). Ícone do app gerado pelo `scripts/gerar-icone.mjs` com a mesma anilha.
+- Ajustes em menu: grupos (Durante o treino, Aparência, Lembretes, Etapa e metas, Dados), cada linha com o valor atual e
+  uma página própria; "Apagar histórico" fica dentro da página da etapa.
 - Cores das letras A–H; animações respeitam Ajustes › Animações e "reduzir movimento".
 - Sincronização com a planilha, catálogo de fichas e validação: ver README.

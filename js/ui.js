@@ -1,4 +1,4 @@
-import { anilhaSVG } from "./anilha.js";
+import { anilha3D, anilhaPlana } from "./anilha.js";
 import { arrastarParaFechar, movimentoOk } from "./movimento.js";
 import { icone } from "./icones.js";
 import { E, FICHA, S } from "./estado.js";
@@ -17,8 +17,9 @@ export function applyTheme(){
 /* Anilha do treino: 3D nas grandes ("md" ou "d3"), de frente nas pequenas (js/anilha.js) */
 /* Estado vazio: ícone, título curto e o que fazer (texto) */
 export const vazio = (ic, titulo, texto="") => `<div class="vazio">${icone(ic)}<b>${esc(titulo)}</b>${texto?`<p>${esc(texto)}</p>`:""}</div>`;
+/* Anilha: 3D realista com "md"/"d3" (grandes); plana nos demais tamanhos (js/anilha.js) */
 export const plate = (l, cls="") => { const d3=/\b(md|d3)\b/.test(cls);
-  return `<div class="plate anilha ${d3?"d3":""} L-${esc(l)} ${cls}" aria-hidden="true">${anilhaSVG(l, { d3, detalhada: /\bmd\b/.test(cls), texto: !/\bsemtexto\b/.test(cls) })}</div>`; };
+  return `<div class="plate anilha ${d3?"d3":""} L-${esc(l)} ${cls}" aria-hidden="true">${d3 ? anilha3D(l) : anilhaPlana(l)}</div>`; };
 export let toastT;
 export function toast(msg){ const t=$("#toast"); const dl=document.getElementById("settings"); const host=dl&&dl.open?dl:document.body; if(t.parentNode!==host) host.appendChild(t); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 export const ico = { check:icone("check"), trofeu:icone("trophy"), clock:icone("clock") };
@@ -26,6 +27,7 @@ export function fmtSeg(s){ s=Math.max(0,Math.ceil(s)); return `${Math.floor(s/60
 export function fmtMin(m){ return `${Math.round(m)} min`; }
 export function header(){
   $("#brandTxt").textContent = `Etapa ${FICHA.etapa}`;
+  const dt=$("#dataTxt"); if(dt) dt.textContent = new Date().toLocaleDateString("pt-BR",{ weekday:"long", day:"numeric", month:"long" }).replace("-feira","");
   if(porVoltas()){
     const n=Math.min(feitosEtapa()+1, totalTreinos());
     // volta e fase continuam na Ficha e no Guia; no topo, só o avanço na etapa
