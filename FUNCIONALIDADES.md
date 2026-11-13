@@ -96,6 +96,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 | Cartão para compartilhar | Imagem 1080×1350 desenhada no aparelho; sem peso e sem cargas por padrão; recordes e volume opcionais | Resumo do treino, fechamento da etapa |
 | Lembretes | Dias e horário em Ajustes viram um evento semanal (.ics) com alerta 15 min antes | Ajustes › Lembretes |
 | Voz | Ajustes › Voz: desligada, cardio (fases do cardio e dos cronômetros, "3, 2, 1", metade, reta final) ou cardio e descanso (também "Vai! Série…"). Alto-falante na tela de fases silencia na hora | Tela de fases, fim do descanso |
+| Som no modo silencioso (opcional) | Ajustes › "Tocar voz e bipes no modo silencioso": durante o treino o app toca como player de mídia (`navigator.audioSession = "playback"` e um áudio mudo em loop), para a voz e os bipes saírem com o iPhone no silencioso. Pode pausar a música de outros apps; desliga ao concluir ou cancelar o treino | Todo o treino |
 
 ## Fundação visual
 - Medidas e cores só por tokens (`css/tokens.css`, cores em `css/base.css`); nada de tamanho solto nem estilo inline.

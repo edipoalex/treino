@@ -40,7 +40,8 @@ export function normalizarEstado(S){
   if(!S.variar || typeof S.variar!=="object" || Array.isArray(S.variar)) S.variar = {};
   if(!RX.data.test(S.revisaoVista||"")) delete S.revisaoVista; // última revisão da semana vista (segunda-feira)
   S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas",
-    voz: ["off","cardio","tudo"].includes(S.pref?.voz) ? S.pref.voz : "cardio" };
+    voz: ["off","cardio","tudo"].includes(S.pref?.voz) ? S.pref.voz : "cardio",
+    silencioso: S.pref?.silencioso===true };
   // lembretes no Calendário (fase 4): dias (0 = segunda) e horário
   { const l=S.lembrete, dias=Array.isArray(l?.dias) ? [...new Set(l.dias.filter(d=>Number.isInteger(d) && d>=0 && d<7))].sort() : [];
     S.lembrete = { dias: dias.length ? dias : [0,1,3,4], hora: /^\d{2}:\d{2}$/.test(l?.hora||"") ? l.hora : "18:00" }; }
