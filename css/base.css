@@ -6,8 +6,9 @@
   --pF:#7B4FD0; --pG:#E07A1F; --pH:#138A8A;
   --onA:#fff; --onB:#fff; --onC:#1A1A1A; --onD:#fff; --onE:#fff; --onF:#fff; --onG:#1A1A1A; --onH:#fff;
   --shadow:0 1px 0 rgba(23,33,43,.06), 0 8px 24px -16px rgba(23,33,43,.35);
-  --display:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
-  --body:"Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* v1.42: Inter no app todo (a mesma do card Hoje); títulos com peso 800 e espaçamento justo */
+  --display:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --tab-h:64px;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);

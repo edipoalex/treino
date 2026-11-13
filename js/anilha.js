@@ -26,7 +26,7 @@ export function anilhaPlana(letra, { texto=false } = {}){
       <circle cx="50" cy="50" r="47" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width=".8"/>
       <circle cx="50" cy="50" r="38" fill="none" stroke="#000" stroke-opacity=".16" stroke-width="1.4"/>
       <circle cx="50" cy="50" r="36.6" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width=".8"/>
-      ${texto?`<text font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="11" letter-spacing="1.5" fill="#fff" fill-opacity=".9"><textPath href="#${id}t" startOffset="50%" text-anchor="middle">TREINO ${L}</textPath></text>`:""}
+      ${texto?`<text font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="10" letter-spacing="1.2" fill="#fff" fill-opacity=".9"><textPath href="#${id}t" startOffset="50%" text-anchor="middle">TREINO ${L}</textPath></text>`:""}
       <circle cx="50" cy="50" r="20.5" fill="#000" fill-opacity=".22"/>
       <circle cx="50" cy="50" r="19.5" fill="url(#${id}a)"/>
       <circle cx="50" cy="50" r="19.5" fill="none" stroke="#000" stroke-opacity=".25" stroke-width=".7"/>

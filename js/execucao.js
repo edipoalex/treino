@@ -182,10 +182,15 @@ export function previaFases(it){
   return `<div class="pre-fases" aria-hidden="true">${fases.map(f=>`<i class="t-${f.tipo}" style="flex:${f.seg}"></i>`).join("")}</div>
     <p class="meta pre-leg"><span class="bol t-${t.a.tipo}"></span> ${dur(t.a.seg)} ${esc(t.a.rot)} · <span class="bol t-${t.b.tipo}"></span> ${dur(t.b.seg)} ${esc(t.b.rot)} · ${t.rodadas} rodadas${t.desaquecer?` · ${dur(t.desaquecer)} de desaquecimento`:""}</p>`;
 }
-export function acaoTempo(it, i, a, cls){
+/* Partes do rest-pause / micro-pausas como etapas (feita, agora, próximas): na sessão v1.42 ficam dentro da série */
+export function partesHtml(it, i, a){
+  const t=tempoDe(it); if(t?.tipo!=="partes") return "";
+  const k=Math.min((a.rp||{})[i]||0, t.partes.length-1);
+  return `<div class="microp" aria-label="Partes da série">${t.partes.map((x,j)=>`<span class="${j<k?"feito":j===k?"agora":""}">${x.pausa?`${fmtDur(x.pausa)}${x.rot?` ${esc(x.rot)}`:""}`:esc(x.rot)}</span>`).join("")}</div>`;
+}
+export function acaoTempo(it, i, a, cls, { chips=true } = {}){
   const t=tempoDe(it); if(!t) return "";
-  const chipsPartes = () => { const k=Math.min((a.rp||{})[i]||0, t.partes.length-1);
-    return `<div class="microp" aria-label="Partes da série">${t.partes.map((x,j)=>`<span class="${j<k?"feito":j===k?"agora":""}">${x.pausa?`${fmtDur(x.pausa)}${x.rot?` ${esc(x.rot)}`:""}`:esc(x.rot)}</span>`).join("")}</div>`; };
+  const chipsPartes = () => chips ? partesHtml(it, i, a) : "";
   if(S.exec?.k===i) return (t.tipo==="partes" ? chipsPartes() : "") + (CARDIO.has(S.exec.tipo) || telaCheia(S.exec) ? miniHtml() : btnRodando());
   if(!it.series){
     if(!CARDIO.has(t.tipo)) return "";

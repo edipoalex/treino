@@ -1,5 +1,5 @@
 import { consumirRepeticao, confete, contar, marcar, recente, segurarRepete } from "../movimento.js";
-import { blocoCarga, cargasDaSerieF, valorPlanejado, cargaDaSerie, cargaDe, cargaPorSerie, cargaResumo, cargasDaSerie, chaveCarga, controlesCarga, digitarCarga, enviarCargasPendentes, grupoDaSerie, grupoIdx, gruposDe, linhaCargaSerie, linhaCargaUnica, linkVariar, partesDe, passoCarga, salvarCarga, serieSelecionada, temCarga, trocarUnidade, ultimaDaSerie, variaPorSerie } from "../cargas.js";
+import { blocoCarga, cargasDaSerieF, valorPlanejado, cargaDaSerie, cargaDe, cargaPorSerie, cargaResumo, cargasDaSerie, chaveCarga, controlesCarga, digitarCarga, fmtCarga, enviarCargasPendentes, grupoDaSerie, grupoIdx, gruposDe, linhaCargaSerie, linhaCargaUnica, linkVariar, partesDe, passoCarga, salvarCarga, serieSelecionada, temCarga, trocarUnidade, ultimaDaSerie, variaPorSerie } from "../cargas.js";
 import { iniciarDescanso, maisTempo, pararDescanso } from "../descanso.js";
 import { E, FICHA, S, save } from "../estado.js";
 import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
@@ -15,7 +15,8 @@ import { abrirCompartilhar, dataCurta, urlApp } from "../compartilhar.js";
 import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "../dicas.js";
 import { icone } from "../icones.js";
 import { motivar } from "../balao.js";
-import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
+import { metodoDe, separarNotas } from "../recursos.js";
+import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, partesHtml, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
 
 /* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
 export const ICO = { mais:icone("ellipsis"), lista:icone("list"), copiar:icone("copy") };
@@ -24,14 +25,10 @@ export const treinoAtual = a => treino(a.letra, a.fase, a.volta ?? a.semana ?? u
 export const minDesde = t => Math.max(0, Math.round((Date.now()-t)/6e4));
 export const rerender = (topo=false) => { const y=scrollY; render(); scrollTo(0, topo?0:y); };
 export const primeiroPendente = (a,t) => { const i=t.itens.findIndex((_,k)=>!a.feitos.includes(k)); return i<0 ? t.itens.length-1 : i; };
-/* Botão de ação: "Série N de M feita"; com descanso no botão, vira o cronômetro (tocar nele pula). */
-export function botaoAcao(it,i,a,destaque){
-  const T=S.timer;
-  if(T && T.k===i && S.pref.descanso==="botao" && T.fim>Date.now())
-    return `<div class="t-linha"><button class="btn primary cor t-btn" data-pular aria-label="Pular descanso"><span class="t-fill" id="tFill"></span>${icone("timer")}<span id="tTxt">${fmtSeg((T.fim-Date.now())/1000)}</span></button>
-      <button class="btn t-mais" data-mais15>+15 s</button></div>`;
+/* Botão de ação: "Série N de M feita" (o descanso agora conta na barra fixa de baixo, v1.42). */
+export function botaoAcao(it,i,a,destaque,{ chips=true } = {}){
   const cls = destaque ? "primary cor" : "";
-  const tx = acaoTempo(it,i,a,cls); if(tx) return tx;
+  const tx = acaoTempo(it,i,a,cls,{ chips }); if(tx) return tx;
   if(!it.series){
     const ok=a.feitos.includes(i);
     return `<div class="linha2"><button class="btn" data-bloco="${i}">${icone("play")} ${it.bloco} min</button><button class="btn ${ok?"":cls} ${ok&&recente("feito")?.i===i?"feito-btn":""}" data-feito="${i}">${ok?`${icone("check")} Feito`:"Marcar feito"}</button></div>`;
@@ -40,94 +37,121 @@ export function botaoAcao(it,i,a,destaque){
   if(f>=it.series) return `<button class="btn reabrir" data-reabrir="${i}">${ico.check} Concluído · ${it.series}/${it.series} · desfazer</button>`;
   return `<button class="btn ${cls} serie-btn ${recente("fimDescanso",120000)?.k===i?"vai":""}" data-serie="${i}">${ico.check}<span>Série ${f+1} de ${it.series} feita</span></button>`;
 }
-export const chipsDe = it => (it.series>0
-  ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso}s de descanso`, `≈ ${fmtMin(minutos(it))}`].concat(voltasDo(it)&&voltasDo(it).length?[semTxt(voltasDo(it))]:[])
-  : [`${it.bloco} min`]).map(c=>`<span class="chip">${c}</span>`).join("");
-export function topoSessao(a,t){
-  const n=t.itens.length;
-  return `<div class="s-topo"><button class="icon-btn s-ic" id="sMenu" aria-label="Opções do treino">${ICO.mais}</button>
-    <div class="s-tit">${plate(a.letra,"xs")}<div><b>Treino ${esc(a.letra)}${a.modo==="express"?" · express":""}</b><span class="meta">${a.feitos.length} de ${n} feitos · ${minDesde(a.inicio)} min</span></div></div>
-    ${S.pref.modo==="foco"?`<button class="icon-btn s-ic" id="sLista" aria-label="Ver todos os exercícios">${ICO.lista}</button>`:`<span class="s-ic" aria-hidden="true"></span>`}</div>
-  <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div>
-  ${a.modo==="express" && notaExpress(t)?`<p class="tx-sec nota-topo meta">${esc(notaExpress(t))}</p>`:""}`;
-}
+
+/* ---------- Sessão v1.42: barra da sessão, cabeçalho do exercício, tabela de séries e barra de ação ----------
+   Lista e foco usam as mesmas peças. A orientação que se repete nos itens (ex.: "Volta de calibração…") vira
+   uma nota do treino (selo na barra; aviso único na lista); cada exercício mostra só a parte dele, numa linha que abre. */
+const oriAberta = new Set();
 /* O que acabou de mudar ganha animação na próxima renderização */
 const pop = (i,j) => { const m=recente("serie"); return m && m.i===i && (j===undefined || m.j===j); };
 const recem = i => { const s=recente("serie"), f=recente("feito"); return (s && s.i===i && s.fim) || (f && f.i===i); };
 /* Série que recebe o ajuste de carga: a selecionada, quando a carga varia por série (senão, a carga do exercício) */
 const alvoSerie = (it,i,a) => cargaPorSerie(it) && variaPorSerie(it) && !a.feitos.includes(i) ? { i, j:serieSelecionada(it,i,a) } : {};
-/* Lista: cada bolinha mostra a carga da série; uma linha compacta ajusta a série selecionada (ou todas) */
-const curto = s => s.replace(/ kg$/,"").replace(/ placas$/," pl");
-function pipsComCarga(it,i,a,ser,fs){
-  const varia=variaPorSerie(it), sel=serieSelecionada(it,i,a);
-  return `<div class="pips-kg">${ser.map((s,j)=>{ const feita=j<fs, edita=varia && !feita;
-      return `<button class="pk ${feita?"feita":j===fs?"atual":""} ${varia&&j===sel&&!feita?"sel":""} ${pop(i,j)?"pop":""}" ${edita?`data-selc="${i}:${j}" aria-label="Série ${j+1}: ajustar carga"`:`tabindex="-1" aria-hidden="true"`}>
-        <span class="pip ${feita?"on":""}"></span>${varia||feita?esc(curto(cargaDaSerie(it,i,j,a))):""}<small>${esc(s.tag || (String(s.r).length<=8 ? s.r : `${j+1}ª série`))}</small>${!feita && recordeSerie(it,i,j)?`<span class="rec-pip" title="Recorde ao alcance">${icone("trophy")}</span>`:""}</button>`; }).join("")}</div>
-    ${varia ? linhaCargaSerie(it,i,sel,a) : linhaCargaUnica(it,i)}${recordeTxt(recordeSerie(it,i,sel))}${sugestaoHtml(it,i,0,grupoDaSerie(it,sel))}${linkVariar(it,i)}`;
+const notas = t => separarNotas(t.itens.map(x=>x.obs||""));
+export function topoSessao(a,t){
+  const n=t.itens.length, nt=notas(t), foco=S.pref.modo==="foco";
+  return `<div class="sb"><div class="sb-l"><button class="icon-btn s-ic" id="sMenu" aria-label="Opções do treino">${ICO.mais}</button>
+    <div class="sb-t"><b>Treino ${esc(a.letra)}${a.modo==="express"?" · express":""}</b>
+      <span>${a.feitos.length} de ${n} · ${minDesde(a.inicio)} min${nt.comum?` <button class="sb-nota" data-nota aria-label="${esc(nt.rotulo)}: ver a orientação">${icone("lightbulb")}${esc(nt.rotulo)}</button>`:""}</span></div>
+    <button class="icon-btn s-ic" id="sModo" aria-label="${foco?"Ver a lista de exercícios":"Ver um exercício por vez"}">${icone(foco?"list":"rectangle-vertical")}</button></div>
+    <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div></div>`;
 }
-/* Foco: cada linha de série com a carga dela; a selecionada abre o − e o + na própria linha */
-function seriesComCarga(it,i,a,ser,fs,done){
-  const varia=variaPorSerie(it), sel=serieSelecionada(it,i,a);
-  const linhas=ser.map((s,j)=>{ const feita=j<fs, ed=!done && varia && j===sel && !feita, u=ultimaDaSerie(it,j);
-    const rec = !feita && !done ? recordeSerie(it,i,j) : null;
-    const kg = varia || feita || rec ? `<span class="kgcol"><span class="kg ${feita?"":"plan"}">${esc(cargaDaSerie(it,i,j,a))}</span>${rec?`<span class="rec-tag">${icone("trophy")} recorde</span>`:u?`<span class="ult">última ${esc(u)}</span>`:""}</span>` : "";
-    return `<div class="f-serie ${feita?"feita":j===fs?"atual":""} ${ed?"edita":""} ${pop(i,j)?"pop":""}" ${!feita&&varia&&!done?`data-selc="${i}:${j}"`:""}>
-      <span class="n">${j+1}${feita?icone("check","ic-sm"):""}</span><span class="reps">${esc(s.r)}${s.tag?` <span class="tag">${esc(s.tag)}</span>`:""}</span>${kg}
-      ${ed?`<div class="passo">${controlesCarga(it,i,0,grupoIdx(it,j),{ valor:valorPlanejado(it,i,j,a) })}</div>`:""}</div>`; }).join("");
-  return `${!done && !varia ? linhaCargaUnica(it,i) : ""}<div class="f-series">${linhas}</div>${!done ? sugestaoHtml(it,i,0,grupoDaSerie(it,sel)) + linkVariar(it,i) : ""}`;
+const cap1 = s => s.charAt(0).toUpperCase()+s.slice(1);
+/* Rest-pause e afins: "falha / 10s / falha / 10s / falha" vira "3× falha" (as etapas aparecem como pílulas na série) */
+function repsDe(it, s){ const t=tempoDe(it); if(t?.tipo!=="partes") return s.r; const r=t.partes.filter(p=>!p.pausa).map(p=>p.rot); return r.length>1 && r.every(x=>x===r[0]) ? `${r.length}× ${r[0]}` : s.r; }
+const metaDe = it => (it.series>0 ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso} s`].concat(voltasDo(it)?.length?[semTxt(voltasDo(it))]:[]) : [`${it.bloco} min`]);
+function cabExercicio(it,i,a,t,{ titulo=true } = {}){
+  const met=metodoDe(it), prop=notas(t).proprias[i], semSeries = it.series>0 && seriesDe(it).every(s=>s.r==="série");
+  const ori=[semSeries?it.prescricao:"", prop].filter(Boolean).join(". "), ab=oriAberta.has(i);
+  return `<div class="sx-cab"><div class="sx-tit"><p class="sx-eb">${met?`<span class="sx-chip">${esc(met)}</span>`:""}${it.series>0?`<span class="sx-meta">${metaDe(it).map(esc).join(" · ")}</span>`:""}</p>
+      ${titulo?`<h2 class="sx-nome">${esc(it.nome)}</h2>`:""}</div>
+    <div class="sx-ac">${it.series>0?`<button class="icon-btn sx-ib ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button>`:""}<button class="icon-btn sx-ib" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">${icone("info")}</button></div></div>
+    ${livreHtml(i)}
+    ${ori?`<button class="sx-ori ${ab?"aberta":""}" data-ori="${i}" aria-expanded="${ab}">${icone("lightbulb")}<span>${esc(ori)}</span>${icone("chevron-down","sx-chev")}</button>`:""}`;
 }
+/* Tabela de séries: a única fonte da prescrição. Feitas com ✓ e a carga usada; a da vez destacada; a selecionada
+   (a da vez, ou outra tocada quando a carga varia por série) abre os controles de carga na própria linha. */
+function tabelaSeries(it,i,a,done){
+  const ser=seriesDe(it), fs=(a.series||{})[i]||0, cps=cargaPorSerie(it), varia=cps && variaPorSerie(it), comCarga=temCarga(it);
+  const sel = done ? -1 : cps && varia ? serieSelecionada(it,i,a) : fs;
+  const linhas=ser.map((s,j)=>{
+    const feita=j<fs, atual=!done && j===fs, ed=j===sel && !feita;
+    const kg = !comCarga ? "" : cps ? cargaDaSerie(it,i,j,a) : feita && a.cs?.[i]?.[j]?.c ? a.cs[i][j].c.map(c=>fmtCarga(c)).join(" / ") : cargaResumo(it, grupoDaSerie(it,j));
+    const rec = !feita && !done && cps ? recordeSerie(it,i,j) : null, u = ed && cps ? ultimaDaSerie(it,j) : null;
+    let corpo="";
+    if(ed){
+      const parts = atual ? partesHtml(it,i,a) : "";
+      const ctrl = !comCarga ? "" : cps ? `<div class="sx-passo">${controlesCarga(it,i,0,grupoIdx(it,j),{ valor:valorPlanejado(it,i,j,a) })}</div>` : blocoCarga(it,i) + sugestoesBloco(it,i,a);
+      const dentro = `${parts}${ctrl}${u||rec?`<p class="sx-ult">${rec?recordeTxt(rec,false):`Última vez: <b>${esc(u)}</b>`}</p>`:""}${cps?sugestaoHtml(it,i,0,grupoDaSerie(it,j)):""}`;
+      corpo = dentro.trim() ? `<div class="sx-ed">${dentro}</div>` : "";
+    }
+    return `<div class="sx-lin ${feita?"feita":""} ${atual?"atual":""} ${ed?"edita":""} ${pop(i,j)?"pop":""}" ${!feita&&varia&&!done&&!ed?`data-selc="${i}:${j}" role="button" aria-label="Série ${j+1}: ajustar carga"`:""}>
+      <span class="n">${feita?icone("check","ic-sm"):j+1}</span><span class="reps">${esc(repsDe(it,s))}${s.tag?` <small>${esc(s.tag)}</small>`:""}</span>
+      <span class="kg">${ed && cps ? "" : esc(/^[—\s/]*$/.test(kg)?"":kg)}${rec&&!ed?` ${icone("trophy","ic-sm rec")}`:""}</span>${corpo}</div>`;
+  }).join("");
+  return `<div class="sx-tab" role="list"><div class="sx-th"><span>Série</span><span>Reps</span><span>${comCarga?"Carga":""}</span></div>${linhas}</div>
+    ${!done && cps ? linkVariar(it,i) : ""}${done ? botaoAcao(it,i,a,false) : ""}`;
+}
+/* Cardio e itens sem séries: cartão com o tempo e a linha das fases */
+function cartaoTempo(it,i,a){
+  const t=tempoDe(it), min = t?.tipo==="intervalo" ? Math.round((t.rodadas*(t.a.seg+t.b.seg)+t.desaquecer)/60) : it.bloco;
+  return `<div class="sx-crd"><p class="sx-crd-t"><b>${esc(String(min))}</b> min</p>${previaFases(it) || `<p class="sx-crd-p">${esc(it.prescricao)}</p>`}</div>`;
+}
+const conteudo = (it,i,a,done) => it.series>0 ? tabelaSeries(it,i,a,done) : cartaoTempo(it,i,a);
 /* Exercícios sem carga por série (combinados): uma sugestão por parte, no grupo da próxima série */
 const sugestoesBloco = (it,i,a) => temCarga(it) ? partesDe(it).map((_,pi)=>sugestaoHtml(it,i,pi,grupoDaSerie(it,(a.series||{})[i]||0))).join("") : "";
+/* Barra de ação fixa embaixo: no descanso, o cronômetro (tempo, próxima série, +15 s, pular); no foco, ‹ ação › */
+export function barraAcao(a,t){
+  const T=S.timer;
+  if(T && S.pref.descanso==="botao" && T.fim>Date.now())
+    return `<div class="sb-acao"><div class="ab"><div class="ab-rest t-btn" role="timer" aria-label="Descanso"><span class="t-fill" id="tFill"></span><span class="ab-t" id="tTxt">${fmtSeg((T.fim-Date.now())/1000)}</span>
+      ${T.prox?`<span class="ab-px"><small>A seguir</small><b>${esc(T.prox.replace(/^Próximo:\s*/,""))}</b></span>`:""}</div>
+      <button class="btn ab-mini" data-mais15>+15 s</button><button class="btn ab-nav" data-pular aria-label="Pular descanso">${icone("skip-forward")}</button></div></div>`;
+  if(S.pref.modo!=="foco") return "";
+  const i=a.ativo, it=t.itens[i], done=a.feitos.includes(i), prox=t.itens[i+1];
+  const meio = done ? `<button class="btn primary cor" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : botaoAcao(it,i,a,true,{ chips:false });
+  return `<div class="sb-acao"><div class="ab"><button class="btn ab-nav" data-navega="-1" ${i===0?"disabled":""} aria-label="Exercício anterior">${icone("chevron-left")}</button>
+    <div class="ab-meio">${meio}</div><button class="btn ab-nav" data-navega="1" aria-label="${prox?"Próximo exercício":"Concluir treino"}">${icone(prox?"chevron-right":"check")}</button></div></div>`;
+}
+function anel(it,i,a){
+  const done=a.feitos.includes(i);
+  if(done) return `<span class="sx-anel ok">${icone("check")}</span>`;
+  if(!(it.series>0)) return `<span class="sx-anel">${icone("play","ic-sm")}</span>`;
+  const f=(a.series||{})[i]||0, C=2*Math.PI*17;
+  return `<span class="sx-anel"><svg class="r" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle class="v" cx="20" cy="20" r="17" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-f/it.series)).toFixed(1)}"/></svg>${f}/${it.series}</span>`;
+}
+function resumoItem(it,i,a){
+  const done=a.feitos.includes(i), c = temCarga(it) ? cargaResumo(it) : "";
+  if(done) return [it.series?`${(a.series||{})[i]||it.series}/${it.series} séries`:"Feito", a.marcas?.[i]?`às ${hora(a.marcas[i])}`:""].filter(Boolean).join(" · ");
+  return [metodoDe(it), metaDe(it)[0], c && c!=="—" ? c : ""].filter(Boolean).join(" · ");
+}
 export function sessaoLista(a,t){
-  const n=t.itens.length, f=a.feitos.length;
+  const n=t.itens.length, f=a.feitos.length, nt=notas(t), vez=primeiroPendente(a,t);
+  const aviso = [nt.comum && !a.notaOk ? `<div class="sx-ban">${icone("lightbulb")}<p><b>${esc(nt.rotulo)}.</b> ${esc(cap1(nt.comum.replace(/^[^:]{3,26}:\s*/,"")))}</p><button class="icon-btn sx-ib" data-nota-ok aria-label="Dispensar">${icone("x")}</button></div>` : "",
+    a.modo==="express" && notaExpress(t) ? `<div class="sx-ban">${icone("zap")}<p>${esc(notaExpress(t))}</p></div>` : ""].join("");
   const cards=t.itens.map((it,i)=>{
-    const done=a.feitos.includes(i), ativo=a.ativo===i, forca=it.series>0, fs=(a.series||{})[i]||0, ser=forca?seriesDe(it):[];
-    const emDescanso = S.timer && S.timer.k===i;
-    return `<li class="item ${done?"done":""} ${ativo&&!done?"ativo":""} ${done&&recem(i)?"recem":""}" data-item="${i}">
-      <div class="i-cab"><div class="i-tit"><p class="name">${esc(it.nome)}</p>${ativo&&!done?`<span class="ativo-tag">em execução</span>`:""}</div>
-        ${ativo&&!done?`<button class="info-btn ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button>`:""}
-        <button class="info-btn" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">${icone("info")}</button></div>
-      <p class="presc">${esc(it.prescricao)}</p>${!done?previaFases(it):""}
-      ${ativo&&!done?livreHtml(i):""}
-      <div class="chips">${chipsDe(it)}</div>
-      ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
-      ${forca && ativo && !done && cargaPorSerie(it) ? pipsComCarga(it,i,a,ser,fs) : forca?`<div class="i-pips"><div class="pips" aria-hidden="true">${ser.map((_,j)=>`<span class="pip ${j<fs?"on":""} ${pop(i,j)?"pop":""}"></span>`).join("")}</div><b class="cnt ${pop(i)?"pop":""}">${fs}/${it.series}</b>
-        ${fs<it.series?`<span class="meta prox-serie">próxima: ${esc(rotSerie(ser[fs]))}</span>`:""}</div>`:""}
-      ${done && a.marcas?.[i] ? `<p class="done-at">${ico.check} Feito às ${hora(a.marcas[i])}</p>` : ""}
-      ${ativo && !done ? (cargaPorSerie(it) ? "" : blocoCarga(it,i) + sugestoesBloco(it,i,a)) : (temCarga(it)?`<p class="meta c-resumo">Carga: ${esc(cargaResumo(it))}</p>`:"")}
-      ${done && !emDescanso ? (forca?botaoAcao(it,i,a,false):"") : botaoAcao(it,i,a,ativo)}
+    const done=a.feitos.includes(i), ab=a.ativo===i;
+    return `<li class="sx-cd ${ab?"aberto":""} ${done?"feito":""} ${done&&recem(i)?"recem":""}" data-item="${i}">
+      <button class="sx-cd-h" data-item="${i}" aria-expanded="${ab}">${anel(it,i,a)}<span class="t"><b>${esc(it.nome)}</b><span>${!ab&&i===vez&&!done?`<em>A seguir</em> · `:""}${esc(resumoItem(it,i,a))}</span></span>${icone(ab?"chevron-down":"chevron-right","sx-chev")}</button>
+      ${ab?`<div class="sx-cd-c">${cabExercicio(it,i,a,t,{ titulo:false })}${conteudo(it,i,a,done)}${done?"":`<div class="sx-acao">${botaoAcao(it,i,a,true,{ chips:false })}</div>`}</div>`:""}
     </li>`;
   }).join("");
-  return `<ul class="items">${cards}</ul>
-  <section class="centro panel fim-treino">
-    <p class="m-0 mb-3 meta">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
-    <button class="btn primary cor grande block" id="finishBtn">Concluir treino ${esc(a.letra)}</button>
+  return `${aviso}<ul class="sx-lista">${cards}</ul>
+  <section class="centro fim-treino">
+    <button class="btn grande block" id="finishBtn">Concluir treino ${esc(a.letra)}</button>
+    <p class="meta">${f===n?"Todos os itens concluídos.":`${n-f} ${n-f>1?"itens pendentes":"item pendente"}.`}</p>
   </section>`;
 }
 export function sessaoFoco(a,t){
-  const i=a.ativo, it=t.itens[i], forca=it.series>0, fs=(a.series||{})[i]||0, done=a.feitos.includes(i);
-  const ser=forca?seriesDe(it):[], prox=t.itens[i+1], emDescanso = S.timer && S.timer.k===i;
-  const lista = forca && cargaPorSerie(it) ? seriesComCarga(it,i,a,ser,fs,done)
-    : forca ? `<div class="f-series">${ser.map((s,j)=>`<div class="f-serie ${j<fs?"feita":j===fs?"atual":""} ${pop(i,j)?"pop":""}"><span class="n">${j+1}${j<fs?icone("check","ic-sm"):""}</span><span>${esc(s.r)}</span>${s.tag?`<span class="tag">${esc(s.tag)}</span>`:""}</div>`).join("")}</div>`
-    : `<p class="tx-destaque presc-grande presc">${esc(it.prescricao)}</p>${previaFases(it)}`;
-  return `<h2 class="f-nome">${esc(it.nome)}</h2>
-    <div class="chips">${chipsDe(it)}<button class="btn f-como" data-info="${i}">Como fazer</button><button class="btn f-como ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button></div>
-    ${livreHtml(i)}
-    ${forca?`<p class="presc meta">${esc(it.prescricao)}</p>`:""}
-    ${it.obs?`<p class="obs">${esc(it.obs)}</p>`:""}
-    ${lista}
-    <div class="f-rodape">
-      ${!done && !cargaPorSerie(it) ? blocoCarga(it,i) + sugestoesBloco(it,i,a) : ""}
-      ${botaoAcao(it,i,a,true)}
-      ${done && !emDescanso ? `<button class="mt-3 btn primary cor grande block" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : ""}
-    </div>
-    <div class="f-nav"><button class="btn" data-navega="-1" ${i===0?"disabled":""}>${icone("chevron-left")} Anterior</button><button class="btn" data-navega="1">${prox?`Próximo ${icone("chevron-right")}`:"Concluir"}</button></div>`;
+  const i=a.ativo, it=t.itens[i], done=a.feitos.includes(i);
+  const links = done ? [] : (botaoAcao(it,i,a,true,{ chips:false }).match(/<button class="link-btn"[^>]*>[^<]*<\/button>/g) || []);
+  return `<div class="sx-foco">${cabExercicio(it,i,a,t)}${conteudo(it,i,a,done)}${links.length?`<div class="sx-sec">${links.join("")}</div>`:""}</div>`;
 }
 export function viewSessao(){
   const a=E.atual, t=treinoAtual(a);
   a.series ??= {};
   if(a.ativo==null || a.ativo>=t.itens.length) a.ativo = primeiroPendente(a,t);
-  $("#view").innerHTML = `<div class="L-${esc(a.letra)}">${topoSessao(a,t)}${S.pref.modo==="foco" ? sessaoFoco(a,t) : sessaoLista(a,t)}</div>`;
+  $("#view").innerHTML = `<div class="L-${esc(a.letra)} sx">${topoSessao(a,t)}${S.pref.modo==="foco" ? sessaoFoco(a,t) : sessaoLista(a,t)}${barraAcao(a,t)}</div>`;
   $("#view").onclick = cliqueSessao;
   segurarRepete($("#view"), "[data-passo]", dado=>{ const b=E.atual; if(!b) return; const [i,pi,gi,dir]=dado.passo.split(":").map(Number);
     marcar("carga",{id:`${i}:${pi}:${gi}`, dir}); const it=treinoAtual(b).itens[i]; passoCarga(it,pi,gi,dir,alvoSerie(it,i,b)); });
@@ -171,6 +195,10 @@ export function cliqueSessao(e){
     return; }
   if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); rerender(true); return comecoExercicio(a, nv); }
   if(el.id==="sMenu") return menuSessao();
+  if(el.id==="sModo"){ S.pref.modo = S.pref.modo==="foco" ? "lista" : "foco"; save(); return rerender(true); }
+  if(d.ori!=null){ const i=+d.ori; oriAberta.has(i) ? oriAberta.delete(i) : oriAberta.add(i); return rerender(); }
+  if(d.nota!=null){ const nt=notas(t); return folha(`<h3>${esc(nt.rotulo)}</h3><p>${esc(nt.comum)}.</p><p class="meta">Vale para todos os exercícios deste treino.</p><button class="btn" data-fechar>Fechar</button>`); }
+  if(d.notaOk!=null){ a.notaOk=true; save(); return rerender(); }
   if(el.id==="sLista") return listaGeral();
   if(el.id==="finishBtn") return concluir();
   if(d.item!=null && el.matches("[data-item]")){ const i=+d.item; if(a.ativo!==i){ a.ativo=i; save(); rerender(); comecoExercicio(a, i); } }
@@ -186,7 +214,7 @@ export function registrarSerie(i){
   const tl=Math.round(livreDe(i)); if(tl>0){ ((a.tm ??= {})[i] ??= [])[f]=tl; S.livre.acum=0; if(S.livre.ini) S.livre.ini=Date.now(); }
   a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15); marcar("serie",{i, j:f, fim:f+1===it.series});
   const fimEx = a.series[i]===it.series;
-  if(fimEx && !a.feitos.includes(i)){ a.feitos.push(i); (a.marcas ??= {})[i]=Date.now(); }
+  if(fimEx && !a.feitos.includes(i)){ a.feitos.push(i); (a.marcas ??= {})[i]=Date.now(); if(S.pref.modo!=="foco") abrirProximo(a, t, i); }
   save();
   desfazer(`Série ${f+1} de ${it.series} registrada`, ()=>{
     a.series[i]=f; if(a.cs?.[i]) a.cs[i].length=Math.min(a.cs[i].length,f); const k=a.feitos.indexOf(i); if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
@@ -204,10 +232,13 @@ export function registrarSerie(i){
 function comecoExercicio(a, i){
   const it=treinoAtual(a).itens[i]; if(it && !a.feitos.includes(i) && !(a.series?.[i])) motivar("inicioExercicio", { ex:it.nome });
 }
+/* Lista: quando um exercício termina, o próximo pendente abre sozinho */
+function abrirProximo(a, t, i){ const pend=t.itens.map((_,k)=>k).filter(k=>!a.feitos.includes(k)); const n=pend.find(k=>k>i) ?? pend[0]; if(n!=null) a.ativo=n; }
 export function alternarFeito(i){
   const a=E.atual, k=a.feitos.indexOf(i); a.marcas ??= {};
   if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
   else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); marcar("feito",{i}); if(S.timer?.k===i) pararDescanso(false);
+    if(S.pref.modo!=="foco") abrirProximo(a, treinoAtual(a), i);
     motivar("exercicioFeito", { ex:treinoAtual(a).itens[i].nome });
     desfazer(`${treinoAtual(a).itens[i].nome} feito`, ()=>{ const j=a.feitos.indexOf(i); if(j>=0){ a.feitos.splice(j,1); delete a.marcas[i]; } save(); rerender(); }); }
   save(); rerender();
@@ -238,12 +269,14 @@ export function menuSessao(){
     <div class="seg"><button data-m="lista" aria-pressed="${S.pref.modo==="lista"}">Lista</button><button data-m="foco" aria-pressed="${S.pref.modo==="foco"}">Foco</button></div>
     ${tOutro?`<button class="btn" data-versao="${outro}">Trocar para ${outro==="express"?"Express":"Completo"} · ${Math.round(totalMin(tOutro))} min</button>`:""}
     <div class="mt-0 linha2"><button class="btn" data-aba="ficha">Ver ficha</button><button class="btn" data-aba="guia">Ver guia</button></div>
+    <button class="btn" data-ajustes>${icone("settings")} Ajustes</button>
     <div class="esp-2"></div>
     <button class="btn danger" data-cancelar>Cancelar treino</button>
     <button class="btn" data-fechar>Fechar</button>`,
     f=>{
       f.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{ S.pref.modo=b.dataset.m; save(); fecharFolha(); rerender(true); });
       f.querySelector("[data-versao]")?.addEventListener("click", e=>{ fecharFolha(); trocarVersao(e.currentTarget.dataset.versao); });
+      f.querySelector("[data-ajustes]").onclick=()=>{ fecharFolha(); document.getElementById("openSettings")?.click(); };
       f.querySelectorAll("[data-aba]").forEach(b=>b.onclick=()=>{ fecharFolha(); nav.tab=b.dataset.aba; render(); scrollTo(0,0); });
       f.querySelector("[data-cancelar]").onclick=()=>{
         f.querySelector(".corpo").innerHTML=`<h3>Cancelar o treino ${esc(a.letra)}?</h3><p class="meta">As séries marcadas não serão registradas.</p>
