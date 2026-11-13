@@ -7,6 +7,7 @@ import { icone } from "../icones.js";
 import { movimentoOk } from "../movimento.js";
 import { limparCronometros } from "../execucao.js";
 import { $, esc } from "../util.js";
+import { cardTreino } from "./card-treino.js";
 import { cartaoRevisao, etapaEncerrada, ligarFechamento, ligarRevisao, painelEtapa, painelSemana, viewFechamento } from "./habito.js";
 
 /* ---------- Views ---------- */
@@ -29,18 +30,12 @@ export function viewHoje(){
   const tEx = temExpress(letra) ? treino(letra, faseAtual(), voltaAtual(), "express") : null;
   const titulo = feito && !escolha ? "Próximo treino" : (escolha && escolha!==proxima() ? "Treino escolhido" : "Treino de hoje");
   const seq = proxima();
-  const qtd = `${t.itens.length} ${t.itens.length>1?"exercícios":"exercício"}`;
   const n=feitosEtapa(), progresso = porVoltas() ? `${Math.min(n+1, totalTreinos())} de ${totalTreinos()}` : `semana ${Math.min(semanaAtual(), FICHA.semanas)} de ${FICHA.semanas}`;
-  /* Card do treino em estúdio: texto à esquerda (nunca por baixo da anilha), anilha 3D em pé no chão à direita, ação dentro do card */
+  /* Card do treino premium: estúdio com a anilha em foto (js/telas/card-treino.js) */
   $("#view").innerHTML = `
-  <section class="hero2 estudio L-${esc(letra)}" id="cardHoje" aria-label="Treino ${esc(letra)}">
-    <div class="h2-anilha" aria-hidden="true"><span class="h2-sombra projetada"></span><span class="h2-sombra contato"></span>${plate(letra,"d3")}</div>
-    <div class="h2-txt"><p class="eyebrow">${titulo} · ${progresso}</p><h2>Treino ${esc(letra)}</h2><p class="foco">${esc(t.foco)}</p></div>
-    <div class="h2-meta"><span>${icone("clock")} ${Math.round(totalMin(t))} min</span>${tEx?`<span>${icone("zap")} Express ${Math.round(totalMin(tEx))} min</span>`:""}
-      <button id="verPrevia" aria-expanded="${!!verPrevia}" aria-controls="previaHoje">${icone("list")} ${qtd} ${icone("chevron-right")}</button></div>
-    ${verPrevia?`<ul class="previa2" id="previaHoje">${t.itens.map(it=>`<li><span>${esc(it.nome)}</span><span>${it.series?`${it.series} ${it.series>1?"séries":"série"}`:`${it.bloco} min`}</span></li>`).join("")}</ul>`:""}
-    <button class="btn primary cor grande block L-${esc(letra)}" id="startBtn">${icone("play")} Iniciar treino</button>
-  </section>
+  ${cardTreino({ letra, chamada:`${titulo} · ${progresso}`, titulo:`Treino ${letra}`, descricao:t.foco, minutos:Math.round(totalMin(t)),
+    express: tEx ? Math.round(totalMin(tEx)) : 0, exercicios:t.itens.length, aberto:!!verPrevia,
+    itens: t.itens.map(it => [it.nome, it.series ? `${it.series} ${it.series>1?"séries":"série"}` : `${it.bloco} min`]) })}
   ${feito ? `<p class="done-today">Treino ${esc(feito.letra)} concluído hoje. Este é o próximo da sequência.</p>` : ""}
   ${aviso ? `<p class="tx-alerta done-today">${aviso}${encerrada?` <button class="btn-link" id="verFecho">Ver o fechamento</button>`:""}</p>` : ""}
   <div class="trocar"><p class="rot">Trocar treino <span class="leg"><i></i>próximo</span></p>
@@ -56,7 +51,7 @@ export function viewHoje(){
   document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
     const nova = b.dataset.pick===seq ? null : b.dataset.pick; if((nova||seq)===letra) return;
     escolha = nova; verPrevia = false; const y=scrollY; render(); scrollTo(0,y);
-    if(movimentoOk()) $("#cardHoje .h2-anilha .plate")?.animate([{transform:"translateX(30%) scale(.85)", opacity:0},{transform:"none", opacity:1}],{duration:500, easing:"cubic-bezier(.22,1,.36,1)"});
+    if(movimentoOk()) $("#cardHoje .ct-anilha")?.animate([{transform:"translateX(18%) scale(.9)", opacity:0},{transform:"none", opacity:1}],{duration:500, easing:"cubic-bezier(.22,1,.36,1)"});
   });
 }
 export let verPrevia=false;

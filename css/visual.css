@@ -6,31 +6,12 @@
 /* Cabeçalho: data do dia acima da etapa; na Hoje o "treino N de M" vai para o card */
 .brand .brand-data{display:block;margin:0 0 2px;font:600 var(--t-legenda)/1.1 var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
 body[data-tab="hoje"]:not(.em-sessao) #weekLbl{display:none}
-.hero2 .h2-meta button[aria-expanded="true"] .ic:last-child{transform:rotate(90deg)}
 .trocar .rot .leg{display:inline-flex;align-items:center;gap:6px}
 .trocar .rot .leg i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .h-topo{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--e3);margin:0 0 var(--e4)}
 .h-topo small{display:block;font:600 var(--t-legenda) var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
 .h-topo b{display:block;font:700 var(--t-tela) var(--display);line-height:1}
 .h-topo .icon-btn{flex:none}
-
-/* Card do treino: coluna de texto à esquerda, anilha à direita fora da área do texto, ação dentro do card */
-.hero2{position:relative;overflow:hidden;border-radius:var(--r-g);padding:var(--e5) var(--e5) var(--e4);
-  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 26%,var(--surface)) 0%,var(--surface) 62%);box-shadow:var(--sombra-2)}
-.hero2 .h2-anilha{position:absolute;top:-8px;right:-30px;pointer-events:none}
-.hero2 .h2-anilha .plate{--size:172px}
-.hero2 .h2-txt{position:relative;max-width:calc(100% - 150px);min-height:112px}
-.hero2 .eyebrow{margin:0;font:600 var(--t-legenda) var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
-.hero2 h2{margin:6px 0 4px;font:700 44px/0.95 var(--display)}
-.hero2 .foco{margin:0;font-size:var(--t-sec);color:var(--ink-2);line-height:1.35}
-.hero2 .h2-meta{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin:var(--e4) 0}
-.hero2 .h2-meta span,.hero2 .h2-meta button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r-total);
-  background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink);font:600 var(--t-legenda) var(--body);border:0;cursor:pointer}
-.hero2 .h2-meta .ic{width:15px;height:15px;color:var(--ink-2)}
-.hero2 .btn.grande{position:relative;width:100%;box-shadow:none}
-.hero2 .previa2{position:relative;list-style:none;margin:0 0 var(--e4);padding:0;border-top:1px solid var(--line)}
-.hero2 .previa2 li{display:flex;justify-content:space-between;gap:var(--e3);padding:10px 0;border-bottom:1px solid var(--line);font-size:var(--t-sec)}
-.hero2 .previa2 li span:last-child{color:var(--muted);white-space:nowrap}
 
 /* Trocar treino: fileira de botões iguais; "próximo" vira um ponto, sem rótulo embaixo que desalinha */
 .trocar{margin-top:var(--e5)}
@@ -76,13 +57,6 @@ body[data-tab="hoje"]:not(.em-sessao) #weekLbl{display:none}
 .aj-sub .bloco > label{font:600 var(--t-sec) var(--body)}
 .aj-versao{text-align:center;font-size:var(--t-legenda);color:var(--muted);margin:0}
 .habito + .week2{margin-top:var(--e5);padding-top:var(--e4);border-top:1px solid var(--line)}
-@media (max-width:359px){
-  .hero2{padding:var(--e4)}
-  .hero2 .h2-anilha{right:-34px}
-  .hero2 .h2-anilha .plate{--size:126px}
-  .hero2 .h2-txt{max-width:calc(100% - 104px);min-height:96px}
-  .hero2 h2{font-size:38px}
-}
 
 /* ---------- Anilha 3D realista (card do treino e fechamento) ---------- */
 .a3{--s:170px;width:var(--s);height:var(--s);perspective:calc(var(--s)*5);filter:drop-shadow(0 calc(var(--s)*.07) calc(var(--s)*.08) rgba(0,0,0,.38))}
@@ -121,37 +95,3 @@ body[data-tab="hoje"]:not(.em-sessao) #weekLbl{display:none}
 /* o brilho corre pelo aço só na entrada da tela e ao abrir o resumo (some com animações reduzidas) */
 .entrando .a3-brilho::before,.folha .a3-brilho::before{animation:a3-brilho 1.4s .5s cubic-bezier(.22,1,.36,1) both}
 @keyframes a3-brilho{from{transform:translateX(-70%);opacity:1}to{transform:translateX(70%);opacity:0}}
-
-/* ---------- Card em estúdio (v1.39): fundo infinito (parede → curva → chão), refletor no alto à esquerda (o mesmo lado
-   que ilumina a borda da anilha), poça de luz no chão e a anilha em pé no chão, com sombra de contato e projetada para a
-   direita. Em cima o "palco" (texto e anilha, altura fixa); embaixo, sobre o chão, etiquetas e o botão. ---------- */
-.hero2.estudio{isolation:isolate;background:none;
-  --parede:color-mix(in srgb,var(--c) 6%,#CDD3D9); --curva:color-mix(in srgb,var(--c) 4%,#E3E7EA); --chao:color-mix(in srgb,var(--c) 3%,#F1F3F5); --fundo-chao:#E1E5E8;
-  --luz:rgba(255,255,255,.85); --poca:rgba(255,255,255,.9); --sombra:28,34,42; --forca-sombra:.6}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .hero2.estudio{
-  --parede:color-mix(in srgb,var(--c) 10%,#121519); --curva:color-mix(in srgb,var(--c) 10%,#2a3038); --chao:color-mix(in srgb,var(--c) 7%,#30363e); --fundo-chao:#15191d;
-  --luz:rgba(255,234,210,.26); --poca:rgba(255,238,220,.20); --sombra:0,0,0; --forca-sombra:.95} }
-:root[data-theme="dark"] .hero2.estudio{
-  --parede:color-mix(in srgb,var(--c) 10%,#121519); --curva:color-mix(in srgb,var(--c) 10%,#2a3038); --chao:color-mix(in srgb,var(--c) 7%,#30363e); --fundo-chao:#15191d;
-  --luz:rgba(255,234,210,.26); --poca:rgba(255,238,220,.20); --sombra:0,0,0; --forca-sombra:.95}
-.hero2.estudio::before{content:"";position:absolute;inset:0;z-index:-2;border-radius:inherit;
-  background:
-    radial-gradient(ellipse 70% 120px at 10% 0,var(--luz),transparent 75%),
-    radial-gradient(ellipse 130px 26px at calc(100% - 84px) 152px,var(--poca),transparent 75%),
-    linear-gradient(180deg,var(--parede) 0,var(--parede) 76px,var(--curva) 120px,var(--chao) 140px,var(--fundo-chao) 100%)}
-.hero2.estudio::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
-  background:radial-gradient(ellipse 95% 90% at 40% 30%,transparent 55%,rgba(var(--sombra),.35))}
-.hero2.estudio .h2-anilha{top:22px;right:18px}
-.hero2.estudio .h2-anilha .plate{--size:128px}
-.hero2.estudio .a3{filter:none}
-.hero2.estudio .h2-txt{max-width:none;min-height:134px}
-.hero2.estudio :is(h2,.foco){max-width:calc(100% - 140px)}
-.h2-sombra{position:absolute;pointer-events:none}
-.h2-sombra.contato{left:18%;right:22%;bottom:-5px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(var(--sombra),var(--forca-sombra)),rgba(var(--sombra),0));filter:blur(1px)}
-.h2-sombra.projetada{left:46%;bottom:-6px;width:110%;height:26px;border-radius:50%;
-  background:radial-gradient(ellipse 64% 58% at 20% 55%,rgba(var(--sombra),calc(var(--forca-sombra) * .85)),rgba(var(--sombra),0) 78%);transform:skewX(-50deg);transform-origin:0 100%;filter:blur(3px)}
-@media (max-width:359px){
-  .hero2.estudio .h2-anilha{right:10px;top:40px}
-  .hero2.estudio .h2-anilha .plate{--size:104px}
-  .hero2.estudio :is(h2,.foco){max-width:calc(100% - 112px)}
-}
