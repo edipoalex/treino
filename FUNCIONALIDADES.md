@@ -136,3 +136,21 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   A voz ("Cardio e descanso") fala a frase, menos as do Sem filtro ("Vai!"). Falas desligadas: fica o "VAI!".
 - Balão: um por vez, topo (abaixo do "Desfazer" quando ele aparece), por cima da tela cheia do descanso e do cardio,
   some em 3,5–6 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.
+
+## Sessão de treino redesenhada (v1.42)
+- Modo imersivo: durante o treino saem o cabeçalho do app (data, etapa, Ajustes) e as abas; Ajustes fica no menu "···".
+- Barra da sessão fixa no topo (`topoSessao`): "···", "Treino X · N de M · min", selo da orientação comum e o ícone
+  que troca lista ↔ foco; progresso em segmentos (verde feito, cor do treino na vez).
+- Orientação comum: frase que se repete nas obs de vários itens (`separarNotas`, js/recursos.js) vira o selo e, na lista,
+  um aviso único que pode ser dispensado (`E.atual.notaOk`); cada exercício mostra só a parte dele numa linha que abre.
+- Cabeçalho do exercício: etiqueta do método (`metodoDe`: Contraste, Rest-pause, Bi-set/Tri-set/Circuito, Drop, Pirâmide,
+  HIIT, Zona 2, Isometria, Até a falha), meta "N séries · descanso", cronômetro livre e "Como fazer".
+- Tabela de séries (única fonte da prescrição): feitas com ✓ e a carga usada; a da vez destacada; a selecionada abre os
+  controles de carga na linha (carga por série, pesado/leve, variar por série, bi-set com uma linha por parte), "Última vez",
+  recorde ao alcance e sugestão; rest-pause mostra as etapas como pílulas ("3× falha").
+- Cardio e itens sem séries: cartão com o tempo e a linha das fases.
+- Barra de ação fixa embaixo: no foco "‹ ação ›" (o texto muda pelo tipo); no descanso (nos dois modos) vira o cronômetro
+  com a próxima série e a carga, "+15 s" e pular. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
+- Lista em acordeão: só o exercício aberto mostra o conteúdo; os outros são uma linha com anel de progresso e resumo
+  ("A seguir" no próximo pendente); ao terminar um exercício, o próximo pendente abre sozinho; tocar em outro abre esse.
+- Fonte Inter no app todo (títulos 800, números tabulares), inclusive anilha e cartão para compartilhar.

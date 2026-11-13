@@ -49,3 +49,37 @@ export function recursosDaFicha(f){
   }
   return { cont, avisos };
 }
+
+/* ---------- Sessão de treino (v1.42): etiqueta do método e orientações ----------
+   metodoDe: nome curto da técnica, para a etiqueta acima do nome do exercício ("Contraste", "Rest-pause", "Bi-set",
+   "Drop duplo", "Pirâmide", "HIIT", "Zona 2"…). Lido do começo da prescrição ou dos recursos; "" quando não há. */
+const capt = s => s.charAt(0).toUpperCase() + s.slice(1);
+export function metodoDe(it){
+  const p = String(it?.prescricao ?? "").trim(), nome = String(it?.nome ?? ""), t = tempoDe(it);
+  if(t?.tipo==="intervalo") return t.rotulo;
+  if(t?.tipo==="continuo") return t.zona2 ? "Zona 2" : "Contínuo";
+  if(t?.tipo==="aquecimento") return "";
+  const m = p.match(/^([A-Za-zÀ-ú][A-Za-zÀ-ú -]{1,18}?)\s*(?::|\(|\d)/);
+  if(m && !/^(de|na|no|em|até)\b/i.test(m[1])) return capt(m[1].trim());
+  if(/\bdrop\b/i.test(p)) return "Drop";
+  const partes = nome.split(" + ").length;
+  if(it?.series>0 && partes>=4) return "Circuito";
+  if(it?.series>0 && partes===3) return "Tri-set";
+  if(/bi-?set/i.test(nome) || (it?.series>0 && partes===2)) return "Bi-set";
+  if(t?.tipo==="segurar") return "Isometria";
+  if(/até (o |a )?(próximo da )?falha/i.test(p)) return "Até a falha";
+  return "";
+}
+/* separarNotas: a frase de orientação que se repete em vários itens do treino ("Volta de calibração: …") vale para o
+   treino todo; sai de cada item e aparece uma vez só. Recebe os textos de "obs" dos itens, devolve
+   { comum, rotulo, proprias } (proprias[i] = o que sobra da obs do item i). */
+const frases = s => String(s||"").split(/(?<=[.;!?])\s+/).map(x=>x.replace(/[.;]\s*$/,"").trim()).filter(Boolean);
+export function separarNotas(obs){
+  const fs = obs.map(frases), cont = new Map();
+  for(const lista of fs) for(const f of new Set(lista)) cont.set(f, (cont.get(f)||0)+1);
+  const comItens = fs.filter(l=>l.length).length;
+  const comuns = [...cont].filter(([, n]) => n>=3 || (n>=2 && n===comItens)).map(([f])=>f);
+  const comum = comuns.join(". ");
+  const r = comum.match(/^([^:]{3,26}):/);
+  return { comum, rotulo: comum ? (r ? r[1].trim() : "Dica do treino") : "", proprias: fs.map(l => l.filter(f=>!comuns.includes(f)).join(". ")) };
+}

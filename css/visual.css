@@ -78,7 +78,7 @@ body[data-tab="hoje"]:not(.em-sessao) #weekLbl{display:none}
     radial-gradient(circle at 38% 32%,color-mix(in srgb,var(--c) 90%,#fff) 0%,color-mix(in srgb,var(--c) 80%,#000) 62%,color-mix(in srgb,var(--c) 52%,#000) 100%);
   box-shadow:inset 0 0 0 calc(var(--s)*.005) rgba(0,0,0,.35),inset 0 0 0 calc(var(--s)*.016) rgba(255,255,255,.09),inset calc(var(--s)*-.02) calc(var(--s)*-.035) calc(var(--s)*.06) rgba(0,0,0,.38),inset calc(var(--s)*.015) calc(var(--s)*.02) calc(var(--s)*.03) rgba(255,255,255,.14)}
 .a3-txt{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.a3-txt text{font:700 10.5px "Barlow Condensed",sans-serif;letter-spacing:1.6px;fill:rgba(255,255,255,.86);filter:drop-shadow(0 .5px 0 rgba(0,0,0,.45))}
+.a3-txt text{font:700 9.5px "Inter",sans-serif;letter-spacing:1.2px;fill:rgba(255,255,255,.86);filter:drop-shadow(0 .5px 0 rgba(0,0,0,.45))}
 /* aço escovado: o gradiente cônico imita o reflexo em leque do metal torneado */
 .a3-aco{position:absolute;inset:30%;border-radius:50%;
   background:radial-gradient(circle closest-side,rgba(0,0,0,0) 62%,rgba(0,0,0,.28) 100%),
