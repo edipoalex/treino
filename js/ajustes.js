@@ -7,7 +7,7 @@ import { atualizarSyncUI, enfileirar } from "./sync.js";
 import { applyTheme, confirmar, toast } from "./ui.js";
 // elemento ausente (ex.: index.html de outra versão) vira um objeto vazio, para os Ajustes não travarem a abertura do app
 const $ = s => document.querySelector(s) || {};
-import { falar, desbloquear, ativarSomSilencioso, desativarSomSilencioso } from "./voz.js";
+import { falar, desbloquear } from "./voz.js";
 import { icsLembrete, primeiraData } from "./inteligente.js";
 
 /* ---------- Ajustes ---------- */
@@ -17,7 +17,6 @@ export function marcarPref(){
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefDesc===S.pref.descanso)));
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefAnim===S.pref.animacoes)));
   document.querySelectorAll("[data-pref-voz]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefVoz===S.pref.voz)));
-  const sl=$("#prefSilencioso"); if(sl) sl.checked=!!S.pref.silencioso;
   const ld=$("#lembDias"); if(ld) ld.innerHTML=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map((d,i)=>`<button data-lemb-dia="${i}" aria-pressed="${S.lembrete.dias.includes(i)}">${d}</button>`).join("");
   const lh=$("#lembHora"); if(lh) lh.value=S.lembrete.hora;
 }
@@ -31,8 +30,7 @@ export function iniciarAjustes(){
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.onclick=()=>{ S.pref.animacoes=b.dataset.prefAnim; save(); marcarPref(); aplicarMovimento(); });
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.onclick=()=>{ S.pref.descanso=b.dataset.prefDesc; save(); marcarPref(); $("#descanso")?.remove(); render(); });
   document.querySelectorAll("[data-pref-voz]").forEach(b=>b.onclick=()=>{ S.pref.voz=b.dataset.prefVoz; save(); marcarPref(); });
-  $("#prefSilencioso").onchange=e=>{ S.pref.silencioso=e.target.checked; save(); if(S.pref.silencioso && E.atual) ativarSomSilencioso(); else if(!S.pref.silencioso) desativarSomSilencioso(); };
-  $("#ouvirVoz").onclick=()=>{ if(S.pref.voz==="off"){ toast("A voz está desligada"); return; } desbloquear(); falar("Forte, 30 segundos. Três, dois, um. Leve."); if(!E.atual) setTimeout(desativarSomSilencioso, 6000); };
+  $("#ouvirVoz").onclick=()=>{ if(S.pref.voz==="off"){ toast("A voz está desligada"); return; } desbloquear(); falar("Forte, 30 segundos. Três, dois, um. Leve."); };
   $("#lembDias").onclick=e=>{ const b=e.target.closest("[data-lemb-dia]"); if(!b) return; const d=+b.dataset.lembDia, ds=S.lembrete.dias;
     S.lembrete.dias = ds.includes(d) ? ds.filter(x=>x!==d) : [...ds, d].sort(); save(); marcarPref(); };
   $("#lembHora").onchange=e=>{ if(/^\d{2}:\d{2}$/.test(e.target.value)){ S.lembrete.hora=e.target.value; save(); } };

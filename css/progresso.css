@@ -97,5 +97,3 @@ mark{background:color-mix(in srgb,var(--warn) 30%,transparent);color:inherit;bor
 .share-prev{display:block;width:100%;max-width:360px;margin:0 auto;border-radius:var(--r-g);box-shadow:var(--sombra-2);aspect-ratio:4/5;background:var(--surface-2)}
 .prog-lista .det{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:359px){.prog-lista .mini{display:none}}
-.check-linha{display:flex;align-items:center;gap:var(--e3);min-height:44px;font-size:var(--t-corpo);font-weight:500;color:var(--ink)}
-.check-linha input{width:22px;height:22px;accent-color:var(--ink);flex:none}
