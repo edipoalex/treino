@@ -11,6 +11,7 @@ import { fmtSeg } from "./ui.js";
 import { $, esc } from "./util.js";
 import { falar, vozLigada } from "./voz.js";
 import { falaFase } from "./inteligente.js";
+import { motivar } from "./balao.js";
 
 const PREP = 3;               // segundos para se posicionar
 let tInt = null, ultimoSeg = null, ultimaEtapa = null, avisos = {};
@@ -68,6 +69,7 @@ export function iniciarExec(i, { pausa=null } = {}){
   clearInterval(tInt); tInt=setInterval(tickExec, 200);
   if(telaCheia(S.exec)) abrirTelaExec();
   rerender(); tickExec();
+  if(pausa==null && CARDIO.has(t.tipo)) motivar("cardioInicio", { ex:it.nome });
 }
 /* Etapa atual pelo tempo decorrido (parado enquanto pausado) */
 function agora(X){
@@ -87,12 +89,17 @@ export function tickExec(){
   if(!s){ bip(1046,.4); vibra([200,80,200]); if(CARDIO.has(X.tipo)) falar(X.tipo==="aquecimento"?"Aquecimento concluído":"Cardio concluído"); return finalizar(); }
   const seg=Math.ceil(s.resta), F=FASE[s.e.tipo]||FASE.exec, pausado=!!X.pausadoEm;
   if(s.j!==ultimaEtapa){ if(ultimaEtapa!=null){ bip(...F.som); if(F.vib) vibra(F.vib); aviso(F.aviso);
-      if(s.e.tipo!=="prep") falar(falaFase(nomeFase(s.e)||s.e.rot, s.e.seg)); } ultimaEtapa=s.j; }
+      if(s.e.tipo!=="prep") falar(falaFase(nomeFase(s.e)||s.e.rot, s.e.seg));
+      if(CARDIO.has(X.tipo) && !pausado && (s.e.tipo==="forte" || s.e.tipo==="leve")) motivar(s.e.tipo==="forte" ? "cardioForte" : "cardioLeve"); } ultimaEtapa=s.j; }
   if(seg!==ultimoSeg){ ultimoSeg=seg; if(!pausado && seg<=3 && seg>0 && !["leve","zona","esteira","desaq"].includes(s.e.tipo)){ bip(s.e.tipo==="prep"?660:880); if(X.etapas[s.j+1] || s.e.tipo==="prep") falar(String(seg)); } }
   const total=totalDe(X), dec=total-(X.etapas.slice(s.j+1).reduce((a,e)=>a+e.seg,0)+s.resta);
   if(X.tipo==="continuo"){ // marcas do cardio contínuo
     if(!avisos.meio && dec>=total/2){ avisos.meio=1; aviso("METADE!"); bip(880,.15,2); vibra([150]); falar("Metade"); }
     if(!avisos.fim && s.resta<=Math.min(60, s.e.seg/6)){ avisos.fim=1; aviso("RETA FINAL"); bip(880,.15,1); falar("Reta final"); } }
+  // falas do cardio: metade e reta final (marcadas no cronômetro salvo: não repetem se o app recarregar)
+  if(CARDIO.has(X.tipo) && !pausado && s.e.tipo!=="prep"){ const fl=(X.falas ??= {});
+    if(!fl.meio && dec>=total/2 && total-dec>60){ fl.meio=1; save(); motivar("cardioMetade"); }
+    else if(!fl.fim && total>=180 && total-dec<=Math.min(60, total*.15)){ fl.fim=1; save(); motivar("cardioRetaFinal"); } }
   const fr = s.e.tipo==="prep" ? 0 : s.resta/s.e.seg, prox=X.etapas[s.j+1];
   // botão da série (isometria e pausas, sem tela cheia)
   const b=$("#eBtn");
@@ -124,7 +131,7 @@ function finalizar(){
   if(X.tipo==="segurar") return registrarSerie(X.k);
   if(X.tipo==="pausa"){ (a.rp ??= {})[X.k]=(a.rp[X.k]||0)+1; save(); return rerender(); }
   if(X.tipo==="aquecimento"){ (a.aq ??= {})[X.k]=0; save(); return rerender(); }
-  if(CARDIO.has(X.tipo)){ if(!a.feitos.includes(X.k)) return alternarFeito(X.k); return rerender(); }
+  if(CARDIO.has(X.tipo)){ motivar("cardioFim"); if(!a.feitos.includes(X.k)) return alternarFeito(X.k); return rerender(); }
   rerender();
 }
 /* Parar: na pausa do rest-pause, pula a pausa; nos outros, para sem marcar */

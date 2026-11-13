@@ -11,6 +11,7 @@ import { $, esc } from "./util.js";
 import { desbloquear, falar } from "./voz.js";
 import { falaCarga } from "./inteligente.js";
 import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "./dicas.js";
+import { desenhoBicho, fecharBalao, fraseFimDescanso } from "./balao.js";
 
 /* ---------- Descanso: no botão da série ou em tela cheia (Ajustes › Descanso) ---------- */
 // guardado no aparelho para o cronômetro continuar se o app for recarregado ou fechado no meio do descanso
@@ -37,24 +38,29 @@ export function pararDescanso(rend=true){
 export function tick(){
   const T=S.timer; if(!T) return;
   const r=(T.fim-Date.now())/1000;
-  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); falar(`Vai! ${falaCarga(T.prox)}`, "descanso"); marcar("fimDescanso",{k:T.k}); fimDescanso(T); return; }
+  if(r<=0){ navigator.vibrate?.([200,100,200]); beep();
+    // falas do treinador: uma frase curta no lugar do "VAI!" (a voz não fala as do Sem filtro)
+    const fr=fraseFimDescanso(); falar(`${fr && fr.tom!=="bravo" ? fr.texto : "Vai!"} ${falaCarga(T.prox)}`, "descanso");
+    marcar("fimDescanso",{k:T.k}); fimDescanso(T, fr); return; }
   const txt=fmtSeg(r), fr=Math.max(0,Math.min(1,r/T.total));
   const tt=$("#tTxt"); if(tt){ tt.textContent=txt; $("#tFill").style.transform=`scaleX(${fr})`; tt.closest(".t-btn")?.classList.toggle("low", r<=10); }
   const dt=$("#dTxt"); if(dt){ dt.textContent=txt; const arc=$("#dArc"), C=2*Math.PI*104; arc.setAttribute("stroke-dashoffset",(C*(1-fr)).toFixed(1)); arc.setAttribute("stroke", r<=10?"var(--warn)":"var(--c)"); }
 }
 /* Fim do descanso: o iPhone não vibra em apps da web e o som some no modo silencioso, então o aviso é visual.
    Tela cheia: "VAI!" na cor do treino por 1,5 s antes de fechar. Sempre: a tela pisca na cor do treino e um aviso
-   desce no topo com a próxima série (aparece mesmo com o cartão fora da tela, no modo lista); tocar nele leva ao exercício. */
-function fimDescanso(T){
-  const a=E.atual, L=a ? `L-${esc(a.letra)}` : "", d=$("#descanso");
+   desce no topo com a próxima série (aparece mesmo com o cartão fora da tela, no modo lista); tocar nele leva ao exercício.
+   Com as falas do treinador ligadas (v1.41), o "VAI!" vira uma frase curta com o personagem (fr = { texto, tom }). */
+function fimDescanso(T, fr=null){
+  const a=E.atual, L=a ? `L-${esc(a.letra)}` : "", d=$("#descanso"), vai=esc(fr?.texto || "VAI!");
+  fecharBalao();
   if(d && movimentoOk()){ clearInterval(tInt); tInt=null; delete S.timer; save();
-    d.insertAdjacentHTML("beforeend", `<div class="tc-vai"><b>VAI!</b>${T.prox?`<span>${esc(T.prox)}</span>`:""}</div>`);
-    setTimeout(()=>{ d.remove(); rerender(); }, 1500); }
+    d.insertAdjacentHTML("beforeend", `<div class="tc-vai${fr?" com-frase":""}">${fr?desenhoBicho(fr.tom,96):""}<b>${vai}</b>${T.prox?`<span>${esc(T.prox)}</span>`:""}</div>`);
+    setTimeout(()=>{ d.remove(); rerender(); }, fr ? 2200 : 1500); }
   else pararDescanso();
   document.querySelectorAll(".flash-fim, .aviso-fim").forEach(x=>x.remove());
   if(movimentoOk()){ const f=document.createElement("div"); f.className=`flash-fim ${L}`; document.body.appendChild(f); setTimeout(()=>f.remove(), 2400); }
-  const av=document.createElement("button"); av.className=`aviso-fim ${L}`; av.setAttribute("role","alert");
-  av.innerHTML=`${icone("dumbbell")}<span><b>VAI!</b>${T.prox?`<small>${esc(T.prox)}</small>`:""}</span>`;
+  const av=document.createElement("button"); av.className=`aviso-fim ${L}${fr?" com-frase":""}`; av.setAttribute("role","alert");
+  av.innerHTML=`${(fr && desenhoBicho(fr.tom,40)) || icone("dumbbell")}<span><b>${vai}</b>${T.prox?`<small>${esc(T.prox)}</small>`:""}</span>`;
   av.onclick=()=>{ av.remove(); document.querySelector(".item.ativo, .f-nome")?.scrollIntoView({ behavior:"smooth", block:"center" }); };
   document.body.appendChild(av); setTimeout(()=>av.remove(), 6000);
 }

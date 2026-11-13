@@ -10,6 +10,8 @@ const $ = s => document.querySelector(s) || {};
 import { falar, desbloquear } from "./voz.js";
 import { icsLembrete, primeiraData } from "./inteligente.js";
 import { icone } from "./icones.js";
+import { exemploFala, desenhoBicho } from "./balao.js";
+import { PERSONAGENS } from "./personagens.js";
 
 /* ---------- Ajustes ---------- */
 export const dlg=$("#settings");
@@ -20,7 +22,19 @@ export function marcarPref(){
   document.querySelectorAll("[data-pref-voz]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.prefVoz===S.pref.voz)));
   const ld=$("#lembDias"); if(ld) ld.innerHTML=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map((d,i)=>`<button data-lemb-dia="${i}" aria-pressed="${S.lembrete.dias.includes(i)}">${d}</button>`).join("");
   const lh=$("#lembHora"); if(lh) lh.value=S.lembrete.hora;
+  marcarFalas();
   atualizarMenu();
+}
+/* Ajustes › Motivação */
+const NOMES_TOM={ padrao:"Motivador", zoeira:"Zoeira", bravo:"Sem filtro" };
+function resumoFalas(){ const f=S.pref.falas; return f.tons.length ? f.tons.map(t=>NOMES_TOM[t]).join(" + ") : "Desligadas"; }
+function marcarFalas(){
+  const f=S.pref.falas;
+  document.querySelectorAll("[data-tom]").forEach(b=>b.setAttribute("aria-pressed",String(f.tons.includes(b.dataset.tom))));
+  document.querySelectorAll("[data-freq]").forEach(b=>b.setAttribute("aria-pressed",String(f.freq===b.dataset.freq)));
+  const bx=$("#falasBichos"); if(bx) bx.innerHTML=[...Object.entries(PERSONAGENS).map(([k,p])=>[k,p.nome,desenhoBicho("padrao",56,k,"D")]),
+    ["sortear","Sortear a cada treino",`<span class="sem">?</span>`],["nenhum","Nenhum (só o balão)",`<span class="sem">—</span>`]]
+    .map(([k,n,fig])=>`<button data-bicho="${k}" aria-pressed="${f.bicho===k}">${fig}<span>${n}</span></button>`).join("");
 }
 
 
@@ -33,6 +47,7 @@ function grupos(){
   return [
     ["Durante o treino", [["modo","dumbbell","--pA","Modo do treino", S.pref.modo==="foco"?"Foco":"Lista"],
       ["descanso","timer","--pA","Descanso", S.pref.descanso==="tela"?"Tela cheia":"No botão"],
+      ["falas","message-circle","--pA","Motivação", resumoFalas()],
       ["voz","volume-2","--pA","Voz", {off:"Desligada",cardio:"Cardio",tudo:"Cardio e descanso"}[S.pref.voz]]]],
     ["Aparência", [["tema","palette","--pB","Tema", {auto:"Automático",light:"Claro",dark:"Escuro"}[S.theme]||"Automático"],
       ["anim","wind","--pB","Animações", S.pref.animacoes==="reduzidas"?"Reduzidas":"Completas"]]],
@@ -71,6 +86,12 @@ export function iniciarAjustes(){
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.onclick=()=>{ S.pref.animacoes=b.dataset.prefAnim; save(); marcarPref(); aplicarMovimento(); });
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.onclick=()=>{ S.pref.descanso=b.dataset.prefDesc; save(); marcarPref(); $("#descanso")?.remove(); render(); });
   document.querySelectorAll("[data-pref-voz]").forEach(b=>b.onclick=()=>{ S.pref.voz=b.dataset.prefVoz; save(); marcarPref(); });
+  $("#falasTons").onclick=async e=>{ const b=e.target.closest("[data-tom]"); if(!b) return; const t=b.dataset.tom, f=S.pref.falas;
+    if(t==="bravo" && !f.tons.includes(t) && !(await confirmar({ titulo:"Ligar o estilo Sem filtro?", texto:"As falas desse estilo têm palavrão, xingamento e sarcasmo. Não são faladas em voz alta.", sim:"Ligar", nao:"Cancelar" }))) return;
+    f.tons = f.tons.includes(t) ? f.tons.filter(x=>x!==t) : ["padrao","zoeira","bravo"].filter(x=>x===t || f.tons.includes(x)); save(); marcarFalas(); };
+  $("#falasFreq").onclick=e=>{ const b=e.target.closest("[data-freq]"); if(!b) return; S.pref.falas.freq=b.dataset.freq; save(); marcarFalas(); };
+  $("#falasBichos").onclick=e=>{ const b=e.target.closest("[data-bicho]"); if(!b) return; S.pref.falas.bicho=b.dataset.bicho; save(); marcarFalas(); };
+  $("#verFala").onclick=()=>{ if(!exemploFala()) toast("Marque pelo menos um estilo"); };
   $("#ouvirVoz").onclick=()=>{ if(S.pref.voz==="off"){ toast("A voz está desligada"); return; } desbloquear(); falar("Forte, 30 segundos. Três, dois, um. Leve."); };
   $("#lembDias").onclick=e=>{ const b=e.target.closest("[data-lemb-dia]"); if(!b) return; const d=+b.dataset.lembDia, ds=S.lembrete.dias;
     S.lembrete.dias = ds.includes(d) ? ds.filter(x=>x!==d) : [...ds, d].sort(); save(); marcarPref(); };

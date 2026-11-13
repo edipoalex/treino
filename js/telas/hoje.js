@@ -8,6 +8,7 @@ import { movimentoOk } from "../movimento.js";
 import { limparCronometros } from "../execucao.js";
 import { $, esc } from "../util.js";
 import { cardTreino } from "./card-treino.js";
+import { motivar, zerarTreinoFalas } from "../balao.js";
 import { cartaoRevisao, etapaEncerrada, ligarFechamento, ligarRevisao, painelEtapa, painelSemana, viewFechamento } from "./habito.js";
 
 /* ---------- Views ---------- */
@@ -94,5 +95,8 @@ export function bindPeso(){
 export function iniciar(letra){
   limparCronometros();
   E.atual = { letra, fase: faseAtual(), semana: Math.min(semanaAtual(), FICHA.semanas), volta: voltaAtual(), modo: temExpress(letra) ? modoPadrao() : "completo", inicio: Date.now(), feitos: [], marcas: {}, series: {}, ativo: 0 };
-  escolha = null; verPrevia=false; save(); render(); scrollTo(0,0);
+  escolha = null; verPrevia=false; zerarTreinoFalas(); save(); render(); scrollTo(0,0);
+  // falas: "volta" depois de 4 dias ou mais sem treinar; senão, o início do treino
+  const ult=Object.values(S.etapas).flatMap(e=>e.historico||[]).map(x=>x.data).sort().pop();
+  motivar(ult && (parseISO(hojeISO())-parseISO(ult))/864e5>=4 ? "volta" : "inicioTreino", { letra });
 }

@@ -7,11 +7,13 @@ import { esc } from "../util.js";
 
 export const FOTOS_ANILHA = new Set(["A","B","C","D","E"]);
 export const fotoAnilha = l => `img/anilhas/anilha-${l}.webp`;
+// a máscara da luz usa a foto numa variável CSS: url() relativa seria lida a partir de css/ (404), então vai absoluta
+const urlAbs = u => typeof document!=="undefined" ? new URL(u, document.baseURI).href : u;
 
 export function cardTreino({ letra, chamada, titulo, descricao, minutos, express, exercicios, itens = [], aberto = false }){
   const L = esc(letra), foto = FOTOS_ANILHA.has(letra) ? fotoAnilha(letra) : "";
   const anilha = foto
-    ? `<div class="ct-anilha" aria-hidden="true" style="--img:url('${foto}')">
+    ? `<div class="ct-anilha" aria-hidden="true" style="--img:url('${urlAbs(foto)}')">
         <img class="reflexo" src="${foto}" alt="" decoding="async"><img class="foto" src="${foto}" alt="" decoding="async"><span class="luz"></span><span class="brilho-chao"></span></div>`
     : `<div class="ct-anilha sem-foto" aria-hidden="true">${plate(letra, "d3")}</div>`;
   return `<section class="ct L-${L}" id="cardHoje" aria-label="${esc(titulo)}">
