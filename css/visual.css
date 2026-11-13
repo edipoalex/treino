@@ -121,3 +121,37 @@ body[data-tab="hoje"]:not(.em-sessao) #weekLbl{display:none}
 /* o brilho corre pelo aço só na entrada da tela e ao abrir o resumo (some com animações reduzidas) */
 .entrando .a3-brilho::before,.folha .a3-brilho::before{animation:a3-brilho 1.4s .5s cubic-bezier(.22,1,.36,1) both}
 @keyframes a3-brilho{from{transform:translateX(-70%);opacity:1}to{transform:translateX(70%);opacity:0}}
+
+/* ---------- Card em estúdio (v1.39): fundo infinito (parede → curva → chão), refletor no alto à esquerda (o mesmo lado
+   que ilumina a borda da anilha), poça de luz no chão e a anilha em pé no chão, com sombra de contato e projetada para a
+   direita. Em cima o "palco" (texto e anilha, altura fixa); embaixo, sobre o chão, etiquetas e o botão. ---------- */
+.hero2.estudio{isolation:isolate;background:none;
+  --parede:color-mix(in srgb,var(--c) 6%,#CDD3D9); --curva:color-mix(in srgb,var(--c) 4%,#E3E7EA); --chao:color-mix(in srgb,var(--c) 3%,#F1F3F5); --fundo-chao:#E1E5E8;
+  --luz:rgba(255,255,255,.85); --poca:rgba(255,255,255,.9); --sombra:28,34,42; --forca-sombra:.6}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .hero2.estudio{
+  --parede:color-mix(in srgb,var(--c) 10%,#121519); --curva:color-mix(in srgb,var(--c) 10%,#2a3038); --chao:color-mix(in srgb,var(--c) 7%,#30363e); --fundo-chao:#15191d;
+  --luz:rgba(255,234,210,.26); --poca:rgba(255,238,220,.20); --sombra:0,0,0; --forca-sombra:.95} }
+:root[data-theme="dark"] .hero2.estudio{
+  --parede:color-mix(in srgb,var(--c) 10%,#121519); --curva:color-mix(in srgb,var(--c) 10%,#2a3038); --chao:color-mix(in srgb,var(--c) 7%,#30363e); --fundo-chao:#15191d;
+  --luz:rgba(255,234,210,.26); --poca:rgba(255,238,220,.20); --sombra:0,0,0; --forca-sombra:.95}
+.hero2.estudio::before{content:"";position:absolute;inset:0;z-index:-2;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 70% 120px at 10% 0,var(--luz),transparent 75%),
+    radial-gradient(ellipse 130px 26px at calc(100% - 84px) 152px,var(--poca),transparent 75%),
+    linear-gradient(180deg,var(--parede) 0,var(--parede) 76px,var(--curva) 120px,var(--chao) 140px,var(--fundo-chao) 100%)}
+.hero2.estudio::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(ellipse 95% 90% at 40% 30%,transparent 55%,rgba(var(--sombra),.35))}
+.hero2.estudio .h2-anilha{top:22px;right:18px}
+.hero2.estudio .h2-anilha .plate{--size:128px}
+.hero2.estudio .a3{filter:none}
+.hero2.estudio .h2-txt{max-width:none;min-height:134px}
+.hero2.estudio :is(h2,.foco){max-width:calc(100% - 140px)}
+.h2-sombra{position:absolute;pointer-events:none}
+.h2-sombra.contato{left:18%;right:22%;bottom:-5px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(var(--sombra),var(--forca-sombra)),rgba(var(--sombra),0));filter:blur(1px)}
+.h2-sombra.projetada{left:46%;bottom:-6px;width:110%;height:26px;border-radius:50%;
+  background:radial-gradient(ellipse 64% 58% at 20% 55%,rgba(var(--sombra),calc(var(--forca-sombra) * .85)),rgba(var(--sombra),0) 78%);transform:skewX(-50deg);transform-origin:0 100%;filter:blur(3px)}
+@media (max-width:359px){
+  .hero2.estudio .h2-anilha{right:10px;top:40px}
+  .hero2.estudio .h2-anilha .plate{--size:104px}
+  .hero2.estudio :is(h2,.foco){max-width:calc(100% - 112px)}
+}

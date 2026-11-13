@@ -31,10 +31,10 @@ export function viewHoje(){
   const seq = proxima();
   const qtd = `${t.itens.length} ${t.itens.length>1?"exercícios":"exercício"}`;
   const n=feitosEtapa(), progresso = porVoltas() ? `${Math.min(n+1, totalTreinos())} de ${totalTreinos()}` : `semana ${Math.min(semanaAtual(), FICHA.semanas)} de ${FICHA.semanas}`;
-  /* Card do treino: texto numa coluna à esquerda (nunca por baixo da anilha), anilha 3D à direita, ação dentro do card */
+  /* Card do treino em estúdio: texto à esquerda (nunca por baixo da anilha), anilha 3D em pé no chão à direita, ação dentro do card */
   $("#view").innerHTML = `
-  <section class="hero2 L-${esc(letra)}" id="cardHoje" aria-label="Treino ${esc(letra)}">
-    <div class="h2-anilha" aria-hidden="true">${plate(letra,"d3")}</div>
+  <section class="hero2 estudio L-${esc(letra)}" id="cardHoje" aria-label="Treino ${esc(letra)}">
+    <div class="h2-anilha" aria-hidden="true"><span class="h2-sombra projetada"></span><span class="h2-sombra contato"></span>${plate(letra,"d3")}</div>
     <div class="h2-txt"><p class="eyebrow">${titulo} · ${progresso}</p><h2>Treino ${esc(letra)}</h2><p class="foco">${esc(t.foco)}</p></div>
     <div class="h2-meta"><span>${icone("clock")} ${Math.round(totalMin(t))} min</span>${tEx?`<span>${icone("zap")} Express ${Math.round(totalMin(tEx))} min</span>`:""}
       <button id="verPrevia" aria-expanded="${!!verPrevia}" aria-controls="previaHoje">${icone("list")} ${qtd} ${icone("chevron-right")}</button></div>
