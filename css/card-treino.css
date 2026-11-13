@@ -1,0 +1,94 @@
+/* ---------- Card do treino premium (v1.40): estúdio fotográfico com a anilha em foto ----------
+   Tudo escala com a largura do card (container query: 1cqw = 1% da largura do card), nas proporções aprovadas no protótipo.
+   Textos, ícones e botão são HTML/SVG; a anilha é uma imagem independente (img/anilhas/anilha-X.webp, fundo transparente).
+   O card é sempre escuro (é uma "foto de estúdio"), nos dois temas. Componente em js/telas/card-treino.js. */
+.ct{--c1:var(--c);--c2:color-mix(in srgb,var(--c) 75%,#000);--glow:120,130,140;--rim:184,196,208;--on:#fff;
+  container-type:inline-size;position:relative;isolation:isolate;overflow:hidden;border-radius:clamp(22px,5.4cqw,32px);
+  color:#fff;font-family:"Inter",system-ui,-apple-system,sans-serif;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04)}
+/* cor de cada treino: botão (degradê), brilho e luz de contorno */
+.ct.L-A{--c1:#FF5A5F;--c2:#C9252C;--glow:214,52,59;--rim:255,90,95}
+.ct.L-B{--c1:#4C93FF;--c2:#1F5FD1;--glow:47,111,219;--rim:90,160,255}
+.ct.L-C{--c1:#FFD34D;--c2:#E0A800;--glow:227,178,28;--rim:255,211,77;--on:#1A1A1A}
+.ct.L-D{--c1:#21E66B;--c2:#00B84D;--glow:24,201,99;--rim:33,230,107}
+.ct.L-E{--c1:#8D9BAB;--c2:#5A6676;--glow:125,138,153;--rim:184,196,208}
+/* estúdio: luz de canto na cor do treino (alto à esquerda), feixe de luz de cima sobre a anilha, poça de luz no chão, vinheta */
+.ct::before{content:"";position:absolute;inset:0;z-index:-2;
+  background:
+    radial-gradient(ellipse 85cqw 70cqw at -6% -10%,rgba(var(--glow),.42),rgba(var(--glow),.12) 45%,transparent 72%),
+    linear-gradient(155deg,rgba(var(--glow),.16) 0%,transparent 42%),
+    radial-gradient(ellipse 9cqw 44cqw at 75% -6%,rgba(255,255,255,.20),transparent 72%),
+    radial-gradient(ellipse 30cqw 58cqw at 75% -10%,rgba(255,255,255,.08),transparent 70%),
+    radial-gradient(ellipse 36cqw 9cqw at 76% 55%,rgba(var(--rim),.18),transparent 72%),
+    radial-gradient(ellipse 50cqw 14cqw at 74% 57%,rgba(255,255,255,.12),transparent 72%),
+    radial-gradient(ellipse 120cqw 100cqw at 55% 30%,transparent 48%,rgba(0,0,0,.5) 100%),
+    linear-gradient(180deg,#060808 0%,#0a0d0d 34%,#171b1c 44%,#121617 56%,#0a0d0d 76%,#070909 100%)}
+/* textura fina de concreto no chão */
+.ct::after{content:"";position:absolute;inset:40% 0 0;z-index:-1;opacity:.55;mix-blend-mode:soft-light;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.6'/></svg>");
+  -webkit-mask:linear-gradient(180deg,transparent,#000 30%);mask:linear-gradient(180deg,transparent,#000 30%)}
+
+/* palco: texto à esquerda e a anilha em pé no chão à direita; a altura cobre a anilha e o trecho mais visível do reflexo */
+.ct-palco{position:relative;padding:6.6cqw 4.5cqw 0;min-height:53.6cqw}
+.ct-anilha{position:absolute;z-index:0;left:56cqw;top:7cqw;width:39cqw;pointer-events:none}
+.ct-anilha img{display:block;width:100%;height:auto}
+/* contorno na cor do treino (rim light) e sombra de volume */
+.ct-anilha .foto{filter:drop-shadow(0 0 .9cqw rgba(var(--rim),.38)) drop-shadow(-.6cqw -.4cqw 1.6cqw rgba(var(--rim),.18)) drop-shadow(0 2.2cqw 2.4cqw rgba(0,0,0,.55)) contrast(1.06) saturate(1.05)}
+/* luz principal só sobre a anilha (máscara = a própria imagem): realce no alto à esquerda, sombra embaixo à direita */
+.ct-anilha .luz{position:absolute;left:0;right:0;top:0;aspect-ratio:490/527;pointer-events:none;mix-blend-mode:soft-light;
+  -webkit-mask:var(--img) center/contain no-repeat;mask:var(--img) center/contain no-repeat;
+  background:radial-gradient(ellipse 70% 55% at 28% 18%,rgba(255,255,255,.30),transparent 62%),radial-gradient(ellipse 80% 70% at 85% 95%,rgba(0,0,0,.38),transparent 65%)}
+/* chão levemente reflexivo: a anilha espelhada, desfocada e sumindo para baixo */
+.ct-anilha .reflexo{position:absolute;left:0;right:0;top:97%;transform:scaleY(-1);opacity:.42;filter:blur(1.6px) saturate(1.15) brightness(.8);
+  -webkit-mask:linear-gradient(0deg,#000 0%,rgba(0,0,0,.45) 20%,transparent 46%);mask:linear-gradient(0deg,#000 0%,rgba(0,0,0,.45) 20%,transparent 46%)}
+.ct-anilha .brilho-chao{position:absolute;left:-30%;right:-30%;top:93%;height:22%;pointer-events:none;z-index:-1;
+  background:radial-gradient(ellipse 50% 40% at 50% 30%,rgba(255,255,255,.07),transparent 75%)}
+/* sombra de contato sob a base e sombra projetada para a direita (a luz vem da esquerda) */
+.ct-anilha::after{content:"";position:absolute;left:12%;right:8%;bottom:-1.5%;height:7%;border-radius:50%;z-index:-1;background:radial-gradient(closest-side,rgba(0,0,0,.9),transparent)}
+.ct-anilha::before{content:"";position:absolute;left:55%;bottom:-2%;width:80%;height:10%;border-radius:50%;z-index:-1;
+  background:radial-gradient(ellipse 60% 55% at 20% 55%,rgba(0,0,0,.6),transparent 75%);transform:skewX(-45deg);filter:blur(3px)}
+/* treino sem foto de anilha (letras F a H): a anilha 3D do app */
+.ct-anilha.sem-foto{left:52cqw;top:4cqw;width:auto}
+.ct-anilha.sem-foto .plate{--size:42cqw}
+
+/* textos: elementos de interface, chapados */
+.ct-eyebrow{position:relative;margin:0;font-weight:600;font-size:2.45cqw;letter-spacing:.16cqw;text-transform:uppercase;color:#B8C0C5;line-height:1.2}
+.ct-titulo{position:relative;margin:3.2cqw 0 0;font-weight:800;font-size:9.6cqw;line-height:1;letter-spacing:-.34cqw;color:#fff;max-width:52cqw}
+.ct-sub{position:relative;margin:2.4cqw 0 0;font-weight:400;font-size:3.05cqw;line-height:1.4;color:#D0D5D8;max-width:44cqw}
+
+/* etiquetas numa linha, abaixo do reflexo */
+.ct-info{position:relative;z-index:1;display:flex;flex-wrap:nowrap;gap:1.6cqw;padding:3.4cqw 4.5cqw 0}
+.ct-pill{display:inline-flex;align-items:center;gap:1.3cqw;height:7cqw;padding:0 2.3cqw;border-radius:999px;white-space:nowrap;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);color:#fff;font-family:inherit;font-weight:600;font-size:2.55cqw;line-height:1;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:background .18s}
+button.ct-pill{cursor:pointer}
+.ct-pill:hover{background:rgba(255,255,255,.12)}
+.ct-pill .ic{width:2.8cqw;height:2.8cqw;flex:none;color:#E6EAEC}
+.ct-pill[aria-expanded="true"] .ic:last-child{transform:rotate(90deg)}
+/* lista de exercícios (abre ao tocar em "N exercícios") */
+.ct-previa{position:relative;z-index:1;list-style:none;margin:3cqw 4.5cqw 0;padding:0;border-top:1px solid rgba(255,255,255,.1)}
+.ct-previa li{display:flex;justify-content:space-between;gap:3cqw;padding:2.4cqw 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:3.2cqw;color:#E6EAEC}
+.ct-previa li span:last-child{color:#9AA4AB;white-space:nowrap}
+
+/* botão principal */
+.ct-acao{position:relative;z-index:1;padding:5cqw 4.5cqw 8.6cqw}
+.ct-btn{display:flex;align-items:center;justify-content:center;gap:2.6cqw;width:100%;height:14cqw;border:0;border-radius:4.6cqw;cursor:pointer;
+  background:linear-gradient(180deg,var(--c1),var(--c2));color:var(--on);font-family:inherit;font-weight:700;font-size:4.3cqw;line-height:1;letter-spacing:-.02em;
+  box-shadow:0 1.2cqw 3cqw -1cqw rgba(var(--glow),.55),0 0 0 1px rgba(255,255,255,.08) inset,0 .3cqw 0 rgba(255,255,255,.18) inset;
+  transition:filter .18s,transform .18s}
+.ct-btn:hover{filter:brightness(1.07)}
+.ct-btn:active{transform:scale(.985)}
+.ct-btn .ic{width:4.9cqw;height:4.9cqw}
+.ct-btn:focus-visible,.ct-pill:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+/* telas estreitas: textos com um pouco mais de tamanho relativo para continuarem legíveis */
+@container (max-width:340px){
+  .ct-eyebrow{font-size:3.1cqw}.ct-sub{font-size:3.9cqw;max-width:47cqw}.ct-titulo{font-size:11cqw}
+  .ct-anilha{left:55cqw;top:9cqw;width:41cqw}
+  .ct-info{gap:1.4cqw}
+  .ct-pill{height:9.6cqw;font-size:3.25cqw;padding:0 2.2cqw;gap:1.2cqw}.ct-pill .ic{width:3.4cqw;height:3.4cqw}
+  .ct-btn{height:16cqw;font-size:5.6cqw}
+  .ct-previa li{font-size:4cqw}
+}
+@media (prefers-reduced-motion:reduce){.ct-btn,.ct-pill{transition:none}}
+html[data-mov="reduzido"] .ct-btn,html[data-mov="reduzido"] .ct-pill{transition:none}

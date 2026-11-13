@@ -104,11 +104,11 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 
 ## Tela Hoje, visual e dados
 - Cabeçalho com a data do dia acima da etapa; na Hoje o "treino N de M" vai para dentro do card (nas outras abas continua no topo).
-- Card do treino (`.hero2.estudio`): cenário de estúdio, com fundo infinito (parede → curva → chão), refletor no alto à
-  esquerda, poça de luz e a anilha 3D em pé no chão com sombra de contato e projetada para a direita; claro vira fundo
-  branco de foto de produto. Em cima o "palco" (texto e anilha); embaixo, sobre o chão, etiquetas e botão.
-  Texto numa coluna fixa à esquerda que nunca passa por baixo da anilha;
-  duração, express e número de exercícios em etiquetas com ícone; "N exercícios" abre a lista dentro do card; "Iniciar treino" dentro do card.
+- Card do treino premium (`js/telas/card-treino.js`, `css/card-treino.css`): estúdio escuro (nos dois temas) com luz de canto
+  na cor do treino, feixe de luz de cima, chão de concreto levemente reflexivo e a anilha em foto (`img/anilhas/anilha-X.webp`,
+  fundo transparente, A–E; letras sem foto usam a anilha 3D), com contorno na cor, sombra de contato e reflexo. Título, descrição,
+  duração, express e "N exercícios" (abre a lista no card) numa linha abaixo do reflexo; "Iniciar treino" na cor do treino.
+  Tudo escala com a largura do card (container query); fonte Inter.
 - Trocar treino: botões iguais com a anilha plana e a letra; o próximo da sequência tem um ponto verde.
 - Revisão da semana passada abaixo do treino do dia; semana com bolinhas planas na cor da letra.
 - Anilhas (`js/anilha.js`): 3D realista nos tamanhos grandes (`plate(l,"d3")`: card, resumo, fechamento), em pé e girada
