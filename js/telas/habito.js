@@ -42,7 +42,7 @@ export function painelSemana(){
   const r=sequencia(todas.map(x => x.data), alvo, hoje), t=textoSequencia(r), seg=segunda(hoje);
   const nomes=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
   const dias=nomes.map((n, i) => { const iso=somarDias(seg, i), h=todas.filter(x => x.data===iso).pop();
-    return `<div class="d ${i===r.dow?"today":""}">${h?plate(h.letra,"xs"):`<span class="slot"></span>`}<span>${n}</span></div>`; }).join("");
+    return `<div class="d ${i===r.dow?"today":""}"><span class="bol ${h?`f L-${esc(h.letra)}`:""}" ${h?`aria-label="Treino ${esc(h.letra)}"`:""}>${h?esc(h.letra):""}</span><span>${n}</span></div>`; }).join("");
   const chamas=r.semanas.map(w => `<i class="${w.ok?"sim":""} ${w.atual?"agora":""}"></i>`).join("");
   const u=ultimo(), durs=E.historico.filter(x => x.duracao>0).map(x => x.duracao);
   const media=durs.length ? Math.round(durs.reduce((a, b) => a+b, 0)/durs.length) : null;
@@ -51,7 +51,7 @@ export function painelSemana(){
     <div class="habito">${anelMeta(r.n, alvo)}
       <div class="seq ${t.zero?"zero":""}"><div class="linha-ic">${icone("flame")}<b>${t.titulo}</b></div><p class="${t.cls}">${t.texto}</p>
       <div class="chamas" role="img" aria-label="Meta batida em ${r.semanas.filter(w => w.ok && !w.atual).length} das 7 semanas anteriores">${chamas}</div></div></div>
-    <div class="week">${dias}</div>
+    <div class="week2">${dias}</div>
     ${rodape?`<p class="mt-3 tx-sec meta">${rodape}</p>`:""}</section>`;
 }
 

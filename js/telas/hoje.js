@@ -30,55 +30,34 @@ export function viewHoje(){
   const titulo = feito && !escolha ? "Próximo treino" : (escolha && escolha!==proxima() ? "Treino escolhido" : "Treino de hoje");
   const seq = proxima();
   const qtd = `${t.itens.length} ${t.itens.length>1?"exercícios":"exercício"}`;
-  $("#view").innerHTML = `${cartaoRevisao()}
-  <section class="hoje-card marcado L-${esc(letra)}" id="cardHoje" role="button" tabindex="0" aria-expanded="${!!verPrevia}"
-    aria-label="Treino ${esc(letra)}: toque para ${verPrevia?"voltar":"ver os exercícios"}">
-    <div class="marca" aria-hidden="true">${plate(letra,"md semtexto")}</div>
-    <div class="face frente" ${verPrevia?"hidden":""}>
-      <div class="flex1"><p class="meta">${titulo}</p><h2>Treino ${esc(letra)}</h2>
-      <p class="meta">${esc(t.foco)} · ~${Math.round(totalMin(t))} min${tEx?` · express ~${Math.round(totalMin(tEx))} min`:""}</p>
-      <span class="virar">${icone("list")} ${qtd}</span></div>
-    </div>
-    <div class="face verso" ${verPrevia?"":"hidden"}>
-      <div class="verso-cab"><b>Treino ${esc(letra)}</b><span class="meta">${qtd}</span></div>
-      <ul class="previa">${t.itens.map(it=>`<li><span>${esc(it.nome)}</span><span>${it.series?`${it.series} ${it.series>1?"séries":"série"}`:`${it.bloco} min`}</span></li>`).join("")}</ul>
-      <span class="virar">${icone("rotate-ccw")} Voltar</span>
-    </div>
+  const n=feitosEtapa(), progresso = porVoltas() ? `${Math.min(n+1, totalTreinos())} de ${totalTreinos()}` : `semana ${Math.min(semanaAtual(), FICHA.semanas)} de ${FICHA.semanas}`;
+  /* Card do treino: texto numa coluna à esquerda (nunca por baixo da anilha), anilha 3D à direita, ação dentro do card */
+  $("#view").innerHTML = `
+  <section class="hero2 L-${esc(letra)}" id="cardHoje" aria-label="Treino ${esc(letra)}">
+    <div class="h2-anilha" aria-hidden="true">${plate(letra,"d3")}</div>
+    <div class="h2-txt"><p class="eyebrow">${titulo} · ${progresso}</p><h2>Treino ${esc(letra)}</h2><p class="foco">${esc(t.foco)}</p></div>
+    <div class="h2-meta"><span>${icone("clock")} ${Math.round(totalMin(t))} min</span>${tEx?`<span>${icone("zap")} Express ${Math.round(totalMin(tEx))} min</span>`:""}
+      <button id="verPrevia" aria-expanded="${!!verPrevia}" aria-controls="previaHoje">${icone("list")} ${qtd} ${icone("chevron-right")}</button></div>
+    ${verPrevia?`<ul class="previa2" id="previaHoje">${t.itens.map(it=>`<li><span>${esc(it.nome)}</span><span>${it.series?`${it.series} ${it.series>1?"séries":"série"}`:`${it.bloco} min`}</span></li>`).join("")}</ul>`:""}
+    <button class="btn primary cor grande block L-${esc(letra)}" id="startBtn">${icone("play")} Iniciar treino</button>
   </section>
   ${feito ? `<p class="done-today">Treino ${esc(feito.letra)} concluído hoje. Este é o próximo da sequência.</p>` : ""}
   ${aviso ? `<p class="tx-alerta done-today">${aviso}${encerrada?` <button class="btn-link" id="verFecho">Ver o fechamento</button>`:""}</p>` : ""}
-  <div class="escolher" role="group" aria-label="Escolher outro treino">${LETRAS.map(l=>`<button aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}<span>${l===seq?"próximo":"&nbsp;"}</span></button>`).join("")}</div>
-  <div class="mt-3 stack">
-    <button class="btn primary cor grande block L-${esc(letra)}" id="startBtn">${icone("play")} Iniciar treino</button>
-  </div>
+  <div class="trocar"><p class="rot">Trocar treino <span class="leg"><i></i>próximo</span></p>
+    <div class="fila" role="group" aria-label="Escolher outro treino" style="--n:${LETRAS.length}">${LETRAS.map(l=>`<button class="L-${esc(l)}" aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}${esc(l)}${l===seq?`<span class="prox"></span>`:""}</button>`).join("")}</div></div>
+  ${cartaoRevisao().replace('class="revisao ','class="revisao compacta ')}
   ${painelSemana()}
   ${painelEtapa()}
   ${pesoPanel()}`;
   bindPeso(); ligarRevisao($("#view"));
   $("#verFecho") && ($("#verFecho").onclick = () => { E.fechoDispensado=false; save(); render(); scrollTo(0,0); });
   $("#startBtn").onclick = () => iniciar(letra);
-  const card=$("#cardHoje");
-  card.onclick = () => virarCard(card);
-  card.onkeydown = e => { if(e.key==="Enter" || e.key===" "){ e.preventDefault(); virarCard(card); } };
+  $("#verPrevia").onclick = () => { verPrevia=!verPrevia; const y=scrollY; render(); scrollTo(0,y); };
   document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
     const nova = b.dataset.pick===seq ? null : b.dataset.pick; if((nova||seq)===letra) return;
-    escolha = nova; verPrevia = false; render();
-    if(movimentoOk()) $("#cardHoje .plate")?.animate([{transform:"perspective(500px) rotateY(-80deg) scale(.8)", opacity:0},{transform:"none", opacity:1}],{duration:550, easing:"cubic-bezier(.22,1,.36,1)"});
+    escolha = nova; verPrevia = false; const y=scrollY; render(); scrollTo(0,y);
+    if(movimentoOk()) $("#cardHoje .h2-anilha .plate")?.animate([{transform:"translateX(30%) scale(.85)", opacity:0},{transform:"none", opacity:1}],{duration:500, easing:"cubic-bezier(.22,1,.36,1)"});
   });
-}
-/* Vira o card: frente (treino) e verso (exercícios). Gira até a borda, troca a face e volta, ajustando a altura. */
-function virarCard(c){
-  verPrevia=!verPrevia;
-  const trocar=()=>{ c.querySelector(".frente").hidden=verPrevia; c.querySelector(".verso").hidden=!verPrevia;
-    c.setAttribute("aria-expanded",String(verPrevia)); c.setAttribute("aria-label",`${c.querySelector("h2").textContent}: toque para ${verPrevia?"voltar":"ver os exercícios"}`); };
-  if(!movimentoOk() || !c.animate){ trocar(); return; }
-  const h0=c.offsetHeight, p="perspective(900px) ";
-  // a troca de face não pode depender só do fim da animação (em segundo plano ela pode não terminar)
-  let trocou=false;
-  const meio=()=>{ if(trocou) return; trocou=true; trocar(); const h1=c.offsetHeight;
-    c.animate([{transform:p+"rotateY(-90deg)", height:h0+"px", overflow:"hidden"},{transform:p+"rotateY(0)", height:h1+"px", overflow:"hidden"}],{duration:280, easing:"cubic-bezier(.22,1,.36,1)"}); };
-  c.animate([{transform:p+"rotateY(0)"},{transform:p+"rotateY(90deg)"}],{duration:150, easing:"ease-in"}).onfinish=meio;
-  setTimeout(meio, 200);
 }
 export let verPrevia=false;
 export function pesoPanel(){

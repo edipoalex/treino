@@ -1,42 +1,53 @@
-/* Anilhas em SVG.
-   - 3D (grandes: tela Hoje e resumo): olímpica de borracha girada levemente no eixo vertical, com a espessura à direita.
-   - De frente (pequenas: semana, histórico, seletores): aro colorido e a letra no cubo de metal, legível até 30 px.
-   As cores vêm das variáveis do tema (--c = cor do treino, --on = cor do texto sobre ela), via classe L-A, L-B…
-   Os gradientes compartilhados (#an-luz, #an-me, #an-fu, #an-lat, #an-parede) e a máscara do furo vazado (#an-vazado)
-   ficam num <svg> escondido no início do index.html.
-   Furo na 3D: a face está girada e a espessura aparece à direita, então pelo furo se vê a parede interna do cubo
-   (à esquerda) e, onde a abertura da frente e a de trás se sobrepõem, o fundo atrás da anilha (vazado). */
+/* Anilhas (v1.38).
+   - 3D realista (grandes: card do treino, resumo, fechamento): camadas de CSS 3D, em pé e girada no eixo vertical.
+     Borracha fosca com frisos e "TREINO A" impresso, espessura visível na borda (iluminada pela esquerda, como
+     a face), inserto de aço escovado (gradiente cônico = reflexo em leque do metal), 6 parafusos, colar e
+     furo vazado (máscara: aparece o fundo). Um brilho corre pelo aço na entrada da tela. Estilos em css/visual.css.
+   - Plana (pequenas: botões de troca, listas, histórico): o mesmo desenho de frente, em SVG, legível até ~30 px.
+   A cor vem de --c (classe L-A, L-B…). Os ids do SVG são únicos por desenho, para várias anilhas na mesma tela. */
 import { esc } from "./util.js";
 
-const F = 'font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700"';
-const COR = 'style="fill:var(--c)"';
+let seq = 0;
+const novoId = () => `an${(++seq).toString(36)}`;
 
-// face da anilha (coordenadas 0–100); detalhada = furo, sulco e "TREINO"; senão a letra vai no cubo
-function face(L, detalhada, texto=true, d3=false){
-  const aro = `<circle cx="50" cy="50" r="47" ${COR}/><circle cx="50" cy="50" r="47" fill="url(#an-luz)"/>
-    <circle cx="50" cy="50" r="45.6" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="2.8"/>
-    <circle cx="50" cy="50" r="43.8" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1"/>`;
-  if(!detalhada) return aro + `<circle cx="50" cy="50" r="31" fill="url(#an-me)" stroke="#000" stroke-opacity=".4" stroke-width="1.2"/>
-    <circle cx="50" cy="50" r="25" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="2"/>
-    <text x="50" y="65" text-anchor="middle" font-size="44" ${F} fill="#1d232a">${L}</text>`;
-  return aro + `<circle cx="50" cy="50" r="32.5" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="1.6"/>
-    <circle cx="50" cy="50" r="31.3" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1"/>
-    <circle cx="50" cy="50" r="19" fill="url(#an-me)" stroke="#000" stroke-opacity=".35" stroke-width="1"/>
-    <circle cx="50" cy="50" r="14.5" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.4"/>
-    ${d3 ? `<circle cx="50" cy="50" r="9" fill="url(#an-parede)"/><circle cx="50" cy="50" r="9" fill="url(#an-fu)" opacity=".55"/><circle cx="50" cy="50" r="9" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".8"/>`
-         : `<circle cx="50" cy="50" r="9" fill="#0d1014"/><circle cx="50" cy="50" r="9" fill="url(#an-fu)"/>`}
-    ${texto?`<text x="50" y="27.5" text-anchor="middle" font-size="19" ${F} style="fill:var(--on)">${L}</text>
-    <text x="50" y="81" text-anchor="middle" font-size="7.5" font-weight="600" fill-opacity=".85" letter-spacing=".6" font-family="Barlow Condensed, Arial Narrow, sans-serif" style="fill:var(--on)">TREINO</text>`:""}`;
+/* Plana, de frente. texto: "TREINO A" na borracha (só faz sentido a partir de ~56 px) */
+export function anilhaPlana(letra, { texto=false } = {}){
+  const id = novoId(), L = esc(letra);
+  const parafusos = [0,60,120,180,240,300].map(a => { const r=14.5, t=(a-90)*Math.PI/180, x=50+r*Math.cos(t), y=50+r*Math.sin(t);
+    return `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.5" fill="#7D858E"/><circle cx="${(x-.35).toFixed(2)}" cy="${(y-.35).toFixed(2)}" r=".6" fill="#E9EDF1"/>`; }).join("");
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><defs>
+    <mask id="${id}m"><rect width="100" height="100" fill="#fff"/><circle cx="50" cy="50" r="6.2" fill="#000"/></mask>
+    <radialGradient id="${id}l" cx="32%" cy="26%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+    <linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3F5F7"/><stop offset=".5" stop-color="#C3C9D0"/><stop offset="1" stop-color="#9AA2AB"/></linearGradient>
+    ${texto?`<path id="${id}t" d="M 22 50 A 28 28 0 0 1 78 50"/>`:""}</defs>
+    <g mask="url(#${id}m)">
+      <circle cx="50" cy="50" r="48.5" style="fill:color-mix(in srgb, var(--c) 80%, #101418)"/>
+      <circle cx="50" cy="50" r="48.5" fill="url(#${id}l)"/>
+      <circle cx="50" cy="50" r="47" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width=".8"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#000" stroke-opacity=".16" stroke-width="1.4"/>
+      <circle cx="50" cy="50" r="36.6" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width=".8"/>
+      ${texto?`<text font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="11" letter-spacing="1.5" fill="#fff" fill-opacity=".9"><textPath href="#${id}t" startOffset="50%" text-anchor="middle">TREINO ${L}</textPath></text>`:""}
+      <circle cx="50" cy="50" r="20.5" fill="#000" fill-opacity=".22"/>
+      <circle cx="50" cy="50" r="19.5" fill="url(#${id}a)"/>
+      <circle cx="50" cy="50" r="19.5" fill="none" stroke="#000" stroke-opacity=".25" stroke-width=".7"/>
+      ${parafusos}
+      <circle cx="50" cy="50" r="9.5" fill="#D6DBE1" stroke="#000" stroke-opacity=".22" stroke-width=".7"/>
+      <circle cx="50" cy="50" r="7.4" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="1.2"/>
+    </g></svg>`;
 }
 
-export function anilhaSVG(letra, { d3=false, detalhada=false, texto=true } = {}){
-  const L = esc(letra);
-  if(!d3) return `<svg viewBox="0 0 100 100" aria-hidden="true">${face(L, detalhada, texto)}</svg>`;
-  const cx = 46, sx = .84, esp = 8, rx = (47*sx).toFixed(1);
-  const lado = `M${cx} 3 L${cx+esp} 3 A${rx} 47 0 0 1 ${cx+esp} 97 L${cx} 97 A${rx} 47 0 0 0 ${cx} 3 Z`;
-  return `<svg viewBox="0 0 100 100" aria-hidden="true">
-    <ellipse cx="${cx+esp+2}" cy="54" rx="${rx}" ry="45" fill="#000" fill-opacity=".25"/>
-    <path d="${lado}" ${COR}/><path d="${lado}" fill="url(#an-lat)"/>
-    <path d="M${cx+esp/2} 3 A${rx} 47 0 0 1 ${cx+esp/2} 97" fill="none" stroke="#000" stroke-opacity=".25" stroke-width=".8"/>
-    <g transform="translate(${cx} 50) scale(${sx} 1) translate(-50 -50)"><g ${detalhada?'mask="url(#an-vazado)"':""}>${face(L, detalhada, texto, true)}</g></g></svg>`;
+/* 3D realista. O tamanho vem de --s (no .plate, igual ao --size) */
+export function anilha3D(letra, { espessura=16 } = {}){
+  const id = novoId(), L = esc(letra);
+  const camadas = Array.from({length:espessura}, (_,i) => `<span class="a3-ca" style="--z:calc(var(--s) * ${(-(i+1)*0.0095).toFixed(4)})"></span>`).join("");
+  const parafusos = [0,60,120,180,240,300].map(a => `<span class="a3-bolt" style="--a:${a}deg"></span>`).join("");
+  return `<div class="a3" aria-hidden="true"><div class="a3-giro">${camadas}
+    <div class="a3-face"><div class="a3-borracha"></div>
+      <svg class="a3-txt" viewBox="0 0 100 100" focusable="false"><defs><path id="${id}t" d="M 21 50 A 29 29 0 0 1 79 50"/></defs>
+        <text><textPath href="#${id}t" startOffset="50%" text-anchor="middle">TREINO ${L}</textPath></text></svg>
+      <div class="a3-aco"><div class="a3-brilho"></div>${parafusos}<div class="a3-colar"></div></div>
+    </div></div></div>`;
 }
+
+/* Compatível com a chamada antiga: d3 → 3D realista; senão, plana */
+export function anilhaSVG(letra, { d3=false, texto=false } = {}){ return d3 ? anilha3D(letra) : anilhaPlana(letra, { texto }); }

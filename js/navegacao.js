@@ -13,6 +13,7 @@ export const nav = { tab:"hoje", fichaFase:null, fichaLetra:null, progEx:null };
 export function render(){
   header();
   document.body.classList.toggle("em-sessao", nav.tab==="hoje" && !!E.atual);
+  document.body.dataset.tab = nav.tab;
   $("#view").onclick=null; $("#view").onchange=null; $("#view").onpointerdown=null;
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===nav.tab ? "page" : "false"));
   ({hoje:viewHoje, ficha:viewFicha, progresso:viewProgresso, historico:viewHistorico, guia:viewGuia})[nav.tab]();

@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="css/telas.css">
 <link rel="stylesheet" href="css/habito.css">
 <link rel="stylesheet" href="css/progresso.css">
+<link rel="stylesheet" href="css/visual.css">
 <link rel="stylesheet" href="css/acabamento.css">
 <link rel="stylesheet" href="css/movimento.css">
 </head>
@@ -40,7 +41,7 @@
 </defs></svg>
 <header class="top">
   <div class="wrap">
-    <p class="brand"><span id="brandTxt">Treino</span> <small id="weekLbl"></small></p>
+    <p class="brand"><small class="brand-data" id="dataTxt"></small><span id="brandTxt">Treino</span> <small id="weekLbl"></small></p>
     <span class="spacer"></span>
     <button class="icon-btn" id="openSettings" aria-label="Ajustes" style="position:relative"><span class="sync-dot" id="syncDot" hidden></span>
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
@@ -63,76 +64,70 @@
 <dialog id="settings" aria-labelledby="setTitle">
   <div class="sheet">
     <div class="grab"></div>
-    <h2 id="setTitle">Ajustes</h2>
-    <div class="field">
-      <label>Tema</label>
-      <div class="seg" id="themeSeg">
-        <button data-theme-opt="auto">Automático</button><button data-theme-opt="light">Claro</button><button data-theme-opt="dark">Escuro</button>
-      </div>
+    <!-- Menu: grupos por tema, uma linha por ajuste com o valor atual; cada linha abre a página dele (js/ajustes.js) -->
+    <div id="ajMenu">
+      <h2 id="setTitle">Ajustes</h2>
+      <div class="aj" id="ajGrupos"></div>
+      <div class="mt-4 stack"><button class="btn block primary" id="closeSettings">Fechar</button></div>
+      <p class="versao aj-versao" id="versaoTxt"></p>
     </div>
-    <div class="field">
-      <label>Modo do treino</label>
+    <section class="aj-sub" data-pag="modo" hidden>
+      <h3>Modo do treino</h3><p class="ajuda">Como os exercícios aparecem durante o treino.</p>
       <div class="seg" id="modoSeg"><button data-pref-modo="lista">Lista</button><button data-pref-modo="foco">Foco</button></div>
-      <p class="meta" style="font-size:14px">Lista: todos os exercícios na tela. Foco: um exercício por vez.</p>
-    </div>
-    <div class="field">
-      <label>Descanso</label>
+      <p class="ajuda">Lista: todos os exercícios na tela. Foco: um exercício por vez.</p>
+    </section>
+    <section class="aj-sub" data-pag="descanso" hidden>
+      <h3>Descanso</h3><p class="ajuda">Onde aparece o cronômetro entre as séries.</p>
       <div class="seg" id="descSeg"><button data-pref-desc="botao">No botão</button><button data-pref-desc="tela">Tela cheia</button></div>
-      <p class="meta" style="font-size:14px">No botão: o botão da série vira o cronômetro. Tela cheia: mostra a próxima série e a carga.</p>
-    </div>
-    <div class="field">
-      <label>Animações</label>
-      <div class="seg" id="animSeg"><button data-pref-anim="completas">Completas</button><button data-pref-anim="reduzidas">Reduzidas</button></div>
-      <p class="meta" style="font-size:14px">Reduzidas: sem transições nem efeitos. O "reduzir movimento" do celular também desliga.</p>
-    </div>
-    <div class="field">
-      <label>Voz</label>
+      <p class="ajuda">No botão: o botão da série vira o cronômetro. Tela cheia: mostra a próxima série e a carga.</p>
+    </section>
+    <section class="aj-sub" data-pag="voz" hidden>
+      <h3>Voz</h3><p class="ajuda">Fala as fases do cardio e dos cronômetros ("Forte, 30 segundos", "3, 2, 1"). Com descanso, também avisa a próxima série.</p>
       <div class="seg" id="vozSeg"><button data-pref-voz="off">Desligada</button><button data-pref-voz="cardio">Cardio</button><button data-pref-voz="tudo">Cardio e descanso</button></div>
-      <p class="meta tx-sec">No iPhone, a voz e os bipes não tocam com o modo silencioso ligado (limite do iPhone para apps da web); o aviso visual do fim do descanso continua.</p>
-      <p class="meta tx-sec">Fala as fases do cardio e dos cronômetros ("Forte, 30 segundos", "3, 2, 1"). Com descanso, também avisa a próxima série. <button class="btn-link" id="ouvirVoz">Ouvir exemplo</button></p>
-    </div>
-    <div class="field">
-      <label>Lembretes no Calendário</label>
+      <button class="btn" id="ouvirVoz">Ouvir exemplo</button>
+      <p class="ajuda">No iPhone, a voz e os bipes não tocam com o modo silencioso ligado (limite do iPhone para apps da web); o aviso visual do fim do descanso continua.</p>
+    </section>
+    <section class="aj-sub" data-pag="tema" hidden>
+      <h3>Tema</h3>
+      <div class="seg" id="themeSeg"><button data-theme-opt="auto">Automático</button><button data-theme-opt="light">Claro</button><button data-theme-opt="dark">Escuro</button></div>
+      <p class="ajuda">Automático segue o tema do iPhone.</p>
+    </section>
+    <section class="aj-sub" data-pag="anim" hidden>
+      <h3>Animações</h3>
+      <div class="seg" id="animSeg"><button data-pref-anim="completas">Completas</button><button data-pref-anim="reduzidas">Reduzidas</button></div>
+      <p class="ajuda">Reduzidas: sem transições nem efeitos. O "reduzir movimento" do iPhone também desliga.</p>
+    </section>
+    <section class="aj-sub" data-pag="lemb" hidden>
+      <h3>Lembretes</h3><p class="ajuda">Um evento semanal no Calendário, com alerta 15 min antes.</p>
       <div class="dias-sel" id="lembDias" role="group" aria-label="Dias de treino"></div>
-      <div class="mt-2 row"><input type="time" id="lembHora" aria-label="Horário do treino"><button class="btn" id="lembBtn">Adicionar ao Calendário</button></div>
-      <p class="meta tx-sec">Cria um evento semanal com alerta 15 min antes. Para mudar, gere de novo e apague o antigo no Calendário.</p>
-    </div>
-    <div class="field">
-      <label for="startDate">Início da etapa (define semana e fase)</label>
-      <input type="date" id="startDate">
-    </div>
-    <div class="field">
-      <label for="phaseMode">Fase</label>
-      <select id="phaseMode">
-        <option value="auto">Automática pela contagem de treinos</option>
-        <option value="1">Sempre fase 1</option>
-        <option value="2">Sempre fase 2</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Meta de peso</label>
-      <div class="row">
-        <div class="kgfield" style="flex:1"><input id="metaKg" inputmode="decimal" placeholder="—" aria-label="Meta em kg"><span>kg</span></div>
-        <input type="date" id="metaData" aria-label="Data da meta" style="flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);padding:0 12px;font-size:16px;min-width:0">
-      </div>
-    </div>
-    <div class="field">
-      <label>Planilha Google (fonte dos dados)</label>
+      <div class="bloco"><label for="lembHora">Horário</label><input type="time" id="lembHora"></div>
+      <button class="btn primary" id="lembBtn">Adicionar ao Calendário</button>
+      <p class="ajuda">Para mudar, gere de novo e apague o evento antigo no Calendário.</p>
+    </section>
+    <section class="aj-sub" data-pag="etapa" hidden>
+      <h3 id="ajEtapaTit">Etapa</h3><p class="ajuda">Define a semana e a fase da ficha.</p>
+      <div class="bloco"><label for="startDate">Início da etapa</label><input type="date" id="startDate"></div>
+      <div class="bloco"><label for="phaseMode">Fase</label>
+        <select id="phaseMode"><option value="auto">Automática pela contagem de treinos</option><option value="1">Sempre fase 1</option><option value="2">Sempre fase 2</option></select></div>
+      <button class="btn block danger" id="resetBtn">Apagar histórico desta etapa</button>
+    </section>
+    <section class="aj-sub" data-pag="meta" hidden>
+      <h3>Meta de peso</h3><p class="ajuda">Aparece no peso da semana e no gráfico do Histórico.</p>
+      <div class="bloco"><label for="metaKg">Peso alvo</label><div class="kgfield"><input id="metaKg" inputmode="decimal" placeholder="Ex.: 80,0"><span>kg</span></div></div>
+      <div class="bloco"><label for="metaData">Até quando</label><input type="date" id="metaData"></div>
+    </section>
+    <section class="aj-sub" data-pag="planilha" hidden>
+      <h3>Planilha Google</h3><p class="ajuda">Fonte dos dados: sessões, cargas, peso e fichas.</p>
       <div class="sync-box" id="syncBox"></div>
-    </div>
-    <div class="field">
-      <label>Backup dos dados deste aparelho</label>
+    </section>
+    <section class="aj-sub" data-pag="backup" hidden>
+      <h3>Backup</h3><p class="ajuda">Os dados deste aparelho num arquivo.</p>
       <div class="row">
-        <button class="btn" id="exportBtn" style="flex:1">Exportar</button>
-        <label class="btn" style="flex:1;font-weight:600" for="importFile">Importar</label>
+        <button class="btn flex1" id="exportBtn">Exportar</button>
+        <label class="btn flex1 forte" for="importFile">Importar</label>
         <input type="file" id="importFile" accept="application/json" class="sr">
       </div>
-    </div>
-    <div class="stack">
-      <button class="btn block danger" id="resetBtn">Apagar histórico desta etapa</button>
-      <button class="btn block primary" id="closeSettings">Fechar</button>
-    </div>
-    <p class="versao" id="versaoTxt"></p>
+    </section>
   </div>
 </dialog>
 <div class="nova-versao" id="novaVersao" hidden><span>Nova versão do app disponível</span><button class="btn" id="atualizarApp">Atualizar</button></div>
