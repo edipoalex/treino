@@ -9,6 +9,7 @@ import { recordeAlcance, sugestaoCarga } from "./inteligente.js";
 import { maximos } from "./metricas.js";
 import { icone } from "./icones.js";
 import { esc, fmtNum } from "./util.js";
+import { motivar } from "./balao.js";
 
 /* Recordes de todas as etapas; recalculados só quando o número de sessões muda */
 let memo = { n:-1, m:{} };
@@ -41,6 +42,7 @@ export function usarSugestao(it, i, pi, g){
   if(cargaPorSerie(it) && variaPorSerie(it)){ const j=[...Array(it.series).keys()].find(k=>k>=fs && grupoDaSerie(it,k)===g); if(j!=null) planejar(it,i,j,v,s.u); }
   else salvarCarga(chaveCarga(partesDe(it)[pi], g), v, s.u);
   (a.sugOff ??= {})[idSug(i,pi,g)] = true; save(); rerender();
+  motivar("cargaSubiu", { ex:it.nome, carga:`${v} ${s.u==="kg"?"kg":"placas"}` });
 }
 export function dispensarSugestao(id){ const a=E.atual; if(!a) return; (a.sugOff ??= {})[id]=true; save(); rerender(); }
 

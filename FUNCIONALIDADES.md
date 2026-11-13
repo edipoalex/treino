@@ -95,7 +95,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 | Guia consultável | Busca em orientações, métodos, cardio e exercícios da fase atual (dicas de `guia` da ficha ou da base), com atalho para o progresso | Aba Guia |
 | Cartão para compartilhar | Imagem 1080×1350 desenhada no aparelho; sem peso e sem cargas por padrão; recordes e volume opcionais | Resumo do treino, fechamento da etapa |
 | Lembretes | Dias e horário em Ajustes viram um evento semanal (.ics) com alerta 15 min antes | Ajustes › Lembretes |
-| Voz | Ajustes › Voz: desligada, cardio (fases do cardio e dos cronômetros, "3, 2, 1", metade, reta final) ou cardio e descanso (também "Vai! Série…"). Alto-falante na tela de fases silencia na hora. No iPhone, voz e bipes não tocam no modo silencioso (limite de apps da web; tocar como mídia não resolveu e pausava a música, removido na v1.37) | Tela de fases, fim do descanso |
+| Voz | Ajustes › Voz: desligada, cardio (fases do cardio e dos cronômetros, "3, 2, 1", metade, reta final) ou cardio e descanso (também "Vai! Série…", ou a frase do treinador). Alto-falante na tela de fases silencia na hora. No iPhone, voz e bipes não tocam no modo silencioso (limite de apps da web; tocar como mídia não resolveu e pausava a música, removido na v1.37) | Tela de fases, fim do descanso |
 
 ## Fundação visual
 - Medidas e cores só por tokens (`css/tokens.css`, cores em `css/base.css`); nada de tamanho solto nem estilo inline.
@@ -118,3 +118,21 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   uma página própria; "Apagar histórico" fica dentro da página da etapa.
 - Cores das letras A–H; animações respeitam Ajustes › Animações e "reduzir movimento".
 - Sincronização com a planilha, catálogo de fichas e validação: ver README.
+
+## Falas do treinador (v1.41)
+- Personagem em balão que comenta o treino. Repertório em `js/falas.js` (por momento e estilo, 4+ frases por estilo),
+  decisão em `js/motivacao.js` (puro, `tests/motivacao.test.js`), tela em `js/balao.js` + `css/balao.css`,
+  personagens em `js/personagens.js` (SVG, na cor do treino, 3 expressões).
+- Ajustes › Motivação (`S.pref.falas`): estilos Motivador, Zoeira e Sem filtro (+18, pede confirmação; marque um ou mais,
+  nenhum desliga), frequência Pouca/Normal/Muita e personagem (Kettão, Anilhão, Halterzão, Wall Ballzão, Trenzão,
+  sortear a cada treino ou nenhum). Padrão: Motivador + Zoeira, Normal, Kettão.
+- Momentos e ganchos: início do treino ou volta após 4+ dias (`iniciar`), início de exercício (foco ao avançar, lista ao
+  tocar, sem série feita), série, antes da última série, exercício concluído e recorde (`registrarSerie`, `alternarFeito`),
+  carga aumentada (`usarSugestao`), cardio início/forte/leve/metade/reta final/fim (`execucao.js`), treino concluído ou
+  meta da semana (`concluir`).
+- Anti-cansaço: intervalo mínimo e limite por treino pela frequência, chance por momento, grandes momentos sempre falam;
+  sorteio sem repetição (últimas 20 não voltam). Estado em `S.mot` (contadores zerados ao iniciar; continua após recarregar).
+- Fim do descanso: a frase troca o "VAI!" no aviso do topo e na tela cheia, com o personagem; não conta no limite.
+  A voz ("Cardio e descanso") fala a frase, menos as do Sem filtro ("Vai!"). Falas desligadas: fica o "VAI!".
+- Balão: um por vez, topo (abaixo do "Desfazer" quando ele aparece), por cima da tela cheia do descanso e do cardio,
+  some em 3,5–6 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.

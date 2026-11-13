@@ -12,6 +12,13 @@ export function load(){
 }
 export function novaEtapa(){ return { inicio:"", faseModo:"auto", historico:[], cargas:{}, atual:null }; }
 /* Completa e limpa o estado (do navegador ou de um backup importado). Versão em S.v. */
+/* Ajustes › Motivação: estilos marcados (vazio = falas desligadas), frequência e personagem */
+const TONS_OK=["padrao","zoeira","bravo"], BICHOS_OK=["kettle","anilha","halter","bola","treno","sortear","nenhum"];
+export function prefFalas(f){
+  if(!f || typeof f!=="object") return { tons:["padrao","zoeira"], freq:"normal", bicho:"kettle" };
+  return { tons: Array.isArray(f.tons) ? TONS_OK.filter(t=>f.tons.includes(t)) : ["padrao","zoeira"],
+    freq: ["pouca","normal","muita"].includes(f.freq) ? f.freq : "normal", bicho: BICHOS_OK.includes(f.bicho) ? f.bicho : "kettle" };
+}
 export function normalizarEstado(S){
   if(!S || typeof S!=="object") S={};
   if(!["auto","light","dark"].includes(S.theme)) S.theme="auto";
@@ -40,7 +47,12 @@ export function normalizarEstado(S){
   if(!S.variar || typeof S.variar!=="object" || Array.isArray(S.variar)) S.variar = {};
   if(!RX.data.test(S.revisaoVista||"")) delete S.revisaoVista; // última revisão da semana vista (segunda-feira)
   S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas",
-    voz: ["off","cardio","tudo"].includes(S.pref?.voz) ? S.pref.voz : "cardio" };
+    voz: ["off","cardio","tudo"].includes(S.pref?.voz) ? S.pref.voz : "cardio", falas: prefFalas(S.pref?.falas) };
+  // falas do treinador (v1.41): sorteio sem repetição e contadores do treino em andamento
+  { const m=S.mot && typeof S.mot==="object" ? S.mot : {};
+    S.mot = { ultimoEm: num(m.ultimoEm) ? m.ultimoEm : 0, noTreino: num(m.noTreino) ? m.noTreino : 0,
+      sacos: m.sacos && typeof m.sacos==="object" && !Array.isArray(m.sacos) ? Object.fromEntries(Object.entries(m.sacos).filter(([,v])=>Array.isArray(v) && v.every(Number.isInteger))) : {},
+      recentes: Array.isArray(m.recentes) ? m.recentes.filter(x=>typeof x==="string").slice(-20) : [] }; }
   // lembretes no Calendário (fase 4): dias (0 = segunda) e horário
   { const l=S.lembrete, dias=Array.isArray(l?.dias) ? [...new Set(l.dias.filter(d=>Number.isInteger(d) && d>=0 && d<7))].sort() : [];
     S.lembrete = { dias: dias.length ? dias : [0,1,3,4], hora: /^\d{2}:\d{2}$/.test(l?.hora||"") ? l.hora : "18:00" }; }

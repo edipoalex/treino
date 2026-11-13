@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="css/visual.css">
 <link rel="stylesheet" href="css/card-treino.css">
 <link rel="stylesheet" href="css/acabamento.css">
+<link rel="stylesheet" href="css/balao.css">
 <link rel="stylesheet" href="css/movimento.css">
 </head>
 <body>
@@ -87,6 +88,21 @@
       <div class="seg" id="vozSeg"><button data-pref-voz="off">Desligada</button><button data-pref-voz="cardio">Cardio</button><button data-pref-voz="tudo">Cardio e descanso</button></div>
       <button class="btn" id="ouvirVoz">Ouvir exemplo</button>
       <p class="ajuda">No iPhone, a voz e os bipes não tocam com o modo silencioso ligado (limite do iPhone para apps da web); o aviso visual do fim do descanso continua.</p>
+    </section>
+    <section class="aj-sub" data-pag="falas" hidden>
+      <h3>Motivação</h3><p class="ajuda">Um personagem comenta o treino em balões: no início, nas séries, nos recordes, no cardio e no fim. No fim do descanso, a frase entra no lugar do "VAI!".</p>
+      <h4 class="aj-tit">Estilos das falas</h4><p class="ajuda">Marque um ou mais. Com mais de um, o app sorteia a cada balão. Nenhum marcado desliga as falas.</p>
+      <div class="aj-tons" id="falasTons">
+        <button data-tom="padrao"><b>Motivador</b><span>Frases de personal: "Treino pago! Muito bem!"</span></button>
+        <button data-tom="zoeira"><b>Zoeira</b><span>Memes e esculhambação: "BIRL! Volta pro ferro!"</span></button>
+        <button data-tom="bravo"><b>Sem filtro (+18)</b><span>Bravo, sarcástico e com palavrão: "Levanta, porra!"</span></button>
+      </div>
+      <h4 class="aj-tit">Frequência</h4>
+      <div class="seg" id="falasFreq"><button data-freq="pouca">Pouca</button><button data-freq="normal">Normal</button><button data-freq="muita">Muita</button></div>
+      <p class="ajuda">Pouca: até 6 balões por treino, com 2 min 30 s entre eles. Normal: até 12, com 1 min 15 s. Muita: até 20, com 40 s. Início e fim do treino, recorde e meta da semana sempre aparecem.</p>
+      <h4 class="aj-tit">Personagem</h4>
+      <div class="aj-bichos" id="falasBichos"></div>
+      <button class="btn" id="verFala">Ver um exemplo</button>
     </section>
     <section class="aj-sub" data-pag="tema" hidden>
       <h3>Tema</h3>

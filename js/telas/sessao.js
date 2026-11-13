@@ -14,6 +14,7 @@ import { ligarSentir, marcoDoTreino, semanasSeguidas, sentirHtml } from "./habit
 import { abrirCompartilhar, dataCurta, urlApp } from "../compartilhar.js";
 import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "../dicas.js";
 import { icone } from "../icones.js";
+import { motivar } from "../balao.js";
 import { acaoTempo, alternarLivre, limparCronometros, marcarAproximacao, minimizarExec, previaFases, avancarParte, iniciarExec, livreDe, livreHtml, pararExec, playLivre, zerarLivre } from "../execucao.js";
 
 /* ---------- Sessão: peças comuns aos modos lista e foco ---------- */
@@ -168,11 +169,11 @@ export function cliqueSessao(e){
     // a unidade vale para o exercício todo, inclusive as cargas planejadas por série
     if(a.plan?.[i]){ const u=cargaDe(chaveCarga(partesDe(it)[pi], gruposDe(it)[gi]||"")).u; for(const k in a.plan[i]) a.plan[i][k].u=u; save(); rerender(); }
     return; }
-  if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); return rerender(true); }
+  if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); rerender(true); return comecoExercicio(a, nv); }
   if(el.id==="sMenu") return menuSessao();
   if(el.id==="sLista") return listaGeral();
   if(el.id==="finishBtn") return concluir();
-  if(d.item!=null && el.matches("[data-item]")){ const i=+d.item; if(a.ativo!==i){ a.ativo=i; save(); rerender(); } }
+  if(d.item!=null && el.matches("[data-item]")){ const i=+d.item; if(a.ativo!==i){ a.ativo=i; save(); rerender(); comecoExercicio(a, i); } }
 }
 export function registrarSerie(i){
   const a=E.atual, t=treinoAtual(a), it=t.itens[i]; a.series ??= {};
@@ -181,6 +182,7 @@ export function registrarSerie(i){
   if(temCarga(it)){ const g=grupoDaSerie(it,f); ((a.cs ??= {})[i] ??= [])[f] = { r:ser[f]?.r ?? "", g, c:cargasDaSerieF(it,i,f,a,g) }; }
   if(a.rp) delete a.rp[i];
   delete a.selC; marcar("fimDescanso",{k:null});
+  const rec = temCarga(it) ? recordeSerie(it,i,f) : null;   // antes de registrar: a série passa o melhor já feito?
   const tl=Math.round(livreDe(i)); if(tl>0){ ((a.tm ??= {})[i] ??= [])[f]=tl; S.livre.acum=0; if(S.livre.ini) S.livre.ini=Date.now(); }
   a.series[i]=f+1; a.ativo=i; navigator.vibrate?.(15); marcar("serie",{i, j:f, fim:f+1===it.series});
   const fimEx = a.series[i]===it.series;
@@ -193,11 +195,20 @@ export function registrarSerie(i){
   const seguinte=t.itens[i+1];
   const prox = !fimEx ? `Série ${f+2} · ${rotSerie(ser[f+1])}${temCarga(it)?` · ${cargaPorSerie(it) ? cargaDaSerie(it,i,f+1,a) : cargaResumo(it, grupoDaSerie(it,f+1))}`:""}` : (seguinte ? `Próximo: ${seguinte.nome}` : "");
   if(!fimEx || seguinte) iniciarDescanso(i, it.descanso, prox); else rerender();
+  if(rec) motivar("recorde", { ex:it.nome, carga:`${fmtNum(rec.v)} ${rec.u==="kg"?"kg":"placas"}` });
+  else if(fimEx) motivar("exercicioFeito", { ex:it.nome });
+  else if(f+2===it.series) motivar("ultimaSerie", { ex:it.nome });
+  else motivar("serie", { ex:it.nome, n:f+1, total:it.series });
+}
+/* falas: começo de um exercício (aberto no foco ou tocado na lista, ainda sem série feita) */
+function comecoExercicio(a, i){
+  const it=treinoAtual(a).itens[i]; if(it && !a.feitos.includes(i) && !(a.series?.[i])) motivar("inicioExercicio", { ex:it.nome });
 }
 export function alternarFeito(i){
   const a=E.atual, k=a.feitos.indexOf(i); a.marcas ??= {};
   if(k>=0){ a.feitos.splice(k,1); delete a.marcas[i]; }
   else { a.feitos.push(i); a.marcas[i]=Date.now(); navigator.vibrate?.(15); marcar("feito",{i}); if(S.timer?.k===i) pararDescanso(false);
+    motivar("exercicioFeito", { ex:treinoAtual(a).itens[i].nome });
     desfazer(`${treinoAtual(a).itens[i].nome} feito`, ()=>{ const j=a.feitos.indexOf(i); if(j>=0){ a.feitos.splice(j,1); delete a.marcas[i]; } save(); rerender(); }); }
   save(); rerender();
 }
@@ -293,6 +304,7 @@ export async function concluir(){
   E.atual=null; limparCronometros(); save(); pararDescanso(false); enviarCargasPendentes(); manterTela(false); $("#desfazer")?.remove();
   const marco=marcoDoTreino(); // meta da semana, semana perfeita, metade da etapa... (depois de registrar a sessão)
   render(); scrollTo(0,0);
+  { const ctx={ letra:a.letra, bicho:a.bicho }; setTimeout(()=>motivar(marco.m && ["meta","perfeita"].includes(marco.m.tipo) ? "metaSemana" : "treinoFim", ctx), 400); }
   folha(`<div class="linha-ic L-${esc(a.letra)}">${plate(a.letra,"sm d3")}<div><h3>Treino ${esc(a.letra)} concluído</h3><p class="meta">${x.inicio}–${x.fim}</p></div></div>
     <div class="stats"><div class="stat"><b data-contar="${x.duracao}">${x.duracao}</b><span>min</span></div><div class="stat"><b data-contar="${seriesFeitas}">${seriesFeitas}</b><span>séries</span></div>${vol?`<div class="stat"><b ${vol>=1000?`data-contar="${Math.round(vol/100)/10}" data-dec="1" data-suf=" t"`:`data-contar="${Math.round(vol)}" data-suf=" kg"`}>${fmtVolume(vol)}</b><span>volume</span></div>`:`<div class="stat"><b>${x.feitos}/${x.total}</b><span>itens</span></div>`}</div>
     ${vol && volAnt ? `<p class="meta">Volume ${difVol>=0?"+":"−"}${Math.abs(difVol)}% sobre o último treino ${esc(a.letra)}.</p>` : ""}
