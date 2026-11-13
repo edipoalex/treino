@@ -2,7 +2,7 @@
    Arquivos do app: rede primeiro (versão nova assim que publicada), cache se estiver offline.
    Fontes do Google: cache primeiro (não mudam).
    A planilha (script.google.com) e qualquer POST passam direto, sem cache. */
-const CACHE = "treino-v11";
+const CACHE = "treino-v12";
 // scripts/validar.mjs confere que todo arquivo de css/ e js/ está nesta lista
 const ARQUIVOS = [
   "./", "manifest.json", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png",
@@ -43,7 +43,8 @@ self.addEventListener("fetch", e => {
   // guarda sem a query (?v=…), para a checagem de versão não encher o cache
   const chave = url.origin + url.pathname;
   // no-cache: revalida com o servidor, para não misturar módulos de versões diferentes
-  const rede = req.mode === "navigate" ? fetch(req) : fetch(req, { cache: "no-cache" });
+  // a página também revalida: um index.html antigo do cache HTTP com módulos novos quebrava a abertura
+  const rede = req.mode === "navigate" ? fetch(req.url, { cache: "no-cache", credentials: "same-origin", redirect: "manual" }) : fetch(req, { cache: "no-cache" });
   e.respondWith(rede.then(res => {
     if (res.ok) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(chave, copia)); }
     return res;
