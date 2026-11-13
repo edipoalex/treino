@@ -5,7 +5,8 @@ import { render } from "./navegacao.js";
 import { fmtKg, hojeISO, parseKg } from "./progresso.js";
 import { atualizarSyncUI, enfileirar } from "./sync.js";
 import { applyTheme, confirmar, toast } from "./ui.js";
-import { $ } from "./util.js";
+// elemento ausente (ex.: index.html de outra versão) vira um objeto vazio, para os Ajustes não travarem a abertura do app
+const $ = s => document.querySelector(s) || {};
 import { falar, desbloquear, ativarSomSilencioso, desativarSomSilencioso } from "./voz.js";
 import { icsLembrete, primeiraData } from "./inteligente.js";
 
