@@ -122,6 +122,7 @@ export function chartVolume(){
 }
 /* Recordes de carga de todas as etapas (registradas por série a partir da v1.18) */
 let verRecordes=false;
+export const alternarRecordes = () => { verRecordes=!verRecordes; };
 export function painelRecordes(){
   const todas=Object.values(S.etapas).flatMap(e=>e.historico||[]);
   const rs=Object.values(maximos(todas)).sort((a,b)=>b.data.localeCompare(a.data) || a.k.localeCompare(b.k));
@@ -165,8 +166,6 @@ export function viewHistorico(){
     ${!parseKg(S.meta.kg)?`<p class="mt-3 tx-sec meta">Defina a meta de peso em Ajustes para ver a linha de meta.</p>`:""}
   </section>
 
-  ${painelRecordes()}
-  ${chartVolume()}
   ${painelTempo()}
 
   <section class="pb-2 panel" aria-labelledby="hSes"><h3 id="hSes">Sessões</h3>
@@ -182,7 +181,6 @@ export function viewHistorico(){
     const x=E.historico.find(y=>y.id===b.dataset.senId); if(!x) return toast("Este treino ainda não tem identificação; sincronize e tente de novo");
     abrirSensacao(x, ()=>{ const y=scrollY; render(); scrollTo(0,y); });
   });
-  $("#verRecordes") && ($("#verRecordes").onclick=()=>{ verRecordes=!verRecordes; const y=scrollY; render(); scrollTo(0,y); });
   $("#verTodas") && ($("#verTodas").onclick=()=>{ verTodas=!verTodas; const y=scrollY; render(); scrollTo(0,y); });
   $("#undoBtn") && ($("#undoBtn").onclick=async()=>{ if(await confirmar({ titulo:"Remover o último treino registrado?", texto:"Some também da planilha.", sim:"Remover", nao:"Manter", perigo:true })){ const x=E.historico.pop(); if(x?.id) enfileirar({tipo:"delSessao", id:x.id}); else save(); toast("Registro removido"); render(); }});
   $("#pAdd").onclick=()=>{

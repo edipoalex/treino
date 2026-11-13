@@ -9,6 +9,8 @@ import { alternarFeito, registrarSerie, rerender, treinoAtual } from "./telas/se
 import { icone } from "./icones.js";
 import { fmtSeg } from "./ui.js";
 import { $, esc } from "./util.js";
+import { falar, vozLigada } from "./voz.js";
+import { falaFase } from "./inteligente.js";
 
 const PREP = 3;               // segundos para se posicionar
 let tInt = null, ultimoSeg = null, ultimaEtapa = null, avisos = {};
@@ -82,14 +84,15 @@ function aviso(txt){ const d=$("#execTela"); if(!d || !txt) return; const a=docu
 export function tickExec(){
   const X=S.exec; if(!X) return;
   const s=agora(X);
-  if(!s){ bip(1046,.4); vibra([200,80,200]); return finalizar(); }
+  if(!s){ bip(1046,.4); vibra([200,80,200]); if(CARDIO.has(X.tipo)) falar(X.tipo==="aquecimento"?"Aquecimento concluído":"Cardio concluído"); return finalizar(); }
   const seg=Math.ceil(s.resta), F=FASE[s.e.tipo]||FASE.exec, pausado=!!X.pausadoEm;
-  if(s.j!==ultimaEtapa){ if(ultimaEtapa!=null){ bip(...F.som); if(F.vib) vibra(F.vib); aviso(F.aviso); } ultimaEtapa=s.j; }
-  if(seg!==ultimoSeg){ ultimoSeg=seg; if(!pausado && seg<=3 && seg>0 && !["leve","zona","esteira","desaq"].includes(s.e.tipo)) bip(s.e.tipo==="prep"?660:880); }
+  if(s.j!==ultimaEtapa){ if(ultimaEtapa!=null){ bip(...F.som); if(F.vib) vibra(F.vib); aviso(F.aviso);
+      if(s.e.tipo!=="prep") falar(falaFase(nomeFase(s.e)||s.e.rot, s.e.seg)); } ultimaEtapa=s.j; }
+  if(seg!==ultimoSeg){ ultimoSeg=seg; if(!pausado && seg<=3 && seg>0 && !["leve","zona","esteira","desaq"].includes(s.e.tipo)){ bip(s.e.tipo==="prep"?660:880); if(X.etapas[s.j+1] || s.e.tipo==="prep") falar(String(seg)); } }
   const total=totalDe(X), dec=total-(X.etapas.slice(s.j+1).reduce((a,e)=>a+e.seg,0)+s.resta);
   if(X.tipo==="continuo"){ // marcas do cardio contínuo
-    if(!avisos.meio && dec>=total/2){ avisos.meio=1; aviso("METADE!"); bip(880,.15,2); vibra([150]); }
-    if(!avisos.fim && s.resta<=Math.min(60, s.e.seg/6)){ avisos.fim=1; aviso("RETA FINAL"); bip(880,.15,1); } }
+    if(!avisos.meio && dec>=total/2){ avisos.meio=1; aviso("METADE!"); bip(880,.15,2); vibra([150]); falar("Metade"); }
+    if(!avisos.fim && s.resta<=Math.min(60, s.e.seg/6)){ avisos.fim=1; aviso("RETA FINAL"); bip(880,.15,1); falar("Reta final"); } }
   const fr = s.e.tipo==="prep" ? 0 : s.resta/s.e.seg, prox=X.etapas[s.j+1];
   // botão da série (isometria e pausas, sem tela cheia)
   const b=$("#eBtn");
@@ -142,8 +145,9 @@ function abrirTelaExec(){
   const regua = X.tipo==="continuo";
   const minutos = regua ? Math.round(X.etapas[1].seg/60) : 0;
   d.innerHTML=`<div class="f-topo L-${esc(a.letra)}">${icone("timer","ic-sm")} ${esc(X.titulo||"")}
-      ${CARDIO.has(X.tipo)?`<button class="ml-auto x" data-x="min" aria-label="Minimizar">${icone("minimize-2")}</button>`:""}
-      <button class="x ${CARDIO.has(X.tipo)?"":"ml-auto"}" data-x="parar" aria-label="${X.tipo==="pausa"?"Pular a pausa":"Parar"}">${icone("x")}</button></div>
+      ${vozLigada()?`<button class="ml-auto x ${X.mudo?"voz-off":""}" data-x="voz" aria-pressed="${!X.mudo}" aria-label="${X.mudo?"Ligar a voz":"Silenciar a voz"}">${icone(X.mudo?"volume-x":"volume-2")}</button>`:""}
+      ${CARDIO.has(X.tipo)?`<button class="${vozLigada()?"":"ml-auto"} x" data-x="min" aria-label="Minimizar">${icone("minimize-2")}</button>`:""}
+      <button class="x ${CARDIO.has(X.tipo)||vozLigada()?"":"ml-auto"}" data-x="parar" aria-label="${X.tipo==="pausa"?"Pular a pausa":"Parar"}">${icone("x")}</button></div>
     <div class="f-centro"><div class="f-ic" id="xIc"></div><p class="f-nome" id="xF"></p><div class="f-tempo" id="xT"></div>
       <div class="f-sub" id="xS"></div><div class="f-dica" id="xD"></div>
       ${X.rodadas?`<div class="f-rodadas" id="xRod">${Array.from({length:X.rodadas},()=>"<span></span>").join("")}</div>`:""}
@@ -153,7 +157,8 @@ function abrirTelaExec(){
     <div class="f-total"><span id="xDec"></span><span id="xRes"></span></div>
     <div class="f-acoes"><button class="btn" data-x="pausa">Pausar</button><button class="btn" data-x="pular">${icone("skip-forward")} Pular fase</button></div>`;
   d.onclick=e=>{ const b=e.target.closest("[data-x]"); if(!b) return;
-    ({ min:()=>minimizarExec(true), parar:pararExec, pausa:pausarExec, pular:pularFase })[b.dataset.x]?.(); };
+    ({ min:()=>minimizarExec(true), parar:pararExec, pausa:pausarExec, pular:pularFase, voz:()=>{ X.mudo=!X.mudo; save(); if(X.mudo) try{ speechSynthesis.cancel(); }catch(e){}
+      b.classList.toggle("voz-off", X.mudo); b.setAttribute("aria-pressed", String(!X.mudo)); b.setAttribute("aria-label", X.mudo?"Ligar a voz":"Silenciar a voz"); b.innerHTML=icone(X.mudo?"volume-x":"volume-2"); } })[b.dataset.x]?.(); };
   document.body.appendChild(d); tickExec();
 }
 

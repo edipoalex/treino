@@ -8,11 +8,14 @@ import { consumirRepeticao, movimentoOk, segurarRepete } from "./movimento.js";
 import { icone } from "./icones.js";
 import { fmtSeg, toast } from "./ui.js";
 import { $, esc } from "./util.js";
+import { desbloquear, falar } from "./voz.js";
+import { falaCarga } from "./inteligente.js";
+import { dispensarSugestao, recordeSerie, recordeTxt, sugestaoHtml, usarSugestao } from "./dicas.js";
 
 /* ---------- Descanso: no botão da série ou em tela cheia (Ajustes › Descanso) ---------- */
 // guardado no aparelho para o cronômetro continuar se o app for recarregado ou fechado no meio do descanso
 export let tInt=null, actx=null;
-export function prepararSom(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){} }
+export function prepararSom(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){} desbloquear(); }
 export function beep(){
   try{ if(!actx) return; [0,.25,.5].forEach(o=>{ const g=actx.createGain(), os=actx.createOscillator(); os.frequency.value=880;
     os.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(.2,actx.currentTime+o); g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+o+.2);
@@ -34,7 +37,7 @@ export function pararDescanso(rend=true){
 export function tick(){
   const T=S.timer; if(!T) return;
   const r=(T.fim-Date.now())/1000;
-  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); marcar("fimDescanso",{k:T.k}); fimDescanso(T); return; }
+  if(r<=0){ navigator.vibrate?.([200,100,200]); beep(); falar(`Vai! ${falaCarga(T.prox)}`, "descanso"); marcar("fimDescanso",{k:T.k}); fimDescanso(T); return; }
   const txt=fmtSeg(r), fr=Math.max(0,Math.min(1,r/T.total));
   const tt=$("#tTxt"); if(tt){ tt.textContent=txt; $("#tFill").style.transform=`scaleX(${fr})`; tt.closest(".t-btn")?.classList.toggle("low", r<=10); }
   const dt=$("#dTxt"); if(dt){ dt.textContent=txt; const arc=$("#dArc"), C=2*Math.PI*104; arc.setAttribute("stroke-dashoffset",(C*(1-fr)).toFixed(1)); arc.setAttribute("stroke", r<=10?"var(--warn)":"var(--c)"); }
@@ -68,6 +71,8 @@ export function abrirTelaDescanso(){
     <button class="btn" data-d="pular">Pular descanso</button></div>`;
   d.onclick=e=>{
     const p=e.target.closest("[data-passo]"); if(p){ if(consumirRepeticao()) return; return ajustarProxima(p.dataset.passo); }
+    const sg=e.target.closest("[data-sug]"); if(sg){ const [i,pi,...g]=sg.dataset.sug.split(":"); usarSugestao(treinoAtual(E.atual).itens[+i], +i, +pi, g.join(":")); return atualizarProxima(); }
+    const sx=e.target.closest("[data-sug-x]"); if(sx){ dispensarSugestao(sx.dataset.sugX); return atualizarProxima(); }
     const u=e.target.closest("[data-uni]"); if(u){ const [i,pi,gi]=u.dataset.uni.split(":").map(Number); trocarUnidade(treinoAtual(E.atual).itens[i],pi,gi); return atualizarProxima(); }
     const b=e.target.closest("[data-d]"); if(!b) return; if(b.dataset.d==="pular") return pararDescanso(); maisTempo(+b.dataset.d); };
   segurarRepete(d, "[data-passo]", dado=>ajustarProxima(dado.passo));
@@ -82,7 +87,8 @@ function proximaSerie(){
 function cargaProxima(){
   const x=proximaSerie(); if(!x) return "";
   const g=grupoDaSerie(x.it,x.f);
-  return `<div class="carga-linha"><span class="rotulo">Carga<small>${g||`série ${x.f+1}`}</small></span>${controlesCarga(x.it,x.i,0,grupoIdx(x.it,x.f),{ digitar:false, valor:valorPlanejado(x.it,x.i,x.f,E.atual) })}</div>`;
+  return `<div class="carga-linha"><span class="rotulo">Carga<small>${g||`série ${x.f+1}`}</small></span>${controlesCarga(x.it,x.i,0,grupoIdx(x.it,x.f),{ digitar:false, valor:valorPlanejado(x.it,x.i,x.f,E.atual) })}</div>
+    ${recordeTxt(recordeSerie(x.it,x.i,x.f))}${sugestaoHtml(x.it,x.i,0,g)}`;
 }
 function atualizarProxima(){
   const x=proximaSerie(), T=S.timer; if(!x || !T) return;

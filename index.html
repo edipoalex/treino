@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="css/sessao.css">
 <link rel="stylesheet" href="css/telas.css">
 <link rel="stylesheet" href="css/habito.css">
+<link rel="stylesheet" href="css/progresso.css">
 <link rel="stylesheet" href="css/acabamento.css">
 <link rel="stylesheet" href="css/movimento.css">
 </head>
@@ -53,6 +54,7 @@
   <div class="wrap">
     <button class="tab" data-tab="hoje"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Hoje</button>
     <button class="tab" data-tab="ficha"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>Ficha</button>
+    <button class="tab" data-tab="progresso"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>Progresso</button>
     <button class="tab" data-tab="historico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/></svg>Histórico</button>
     <button class="tab" data-tab="guia"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></svg>Guia</button>
   </div>
@@ -82,6 +84,17 @@
       <label>Animações</label>
       <div class="seg" id="animSeg"><button data-pref-anim="completas">Completas</button><button data-pref-anim="reduzidas">Reduzidas</button></div>
       <p class="meta" style="font-size:14px">Reduzidas: sem transições nem efeitos. O "reduzir movimento" do celular também desliga.</p>
+    </div>
+    <div class="field">
+      <label>Voz</label>
+      <div class="seg" id="vozSeg"><button data-pref-voz="off">Desligada</button><button data-pref-voz="cardio">Cardio</button><button data-pref-voz="tudo">Cardio e descanso</button></div>
+      <p class="meta tx-sec">Fala as fases do cardio e dos cronômetros ("Forte, 30 segundos", "3, 2, 1"). Com descanso, também avisa a próxima série. <button class="btn-link" id="ouvirVoz">Ouvir exemplo</button></p>
+    </div>
+    <div class="field">
+      <label>Lembretes no Calendário</label>
+      <div class="dias-sel" id="lembDias" role="group" aria-label="Dias de treino"></div>
+      <div class="mt-2 row"><input type="time" id="lembHora" aria-label="Horário do treino"><button class="btn" id="lembBtn">Adicionar ao Calendário</button></div>
+      <p class="meta tx-sec">Cria um evento semanal com alerta 15 min antes. Para mudar, gere de novo e apague o antigo no Calendário.</p>
     </div>
     <div class="field">
       <label for="startDate">Início da etapa (define semana e fase)</label>
