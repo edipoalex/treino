@@ -2,7 +2,7 @@
    Arquivos do app: rede primeiro (versão nova assim que publicada), cache se estiver offline.
    Fontes do Google: cache primeiro (não mudam).
    A planilha (script.google.com) e qualquer POST passam direto, sem cache. */
-const CACHE = "treino-v17";
+const CACHE = "treino-v18";
 // scripts/validar.mjs confere que todo arquivo de css/ e js/ está nesta lista
 const ARQUIVOS = [
   "./", "manifest.json", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png",

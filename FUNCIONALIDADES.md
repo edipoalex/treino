@@ -151,7 +151,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Cardio e itens sem séries: cartão com o tempo e a linha das fases.
 - Barra de ação fixa embaixo: no foco "‹ ação ›" (o texto muda pelo tipo); no descanso (nos dois modos) vira o cronômetro
   (v1.43): barra de 96 px na cor sólida do treino que esvazia (laranja nos últimos 10 s), tempo grande no centro e zonas de
-  toque −15 s · pular · +15 s ("−15" nunca deixa menos de 5 s); a próxima série fica numa linha acima. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
+  toque −15 s · pular · +15 s em 20/60/20 (v1.44) ("−15" nunca deixa menos de 5 s); a próxima série fica numa linha acima. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
 - Lista em acordeão: só o exercício aberto mostra o conteúdo; os outros são uma linha com anel de progresso e resumo
   ("A seguir" no próximo pendente); ao terminar um exercício, o próximo pendente abre sozinho; tocar em outro abre esse.
 - Fonte Inter no app todo (títulos 800, números tabulares), inclusive anilha e cartão para compartilhar.

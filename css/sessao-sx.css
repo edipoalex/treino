@@ -140,20 +140,22 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .ab-meio .linha2{flex:1;margin:0;gap:6px}
 .ab-meio>p,.ab-meio .passos-aq{flex-basis:100%;margin:0}
 .ab-meio .passos-aq{gap:6px}
-/* descanso (v1.43): barra grande na cor sólida do treino, que esvazia; zonas de toque −15 s · pular · +15 s */
+/* descanso (v1.43): barra grande na cor sólida do treino, que esvazia; zonas de toque −15 s · pular · +15 s
+   (v1.44: 20/60/20, laterais menores; o meio, que é o toque mais usado, fica maior) */
 .ab-col{flex-direction:column;align-items:stretch;gap:6px}
 .ab-prox{margin:0;text-align:center;font-size:var(--t-sec);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ab-prox b{color:var(--ink);font-weight:600}
-.ab-rest{position:relative;overflow:hidden;display:grid;grid-template-columns:27% 1fr 27%;height:96px;border-radius:22px;background:var(--surface-3)}
+.ab-rest{position:relative;overflow:hidden;display:grid;grid-template-columns:20% 1fr 20%;height:96px;border-radius:22px;background:var(--surface-3)}
 .ab-rest .t-fill{background:var(--c);transition:transform .25s linear}
 .ab-rest.low .t-fill{background:var(--warn)}
 .ab-z{position:relative;border:0;background:transparent;color:#fff;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   text-shadow:0 1px 6px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .ab-z+.ab-z{box-shadow:inset 1px 0 0 rgba(255,255,255,.2)}
-.ab-z b{font-size:22px;font-weight:800}
-.ab-z small{white-space:nowrap;font-size:11.5px;font-weight:600;opacity:.85;letter-spacing:.05em;text-transform:uppercase}
+.ab-z b{font-size:17px;font-weight:700}
+.ab-z small{white-space:nowrap;font-size:10px;font-weight:600;opacity:.85;letter-spacing:.05em;text-transform:uppercase}
 .ab-z:active{background:rgba(255,255,255,.16)}
 .ab-z:focus-visible{outline:3px solid #fff;outline-offset:-3px}
-.ab-meio-z .ab-t{font-size:46px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.ab-meio-z small{font-size:11.5px}
+.ab-meio-z .ab-t{font-size:48px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 :root:not([data-theme="dark"]) .ab-rest{background:#3A444E}
-@media (max-width:360px){ .ab-nav{width:48px;min-width:48px} .ab-meio-z .ab-t{font-size:40px} .ab-z b{font-size:19px} .ab-z small{font-size:10px;letter-spacing:.02em} }
+@media (max-width:360px){ .ab-nav{width:48px;min-width:48px} .ab-meio-z .ab-t{font-size:40px} .ab-z b{font-size:15px} .ab-z small{font-size:9px;letter-spacing:.02em} }
