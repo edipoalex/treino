@@ -28,7 +28,8 @@ export function iniciarDescanso(k, seg, prox){
   if(S.pref.descanso==="tela") abrirTelaDescanso();
   rerender(); tick();
 }
-export function maisTempo(seg){ const T=S.timer; if(!T) return; T.fim+=seg*1000; T.total=Math.max(T.total,(T.fim-Date.now())/1000); save(); tick(); }
+/* +15/−15 s: o "−" nunca deixa menos de 5 s, para não encerrar o descanso sem querer */
+export function maisTempo(seg){ const T=S.timer; if(!T) return; T.fim = seg<0 ? Math.max(Math.min(T.fim, Date.now()+5000), T.fim+seg*1000) : T.fim+seg*1000; T.total=Math.max(T.total,(T.fim-Date.now())/1000); save(); tick(); }
 export function pararDescanso(rend=true){
   clearInterval(tInt); tInt=null; const tinha=!!S.timer;
   if(tinha){ delete S.timer; save(); }
