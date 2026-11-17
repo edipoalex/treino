@@ -52,7 +52,8 @@ export function normalizarEstado(S){
   { const m=S.mot && typeof S.mot==="object" ? S.mot : {};
     S.mot = { ultimoEm: num(m.ultimoEm) ? m.ultimoEm : 0, noTreino: num(m.noTreino) ? m.noTreino : 0,
       sacos: m.sacos && typeof m.sacos==="object" && !Array.isArray(m.sacos) ? Object.fromEntries(Object.entries(m.sacos).filter(([,v])=>Array.isArray(v) && v.every(Number.isInteger))) : {},
-      recentes: Array.isArray(m.recentes) ? m.recentes.filter(x=>typeof x==="string").slice(-20) : [] }; }
+      recentes: Array.isArray(m.recentes) ? m.recentes.filter(x=>typeof x==="string").slice(-20) : [],
+      cats: m.cats && typeof m.cats==="object" && !Array.isArray(m.cats) ? Object.fromEntries(Object.entries(m.cats).filter(([,v])=>Array.isArray(v)).map(([k,v])=>[k, v.filter(x=>typeof x==="string").slice(-12)])) : {} }; }
   // lembretes no Calendário (fase 4): dias (0 = segunda) e horário
   { const l=S.lembrete, dias=Array.isArray(l?.dias) ? [...new Set(l.dias.filter(d=>Number.isInteger(d) && d>=0 && d<7))].sort() : [];
     S.lembrete = { dias: dias.length ? dias : [0,1,3,4], hora: /^\d{2}:\d{2}$/.test(l?.hora||"") ? l.hora : "18:00" }; }

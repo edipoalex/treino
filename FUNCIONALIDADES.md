@@ -130,6 +130,10 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   tocar, sem série feita), série, antes da última série, exercício concluído e recorde (`registrarSerie`, `alternarFeito`),
   carga aumentada (`usarSugestao`), cardio início/forte/leve/metade/reta final/fim (`execucao.js`), treino concluído ou
   meta da semana (`concluir`).
+- Categorias de humor (v1.46): em `js/falas.js` cada estilo agrupa as frases por categoria (registradas em `CATEGORIAS`):
+  Motivador (incentivo, técnica, conquista, constância), Zoeira (memes de academia, cotidiano, cultura pop e games, ironia),
+  Sem filtro (cobrança, sarcasmo, comemoração). O motor alterna as categorias por estilo (a mais antiga primeiro; a anterior
+  só repete se for a única com frase nova) e não repete frase até usar todas do momento. Lista simples sem grupos é aceita.
 - Anti-cansaço: intervalo mínimo e limite por treino pela frequência, chance por momento, grandes momentos sempre falam;
   sorteio sem repetição (últimas 20 não voltam). Estado em `S.mot` (contadores zerados ao iniciar; continua após recarregar).
 - Fim do descanso: a frase troca o "VAI!" no aviso do topo e na tela cheia, com o personagem; não conta no limite.
