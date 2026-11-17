@@ -120,7 +120,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Sincronização com a planilha, catálogo de fichas e validação: ver README.
 
 ## Falas do treinador (v1.41)
-- Personagem em balão que comenta o treino. Repertório em `js/falas.js` (por momento e estilo, 4+ frases por estilo),
+- Personagem em balão que comenta o treino. Repertório em `js/falas.js` (v2.0, 546 frases; por momento e estilo, 5+ por estilo),
   decisão em `js/motivacao.js` (puro, `tests/motivacao.test.js`), tela em `js/balao.js` + `css/balao.css`,
   personagens em `js/personagens.js` (SVG, na cor do treino, 3 expressões).
 - Ajustes › Motivação (`S.pref.falas`): estilos Motivador, Zoeira e Sem filtro (+18, pede confirmação; marque um ou mais,
@@ -133,6 +133,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Anti-cansaço: intervalo mínimo e limite por treino pela frequência, chance por momento, grandes momentos sempre falam;
   sorteio sem repetição (últimas 20 não voltam). Estado em `S.mot` (contadores zerados ao iniciar; continua após recarregar).
 - Fim do descanso: a frase troca o "VAI!" no aviso do topo e na tela cheia, com o personagem; não conta no limite.
+  Até 60 letras; acima de 32 a letra diminui para caber (classe `longa`).
   A voz ("Cardio e descanso") fala a frase, menos as do Sem filtro ("Vai!"). Falas desligadas: fica o "VAI!".
 - Balão: um por vez, topo (abaixo do "Desfazer" quando ele aparece), por cima da tela cheia do descanso e do cardio,
   letra de 19 px e personagem de 66 px (v1.43), some em 6–10 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.

@@ -52,15 +52,15 @@ export function tick(){
    desce no topo com a próxima série (aparece mesmo com o cartão fora da tela, no modo lista); tocar nele leva ao exercício.
    Com as falas do treinador ligadas (v1.41), o "VAI!" vira uma frase curta com o personagem (fr = { texto, tom }). */
 function fimDescanso(T, fr=null){
-  const a=E.atual, L=a ? `L-${esc(a.letra)}` : "", d=$("#descanso"), vai=esc(fr?.texto || "VAI!");
+  const a=E.atual, L=a ? `L-${esc(a.letra)}` : "", d=$("#descanso"), vai=esc(fr?.texto || "VAI!"), longa=(fr?.texto||"").length>32 ? " longa" : "";
   fecharBalao();
   if(d && movimentoOk()){ clearInterval(tInt); tInt=null; delete S.timer; save();
-    d.insertAdjacentHTML("beforeend", `<div class="tc-vai${fr?" com-frase":""}">${fr?desenhoBicho(fr.tom,96):""}<b>${vai}</b>${T.prox?`<span>${esc(T.prox)}</span>`:""}</div>`);
+    d.insertAdjacentHTML("beforeend", `<div class="tc-vai${fr?" com-frase":""}${longa}">${fr?desenhoBicho(fr.tom,96):""}<b>${vai}</b>${T.prox?`<span>${esc(T.prox)}</span>`:""}</div>`);
     setTimeout(()=>{ d.remove(); rerender(); }, fr ? 2200 : 1500); }
   else pararDescanso();
   document.querySelectorAll(".flash-fim, .aviso-fim").forEach(x=>x.remove());
   if(movimentoOk()){ const f=document.createElement("div"); f.className=`flash-fim ${L}`; document.body.appendChild(f); setTimeout(()=>f.remove(), 2400); }
-  const av=document.createElement("button"); av.className=`aviso-fim ${L}${fr?" com-frase":""}`; av.setAttribute("role","alert");
+  const av=document.createElement("button"); av.className=`aviso-fim ${L}${fr?" com-frase":""}${longa}`; av.setAttribute("role","alert");
   av.innerHTML=`${(fr && desenhoBicho(fr.tom,40)) || icone("dumbbell")}<span><b>${vai}</b>${T.prox?`<small>${esc(T.prox)}</small>`:""}</span>`;
   av.onclick=()=>{ av.remove(); document.querySelector(".item.ativo, .f-nome")?.scrollIntoView({ behavior:"smooth", block:"center" }); };
   document.body.appendChild(av); setTimeout(()=>av.remove(), 6000);

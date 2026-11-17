@@ -10,13 +10,13 @@ const CTX = { letra:"A", ex:"Supino", n:1, total:4, carga:"80 kg" };
 
 test("todo momento tem frases nos 3 estilos, ao menos 4 por estilo, sem placeholder desconhecido", () => {
   for(const ev of Object.keys(EVENTOS)) for(const tom of Object.keys(TONS)){
-    const l = FALAS[ev]?.[tom]; assert.ok(l?.length >= 4, `${ev}.${tom}`);
+    const l = FALAS[ev]?.[tom]; assert.ok(l?.length >= 5, `${ev}.${tom}`);
     for(const f of l) assert.match(f, /^[^{}]*(\{(letra|ex|n|total|carga)\}[^{}]*)*$/, f);
   }
-  assert.ok(total() > 250);
+  assert.ok(total() > 500);
 });
-test("frases do fim do descanso são curtas (cabem grandes na tela cheia)", () => {
-  for(const tom of Object.keys(TONS)) for(const f of FALAS.fimDescanso[tom]) assert.ok(f.length <= 36, f);
+test("frases do fim do descanso cabem no aviso e na tela cheia (até 60 letras; acima de 32 a letra diminui)", () => {
+  for(const tom of Object.keys(TONS)) for(const f of FALAS.fimDescanso[tom]) assert.ok(f.length <= 60, f);
 });
 test("sem estilo marcado, não fala nada", () => {
   assert.equal(falar("inicioTreino", CTX, novo(), { tons:[], freq:"normal" }), null);
