@@ -29,6 +29,9 @@
 .aviso-fim.com-frase b{font-size:clamp(18px,5vw,22px);line-height:1.1;text-transform:uppercase}
 .tc-vai .bichinho{width:96px;height:96px;padding:8px;border-radius:50%;background:rgba(255,255,255,.94)}
 .tc-vai.com-frase b{font-size:clamp(40px,12vw,64px);line-height:1.02;text-transform:uppercase;max-width:12ch}
+/* frases maiores (33 a 60 letras, v1.45): letra menor para caber */
+.tc-vai.com-frase.longa b{font-size:clamp(28px,8.5vw,44px);line-height:1.08;max-width:16ch}
+.aviso-fim.com-frase.longa b{font-size:clamp(16px,4.4vw,19px);line-height:1.15}
 
 /* Ajustes › Motivação: prévia dos personagens */
 .aj-tit{margin:20px 0 4px;font-size:var(--t-corpo);font-weight:700}
