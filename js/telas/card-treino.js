@@ -14,7 +14,7 @@ export function cardTreino({ letra, chamada, titulo, descricao, minutos, express
   const L = esc(letra), foto = FOTOS_ANILHA.has(letra) ? fotoAnilha(letra) : "";
   const anilha = foto
     ? `<div class="ct-anilha" aria-hidden="true" style="--img:url('${urlAbs(foto)}')">
-        <img class="reflexo" src="${foto}" alt="" decoding="async"><img class="foto" src="${foto}" alt="" decoding="async"><span class="luz"></span><span class="brilho-chao"></span></div>`
+        <img class="reflexo" src="${foto}" alt="" width="490" height="527" decoding="async"><img class="foto" src="${foto}" alt="" width="490" height="527" fetchpriority="high"><span class="luz"></span><span class="brilho-chao"></span></div>`
     : `<div class="ct-anilha sem-foto" aria-hidden="true">${plate(letra, "d3")}</div>`;
   return `<section class="ct L-${L}" id="cardHoje" aria-label="${esc(titulo)}">
     ${anilha}

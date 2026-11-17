@@ -106,7 +106,8 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Cabeçalho com a data do dia acima da etapa; na Hoje o "treino N de M" vai para dentro do card (nas outras abas continua no topo).
 - Card do treino premium (`js/telas/card-treino.js`, `css/card-treino.css`): estúdio escuro (nos dois temas) com luz de canto
   na cor do treino, feixe de luz de cima, chão de concreto levemente reflexivo e a anilha em foto (`img/anilhas/anilha-X.webp`,
-  fundo transparente, A–E; letras sem foto usam a anilha 3D), com contorno na cor, sombra de contato e reflexo. Título, descrição,
+  fundo transparente, A–E; letras sem foto usam a anilha 3D; v1.47: o service worker serve as imagens do cache primeiro,
+  sem esperar a rede, e a foto principal carrega com prioridade alta), com contorno na cor, sombra de contato e reflexo. Título, descrição,
   duração, express e "N exercícios" (abre a lista no card) numa linha abaixo do reflexo; "Iniciar treino" na cor do treino.
   Tudo escala com a largura do card (container query); fonte Inter.
 - Trocar treino: botões iguais com a anilha plana e a letra; o próximo da sequência tem um ponto verde.

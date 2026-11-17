@@ -1,8 +1,10 @@
 /* Treino – service worker
    Arquivos do app: rede primeiro (versão nova assim que publicada), cache se estiver offline.
+   Imagens (img/, v1.47): cache primeiro, sem esperar a rede. Elas só mudam junto com a versão do app, e a troca de
+   versão (CACHE novo) baixa todas de novo na instalação; assim a anilha do card Hoje aparece na hora, mesmo com rede lenta.
    Fontes do Google: cache primeiro (não mudam).
    A planilha (script.google.com) e qualquer POST passam direto, sem cache. */
-const CACHE = "treino-v20";
+const CACHE = "treino-v21";
 // scripts/validar.mjs confere que todo arquivo de css/ e js/ está nesta lista
 const ARQUIVOS = [
   "./", "manifest.json", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png",
@@ -19,7 +21,8 @@ const ARQUIVOS = [
 const FONTES = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  // cache "reload": baixa do servidor, sem pegar cópia antiga do cache HTTP do navegador
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
@@ -43,6 +46,13 @@ self.addEventListener("fetch", e => {
 
   // guarda sem a query (?v=…), para a checagem de versão não encher o cache
   const chave = url.origin + url.pathname;
+  if (url.pathname.includes("/img/")) {
+    e.respondWith(caches.match(chave).then(r => r || fetch(req).then(res => {
+      if (res.ok) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(chave, copia)); }
+      return res;
+    })));
+    return;
+  }
   // no-cache: revalida com o servidor, para não misturar módulos de versões diferentes
   // a página também revalida: um index.html antigo do cache HTTP com módulos novos quebrava a abertura
   const rede = req.mode === "navigate" ? fetch(req.url, { cache: "no-cache", credentials: "same-origin", redirect: "manual" }) : fetch(req, { cache: "no-cache" });
