@@ -104,9 +104,11 @@ const sugestoesBloco = (it,i,a) => temCarga(it) ? partesDe(it).map((_,pi)=>suges
 export function barraAcao(a,t){
   const T=S.timer;
   if(T && S.pref.descanso==="botao" && T.fim>Date.now())
-    return `<div class="sb-acao"><div class="ab"><div class="ab-rest t-btn" role="timer" aria-label="Descanso"><span class="t-fill" id="tFill"></span><span class="ab-t" id="tTxt">${fmtSeg((T.fim-Date.now())/1000)}</span>
-      ${T.prox?`<span class="ab-px"><small>A seguir</small><b>${esc(T.prox.replace(/^Próximo:\s*/,""))}</b></span>`:""}</div>
-      <button class="btn ab-mini" data-mais15>+15 s</button><button class="btn ab-nav" data-pular aria-label="Pular descanso">${icone("skip-forward")}</button></div></div>`;
+    return `<div class="sb-acao"><div class="ab ab-col">${T.prox?`<p class="ab-prox">A seguir: <b>${esc(T.prox.replace(/^Próximo:\s*/,"").split(" · ").filter(x=>!/^[—\s/]+$/.test(x)).join(" · "))}</b></p>`:""}
+      <div class="ab-rest t-btn" role="group" aria-label="Descanso"><span class="t-fill" id="tFill"></span>
+        <button class="ab-z" data-menos15 aria-label="Menos 15 segundos de descanso"><b>−15</b><small>seg</small></button>
+        <button class="ab-z ab-meio-z" data-pular aria-label="Pular descanso"><b class="ab-t" id="tTxt">${fmtSeg((T.fim-Date.now())/1000)}</b><small>toque para pular</small></button>
+        <button class="ab-z" data-mais15 aria-label="Mais 15 segundos de descanso"><b>+15</b><small>seg</small></button></div></div></div>`;
   if(S.pref.modo!=="foco") return "";
   const i=a.ativo, it=t.itens[i], done=a.feitos.includes(i), prox=t.itens[i+1];
   const meio = done ? `<button class="btn primary cor" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : botaoAcao(it,i,a,true,{ chips:false });
@@ -183,6 +185,7 @@ export function cliqueSessao(e){
   if(d.livreZerar!=null) return zerarLivre();
   if(d.pular!=null) return pararDescanso();
   if(d.mais15!=null) return maisTempo(15);
+  if(d.menos15!=null) return maisTempo(-15);
   if(d.bloco!=null){ const i=+d.bloco; a.ativo=i; save(); return iniciarDescanso(i, t.itens[i].bloco*60, "Fim do bloco"); }
   if(d.feito!=null) return alternarFeito(+d.feito);
   if(d.reabrir!=null) return reabrir(+d.reabrir);

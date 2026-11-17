@@ -135,7 +135,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Fim do descanso: a frase troca o "VAI!" no aviso do topo e na tela cheia, com o personagem; não conta no limite.
   A voz ("Cardio e descanso") fala a frase, menos as do Sem filtro ("Vai!"). Falas desligadas: fica o "VAI!".
 - Balão: um por vez, topo (abaixo do "Desfazer" quando ele aparece), por cima da tela cheia do descanso e do cardio,
-  some em 3,5–6 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.
+  letra de 19 px e personagem de 66 px (v1.43), some em 6–10 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.
 
 ## Sessão de treino redesenhada (v1.42)
 - Modo imersivo: durante o treino saem o cabeçalho do app (data, etapa, Ajustes) e as abas; Ajustes fica no menu "···".
@@ -150,7 +150,8 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   recorde ao alcance e sugestão; rest-pause mostra as etapas como pílulas ("3× falha").
 - Cardio e itens sem séries: cartão com o tempo e a linha das fases.
 - Barra de ação fixa embaixo: no foco "‹ ação ›" (o texto muda pelo tipo); no descanso (nos dois modos) vira o cronômetro
-  com a próxima série e a carga, "+15 s" e pular. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
+  (v1.43): barra de 96 px na cor sólida do treino que esvazia (laranja nos últimos 10 s), tempo grande no centro e zonas de
+  toque −15 s · pular · +15 s ("−15" nunca deixa menos de 5 s); a próxima série fica numa linha acima. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
 - Lista em acordeão: só o exercício aberto mostra o conteúdo; os outros são uma linha com anel de progresso e resumo
   ("A seguir" no próximo pendente); ao terminar um exercício, o próximo pendente abre sozinho; tocar em outro abre esse.
 - Fonte Inter no app todo (títulos 800, números tabulares), inclusive anilha e cartão para compartilhar.

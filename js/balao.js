@@ -34,7 +34,7 @@ export function fecharBalao(){
 }
 export function mostrarBalao({ texto, tom }, { bicho, letra } = {}){
   fecharBalao(); clearTimeout(tFecha);
-  const dur = Math.min(6000, 3500 + texto.length * 40), fig = desenhoBicho(tom, 52, bicho, letra);
+  const dur = Math.min(10000, 6000 + texto.length * 50), fig = desenhoBicho(tom, 66, bicho, letra);   // v1.43: 6 a 10 s
   const b = document.createElement("div"); b.id = "balao"; b.className = `balao ${tom}${fig ? "" : " sem-bicho"}`;
   b.innerHTML = `${fig}<div class="fala" role="status" aria-live="polite"><span>${esc(texto)}</span>
     <button class="fechar" aria-label="Fechar">×</button><i class="tempo" style="animation-duration:${dur}ms"></i></div>`;
