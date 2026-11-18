@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { metodoDe, separarNotas } from "../js/recursos.js";
-import { seriesDe } from "../js/series.js";
+import { seriesDe, notaPrescricao, tempoDe } from "../js/series.js";
 import { fonteDaFicha } from "../js/validacao.js";
 import { FICHA_EMBUTIDA } from "../js/ficha-atual.js";
 
@@ -51,4 +51,28 @@ test("fonte da ficha: a planilha decide; sem decisão, aparelho antigo fica no a
   assert.equal(fonteDaFicha({}, "app"), "app");
   assert.equal(fonteDaFicha({}, ""), "planilha");
   assert.equal(fonteDaFicha(undefined, "planilha"), "planilha");
+});
+
+test("faixa de repetições com texto depois: séries, técnica na última e o resto na orientação", () => {
+  const sd = (p, n) => seriesDe({ prescricao:p, series:n }).map(x => x.r + (x.tag ? ` [${x.tag}]` : ""));
+  assert.deepEqual(sd("4x8–10, descida em 3 s, profundidade máxima; RIR 1 (sem falha)", 4), ["8–10","8–10","8–10","8–10"]);
+  assert.deepEqual(sd("3x10–14; na última série, drop-set de ~25% até a falha", 3), ["10–14","10–14","10–14 [drop-set]"]);
+  assert.deepEqual(sd("3x10–12 por perna, tronco à frente; última série até a falha", 3), ["10–12 por perna","10–12 por perna","10–12 por perna [até a falha]"]);
+  assert.deepEqual(sd("3x15–20, tronco inclinado à frente; última série em rest-pause", 3), ["15–20","15–20","15–20 [rest-pause]"]);
+  assert.deepEqual(sd("2x12–15 por perna até a falha", 2), ["12–15 por perna [até a falha]","12–15 por perna [até a falha]"]);
+  assert.deepEqual(sd("3x10–12, RIR 2–3", 3), ["10–12","10–12","10–12"]);
+  assert.deepEqual(sd("2 séries em micro-pausas (30 / 20 s / 20 / 15 s / 10 / 10 s / 6 e falha)", 2), ["micro-pausas","micro-pausas"]);
+  assert.equal(notaPrescricao({ prescricao:"4x8–10, descida em 3 s; RIR 1", series:4 }), "descida em 3 s; RIR 1");
+  assert.equal(notaPrescricao({ prescricao:"4x6 (carga alta)", series:4 }), "");
+  assert.equal(notaPrescricao({ prescricao:"3x10–12, RIR 2–3", series:2 }), "");   // contagem não bate: nada
+});
+test("cadência e pausa não viram cronômetro; isometria continua", () => {
+  assert.equal(tempoDe({ nome:"Agachamento", prescricao:"4x8–10, descida em 3 s, profundidade máxima", series:4 }), null);
+  assert.equal(tempoDe({ nome:"Stiff", prescricao:"3x8–10, descida em 3 s até alongar bem; RIR 1", series:3 }), null);
+  assert.equal(tempoDe({ nome:"Panturrilha", prescricao:"3x10–15 com 2 s de pausa embaixo", series:3 }), null);
+  assert.equal(tempoDe({ nome:"Prancha frontal", prescricao:"3x30–45 s", series:3 })?.tipo, "segurar");
+});
+test("aquecimento com 1 série leve de aproximação e método informado na ficha", () => {
+  assert.equal(tempoDe({ nome:"Aquecimento", prescricao:"4 min de bike leve + 1 série leve de aproximação no supino", series:0, bloco:4 })?.tipo, "aquecimento");
+  assert.equal(metodoDe({ nome:"Agachamento", prescricao:"4x8–10, descida em 3 s", series:4, metodo:"Cadência controlada" }), "Cadência controlada");
 });

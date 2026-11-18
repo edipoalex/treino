@@ -12,7 +12,7 @@ export const contraste = it => { const tags=new Set(seriesDe(it).map(s=>s.tag));
 
 const TEMPO = /\d+\s*(s|seg|segundos?|min|minutos?)(?![a-zà-ú])/i;
 /* Tira do texto o tempo que é só descanso ("30 s de descanso", "(descanso de 45 s …)") */
-const semDescanso = p => p.replace(/\d+\s*s\w*\s+(na|no|de)\s+(descida|subida|exc[êe]ntric\w*|conc[êe]ntric\w*|pausa|cad[êe]ncia|topo)/gi, "").replace(/\([^()]*(descanso|pausa|intervalo)[^()]*\)/gi, "")
+const semDescanso = p => p.replace(/(descida|subida|exc[êe]ntrica?|conc[êe]ntrica?|cad[êe]ncia|pausa)\s+(em|de|com)\s+\d+\s*s\w*/gi, "").replace(/\d+\s*s\w*\s+(na|no|de)\s+(descida|subida|exc[êe]ntric\w*|conc[êe]ntric\w*|pausa|cad[êe]ncia|topo)/gi, "").replace(/\([^()]*(descanso|pausa|intervalo)[^()]*\)/gi, "")
   .replace(/(descanso|pausa|intervalo)(\s+de)?\s*\d+\s*(s|seg|min)\w*/gi, "")
   .replace(/\d+\s*(s|seg|min)\w*\s*(de\s+)?(descanso|pausa|intervalo)/gi, "");
 
@@ -56,6 +56,7 @@ export function recursosDaFicha(f){
 const capt = s => s.charAt(0).toUpperCase() + s.slice(1);
 export function metodoDe(it){
   const p = String(it?.prescricao ?? "").trim(), nome = String(it?.nome ?? ""), t = tempoDe(it);
+  if(typeof it?.metodo==="string" && it.metodo.trim() && it.metodo.length<=20) return it.metodo.trim();   // informado na ficha (v1.50)
   if(t?.tipo==="intervalo") return t.rotulo;
   if(t?.tipo==="continuo") return t.zona2 ? "Zona 2" : "Contínuo";
   if(t?.tipo==="aquecimento") return "";
