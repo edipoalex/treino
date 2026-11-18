@@ -129,6 +129,12 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Publicação da ficha de outro perfil: `scripts/publicar-ficha.mjs --perfil NOME ficha.json` (endereço e chave em
   `~/.config/treino/perfis.json`, fora do repositório); valida, ajusta a versão, grava Config `ficha` = `planilha` e envia.
 - Séries por faixa com "+" ("2x12 + 1x20", "2x12 + 2x15 + 2x20"), com nota "(na última: …)" na última série.
+- Faixa de repetições com texto depois (v1.50): "3x10–12, RIR 2–3", "4x8–10, descida em 3 s…", "3x10–12 por perna…",
+  "2x15 por lado": séries com a faixa (e "por perna/lado"), técnica da última série como etiqueta ("última série até a
+  falha", "drop-set", "rest-pause"), "até a falha" logo depois marca todas, e o resto do texto vai para a linha de
+  orientação do exercício (`notaPrescricao`). "2 séries em micro-pausas (…)" mostra "micro-pausas" com as etapas.
+- Cadência e pausa ("descida em 3 s", "2 s de pausa") não viram cronômetro; "N min de … + 1 série leve de aproximação"
+  é aquecimento; o campo "metodo" da ficha, quando existe, é a etiqueta do método.
 - Falas com tratamento (Ajustes › Motivação › Tratamento): `{masculino|feminino}` nas frases de `js/falas.js`.
 
 ## Falas do treinador (v1.41)

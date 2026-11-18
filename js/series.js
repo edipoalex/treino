@@ -27,7 +27,26 @@ export function seriesDe(it){
     const r=m[2].replace(/\s*\+\s*/g," + ").trim(), nota=m[4]||"", ultima=/na última/i.test(nota) ? nota.replace(/^na última:\s*/i,"") : "";
     return repete(r, j => ultima ? (j===n-1 ? ultima : "") : nota);
   }
+  // "2 séries em micro-pausas (30 / 20 s / …)": a série leva o nome da técnica; as etapas aparecem como pílulas (v1.50)
+  if((m=p.match(/^\s*(\d+)\s*s[ée]ries?\s+(?:em|de|com)\s+([^()]+?)\s*(?:\(|$)/i)) && +m[1]===n) return repete(m[2].trim(),"");
+  // faixa de repetições com texto depois (v1.50): "3x10–12, RIR 2–3", "4x8–10, descida em 3 s…; RIR 1",
+  // "3x10–12 por perna, …; última série até a falha", "2x15 por perna". O texto que sobra aparece na orientação.
+  if((m=p.match(FAIXA)) && +m[1]===n){
+    const r=m[2].replace(/\s*[–-]\s*/,"–").replace(/\s+s$/," s"), lado=(m[3]||"").trim(), resto=m[4]||"";
+    const tudo=/^\s*até a falha/i.test(resto) ? "até a falha" : "", ult=ultimaDe(resto);
+    return Array.from({length:n},(_,j)=>({ r: lado ? `${r} ${lado}` : r, tag: j===n-1 && ult ? ult : tudo }));
+  }
   return Array.from({length:n},()=>({r:"série", tag:""}));
+}
+const FAIXA = /^\s*(\d+)\s*x\s*(\d+(?:\s*[–-]\s*\d+)?(?:\s*s(?![a-zà-ú]))?)\s*(por (?:perna|lado|braço))?\s*(?:[,;]\s*|\s+|$)(.*)$/i;
+/* técnica pedida só na última série: "na última série, drop-set…", "última série até a falha", "última série em rest-pause" */
+function ultimaDe(t){ const m=String(t).match(/(?:na\s+)?última série[^;.]*?(até a falha|drop-?set|rest-pause)/i); return m ? (/drop/i.test(m[1]) ? "drop-set" : m[1].toLowerCase()) : ""; }
+/* O que a prescrição diz além das séries ("descida em 3 s, profundidade máxima…; RIR 1"), para a linha de orientação */
+export function notaPrescricao(it){
+  const p=String(it?.prescricao ?? "").trim();
+  if(/^\s*\d+\s*x\s*[\d+ –-]*\d\s*(\([^)]*\))?\s*$/.test(p)) return "";   // "4x6 (carga alta)": a nota já vira etiqueta da série
+  const m=p.match(FAIXA);
+  return m && +m[1]===it.series ? m[4].replace(/^[\s,;]+/,"").trim() : "";
 }
 export const rotSerie = s => s ? [s.r, s.tag].filter(Boolean).join(" ") : "";
 
@@ -55,7 +74,7 @@ export function tempoDe(it){
   }
   if(!(it?.series > 0)){
     // aquecimento: "5 min de esteira leve + 2 séries de aproximação no supino"
-    m = p.match(/^\s*(\d+)\s*min\s+de\s+([^+]+?)\s*\+\s*(\d+)\s*s[ée]ries?\s+de\s+(.+)$/i);
+    m = p.match(/^\s*(\d+)\s*min\s+de\s+([^+]+?)\s*\+\s*(\d+)\s*s[ée]ries?\s+(?:leves?\s+)?de\s+(.+)$/i);   // "1 série leve de aproximação" também
     if(m) return { tipo:"aquecimento", seg:+m[1]*60, rot:m[2].trim(), passos:+m[3], passoRot:m[4].trim() };
     // cardio contínuo (zona 2, caminhada, "40 min"…): o tempo é o do bloco
     if(CARDIO_RX.test(p+" "+nome) && it?.bloco>0){
@@ -76,6 +95,7 @@ export function tempoDe(it){
     // cadência ("3s na descida", "2 s de pausa no topo") não é cronômetro
     if(/^\s*(na|no|de)\s+(descida|subida|exc[êe]ntric|conc[êe]ntric|pausa|cad[êe]ncia|topo)/i.test(p.slice(mm.index+mm[0].length))) continue;
     if(/(descanso|pausa|intervalo)(\s+de)?\s*$/i.test(p.slice(0, mm.index))) continue;
+    if(/(descida|subida|exc[êe]ntrica?|conc[êe]ntrica?|cad[êe]ncia|pausa)\s+(em|de|com)\s*$/i.test(p.slice(0, mm.index))) continue;   // "descida em 3 s"
     if(/^\s*(de\s+)?(descanso|pausa|intervalo)/i.test(p.slice(mm.index+mm[0].length))) continue;
     const abre=p.lastIndexOf("(", mm.index), fecha=p.indexOf(")", mm.index);   // dentro de "(descanso de 45 s …, 90 s entre …)"
     if(abre>=0 && abre>p.lastIndexOf(")", mm.index) && /descanso|pausa|intervalo/i.test(p.slice(abre, fecha<0?undefined:fecha))) continue;

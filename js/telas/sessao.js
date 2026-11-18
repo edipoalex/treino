@@ -5,7 +5,7 @@ import { E, FICHA, S, save } from "../estado.js";
 import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude } from "../guia-exercicios.js";
 import { nav, render } from "../navegacao.js";
 import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpress, totalMin, treino, voltasDo } from "../progresso.js";
-import { rotSerie, seriesDe, tempoDe } from "../series.js";
+import { notaPrescricao, rotSerie, seriesDe, tempoDe } from "../series.js";
 import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSessao } from "../metricas.js";
 import { enfileirar, hora } from "../sync.js";
 import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
@@ -62,7 +62,7 @@ function repsDe(it, s){ const t=tempoDe(it); if(t?.tipo!=="partes") return s.r; 
 const metaDe = it => (it.series>0 ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso} s`].concat(voltasDo(it)?.length?[semTxt(voltasDo(it))]:[]) : [`${it.bloco} min`]);
 function cabExercicio(it,i,a,t,{ titulo=true } = {}){
   const met=metodoDe(it), prop=notas(t).proprias[i], semSeries = it.series>0 && seriesDe(it).every(s=>s.r==="série");
-  const ori=[semSeries?it.prescricao:"", prop].filter(Boolean).join(". "), ab=oriAberta.has(i);
+  const ori=[semSeries ? it.prescricao : notaPrescricao(it), prop].filter(Boolean).map(x=>x.replace(/\.$/,"")).map(x=>x.charAt(0).toUpperCase()+x.slice(1)).join(". "), ab=oriAberta.has(i);
   return `<div class="sx-cab"><div class="sx-tit"><p class="sx-eb">${met?`<span class="sx-chip">${esc(met)}</span>`:""}${it.series>0?`<span class="sx-meta">${metaDe(it).map(esc).join(" · ")}</span>`:""}</p>
       ${titulo?`<h2 class="sx-nome">${esc(it.nome)}</h2>`:""}</div>
     <div class="sx-ac">${it.series>0?`<button class="icon-btn sx-ib ${S.livre?.k===i?"on":""}" data-livre="${i}" aria-label="Cronômetro livre">${icone("timer")}</button>`:""}<button class="icon-btn sx-ib" data-info="${i}" aria-label="Como fazer ${esc(it.nome)}">${icone("info")}</button></div></div>
