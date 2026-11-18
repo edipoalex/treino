@@ -112,8 +112,11 @@ export function barraAcao(a,t){
   if(S.pref.modo!=="foco") return "";
   const i=a.ativo, it=t.itens[i], done=a.feitos.includes(i), prox=t.itens[i+1];
   const meio = done ? `<button class="btn primary cor" data-navega="1">${prox?`Próximo: ${esc(prox.nome)}`:`Concluir treino ${esc(a.letra)}`}</button>` : botaoAcao(it,i,a,true,{ chips:false });
-  return `<div class="sb-acao"><div class="ab"><button class="btn ab-nav" data-navega="-1" ${i===0?"disabled":""} aria-label="Exercício anterior">${icone("chevron-left")}</button>
-    <div class="ab-meio">${meio}</div><button class="btn ab-nav" data-navega="1" aria-label="${prox?"Próximo exercício":"Concluir treino"}">${icone(prox?"chevron-right":"check")}</button></div></div>`;
+  /* v1.48: padrão único dos botões da sessão = a barra do descanso: 96 px, 20/60/20; ‹ e › nas laterais e a ação no meio */
+  return `<div class="sb-acao"><div class="ab"><div class="ab-uni" role="group" aria-label="Ação do exercício">
+    <button class="ab-z ab-lado" data-navega="-1" ${i===0?"disabled":""} aria-label="Exercício anterior">${icone("chevron-left")}<small>anterior</small></button>
+    <div class="ab-acao">${meio}</div>
+    <button class="ab-z ab-lado" data-navega="1" aria-label="${prox?"Próximo exercício":"Concluir treino"}">${icone(prox?"chevron-right":"check")}<small>${prox?"próximo":"concluir"}</small></button></div></div></div>`;
 }
 function anel(it,i,a){
   const done=a.feitos.includes(i);

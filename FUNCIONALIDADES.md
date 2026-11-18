@@ -155,6 +155,10 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   controles de carga na linha (carga por série, pesado/leve, variar por série, bi-set com uma linha por parte), "Última vez",
   recorde ao alcance e sugestão; rest-pause mostra as etapas como pílulas ("3× falha").
 - Cardio e itens sem séries: cartão com o tempo e a linha das fases.
+- Padrão dos botões da sessão (v1.48): toda ação principal tem 96 px e raio 22, como a barra do descanso. No foco, barra
+  única 20/60/20 ("‹ anterior · ação · próximo ›"), com a ação no meio para todos os tipos (série, rest-pause e pausa,
+  isometria e cronômetro rodando, aquecimento e aproximação, cardio, concluído → "Próximo"); na lista, a ação do cartão
+  aberto também tem 96 px. Vale para todos os treinos.
 - Barra de ação fixa embaixo: no foco "‹ ação ›" (o texto muda pelo tipo); no descanso (nos dois modos) vira o cronômetro
   (v1.43): barra de 96 px na cor sólida do treino que esvazia (laranja nos últimos 10 s), tempo grande no centro e zonas de
   toque −15 s · pular · +15 s em 20/60/20 (v1.44) ("−15" nunca deixa menos de 5 s); a próxima série fica numa linha acima. "Série feita" continua iniciando o descanso; tela cheia segue em Ajustes.
