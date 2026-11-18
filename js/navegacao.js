@@ -1,5 +1,7 @@
 import { entrada, trocarTela } from "./movimento.js";
-import { E } from "./estado.js";
+import { E, precisaFicha } from "./estado.js";
+import { viewBoasVindas } from "./telas/boas-vindas.js";
+import { sincronizar } from "./sync.js";
 import { viewFicha } from "./telas/ficha.js";
 import { viewGuia } from "./telas/guia.js";
 import { viewHistorico } from "./telas/historico.js";
@@ -12,6 +14,10 @@ import { $ } from "./util.js";
 export const nav = { tab:"hoje", fichaFase:null, fichaLetra:null, progEx:null };
 export function render(){
   header();
+  // sem ficha para mostrar (aparelho novo ou perfil da planilha sem ficha ainda): boas-vindas, sem as abas
+  const semFicha = precisaFicha();
+  document.body.classList.toggle("sem-ficha", semFicha);
+  if(semFicha){ $("#brandTxt").textContent = "Treino"; document.title = "Treino"; document.body.classList.remove("em-sessao"); $("#view").onclick=null; return viewBoasVindas(render, sincronizar); }
   document.body.classList.toggle("em-sessao", nav.tab==="hoje" && !!E.atual);
   document.body.dataset.tab = nav.tab;
   $("#view").onclick=null; $("#view").onchange=null; $("#view").onpointerdown=null;

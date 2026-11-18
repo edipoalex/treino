@@ -12,7 +12,7 @@ const CTX = { letra:"A", ex:"Supino", n:1, total:4, carga:"80 kg" };
 test("todo momento tem frases nos 3 estilos, ao menos 4 por estilo, sem placeholder desconhecido", () => {
   for(const ev of Object.keys(EVENTOS)) for(const tom of Object.keys(TONS)){
     const l = todas(ev, tom); assert.ok(l.length >= 5, `${ev}.${tom}`);
-    for(const f of l) assert.match(f, /^[^{}]*(\{(letra|ex|n|total|carga)\}[^{}]*)*$/, f);
+    for(const f of l) assert.match(f, /^[^{}]*(\{((letra|ex|n|total|carga)|[^{}|]*\|[^{}|]*)\}[^{}]*)*$/, f);
   }
   assert.ok(total() > 500);
 });
@@ -85,4 +85,13 @@ test("estado antigo ou incompleto não quebra (repertório mudou de tamanho)", (
   const st = { ultimoEm:0, noTreino:0, sacos:{ "fimDescanso.padrao":[999, 0], "fimDescanso.padrao.incentivo":[999] } };
   assert.ok(falar("fimDescanso", CTX, st, { tons:["padrao"] }).texto);
   assert.ok(falar("fimDescanso", CTX, { }, { tons:["padrao"] }).texto);
+});
+
+test("tratamento: {masculino|feminino} pela opção de Ajustes", async () => {
+  const { preencher } = await import("../js/motivacao.js");
+  assert.equal(preencher("Bem-vind{o|a} de volta, {seu|sua} peste! Treino {letra}.", { letra:"A" }), "Bem-vindo de volta, seu peste! Treino A.");
+  assert.equal(preencher("Bem-vind{o|a} de volta, {seu|sua} peste! Treino {letra}.", { letra:"A" }, "f"), "Bem-vinda de volta, sua peste! Treino A.");
+  // nenhuma frase fica com chave sobrando, nos dois tratamentos
+  for(const ev of Object.keys(EVENTOS)) for(const tom of Object.keys(TONS)) for(const f of todas(ev, tom))
+    for(const g of ["m","f"]) assert.doesNotMatch(preencher(f, CTX, g), /[{}|]/, f);
 });

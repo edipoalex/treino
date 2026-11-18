@@ -120,6 +120,17 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Cores das letras A–H; animações respeitam Ajustes › Animações e "reduzir movimento".
 - Sincronização com a planilha, catálogo de fichas e validação: ver README.
 
+## Vários perfis (v1.49)
+- Fonte da ficha por planilha (`fonteDaFicha`, js/validacao.js): Config `ficha` = `planilha` → só a ficha ativa da
+  planilha, em qualquer etapa, e a ficha do app nunca é enviada; `app` (ou aparelho que já usava o app) → como antes.
+  Aparelho novo sem fonte definida fica em "planilha" por segurança.
+- Boas-vindas (`js/telas/boas-vindas.js`): aparelho novo escolhe "Conectar minha planilha" ou "Usar a ficha que já vem
+  no app"; perfil da planilha sem ficha mostra "Aguardando a primeira ficha" com Atualizar. As abas ficam escondidas.
+- Publicação da ficha de outro perfil: `scripts/publicar-ficha.mjs --perfil NOME ficha.json` (endereço e chave em
+  `~/.config/treino/perfis.json`, fora do repositório); valida, ajusta a versão, grava Config `ficha` = `planilha` e envia.
+- Séries por faixa com "+" ("2x12 + 1x20", "2x12 + 2x15 + 2x20"), com nota "(na última: …)" na última série.
+- Falas com tratamento (Ajustes › Motivação › Tratamento): `{masculino|feminino}` nas frases de `js/falas.js`.
+
 ## Falas do treinador (v1.41)
 - Personagem em balão que comenta o treino. Repertório em `js/falas.js` (v2.0, 546 frases; por momento e estilo, 5+ por estilo),
   decisão em `js/motivacao.js` (puro, `tests/motivacao.test.js`), tela em `js/balao.js` + `css/balao.css`,

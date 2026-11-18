@@ -104,6 +104,27 @@ Alterações que a planilha recusa (dado inválido) vão para a aba **Rejeitadas
 etapas e são a fonte de verdade do agente. As etapas dos PDFs foram importadas uma vez (o conteúdo é licenciado
 para uso pessoal e não fica neste repositório); cada ficha publicada no app entra no catálogo automaticamente.
 
+## Vários perfis (outra pessoa usando o app)
+O app é o mesmo para todos; cada pessoa tem a própria planilha (cópia de "Treino – Dados") e o próprio aparelho.
+- **De onde vem a ficha:** na aba **Config** da planilha, `ficha` = `planilha` faz o app daquele perfil usar só a ficha
+  ativa da planilha (qualquer etapa) e nunca receber a ficha embutida no app. Sem essa linha, a sua planilha continua
+  como sempre (ficha do app). Um aparelho novo começa nas boas-vindas ("Conectar minha planilha").
+- **Preparar a planilha da pessoa (uma vez):** colar o `Code.gs` em Extensões › Apps Script, rodar `configurar()`
+  (gera a chave; anote do registro de execução) e **Implantar › Nova implantação › App da Web**, executando como você
+  e com acesso "Qualquer pessoa" (a chave protege). Anote o endereço `…/exec`.
+- **Publicar a ficha da pessoa** (não entra no repositório): crie `~/.config/treino/perfis.json` com
+  `{ "thay": { "url": "https://script.google.com/macros/s/…/exec", "chave": "…" } }` e rode
+
+  ```bash
+  node scripts/publicar-ficha.mjs --perfil thay caminho/etapa-10.json
+  ```
+
+  O script valida a ficha (mesmas regras), ajusta a `versao` em revisões, grava `ficha` = `planilha` na Config e envia
+  a ficha ativa; a planilha a registra no catálogo. `--simular` só confere, sem enviar.
+- **No aparelho da pessoa:** abrir o app, Adicionar à Tela de Início, "Conectar minha planilha" (endereço e chave) e,
+  em Ajustes › Motivação, escolher o tratamento (Masculino ou Feminino).
+- Dados e fichas da pessoa ficam só na planilha dela e no aparelho dela; nada vai para este repositório público.
+
 ## Agente das fichas
 O prompt do projeto que cria as fichas fica em [`agente/prompt.md`](agente/prompt.md).
 O agente cuida só do treino (fichas, orientações, feedback) e entrega a ficha como `etapa-NN.json`;

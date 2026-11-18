@@ -1,11 +1,11 @@
 import { envioCarga } from "./cargas.js";
-import { FICHA, S, novaEtapa, save, usarFicha } from "./estado.js";
+import { FICHA, S, fichaEscolhida, novaEtapa, save, usarFicha } from "./estado.js";
 import { FICHA_EMBUTIDA } from "./ficha-atual.js";
 import { render } from "./navegacao.js";
 import { confirmar, toast } from "./ui.js";
 import { $, esc } from "./util.js";
 import { chaveSen, sensacaoOk } from "./habito.js";
-import { RX, cmpFicha, limparSessao, num, pesoOk, unidOk, validarFicha, vazio } from "./validacao.js";
+import { RX, cmpFicha, fonteDaFicha, limparSessao, num, pesoOk, unidOk, validarFicha, vazio } from "./validacao.js";
 
 /* ---------- Sincronização com a planilha ---------- */
 export const SCRIPT_PADRAO="https://script.google.com/macros/s/AKfycbxwTnJ-NgKNXqWs5DKNwUwjG6dw0hC1vETohzrDlxh5x-7ijcNBh_oLuQ8YiGh5QB_M/exec";
@@ -59,8 +59,11 @@ export function aplicarRemoto(rem){
   const erroFicha = rem.ficha ? validarFicha(rem.ficha) : "";
   if(erroFicha) console.warn("Ficha da planilha ignorada:", erroFicha);
   const rf = rem.ficha && !erroFicha ? rem.ficha : null;
-  if(rf && cmpFicha(rf, FICHA_EMBUTIDA)>=0){ S.fichaRemota = rf; const trocou = rf.etapa!==FICHA.etapa; usarFicha(rf); if(trocou) toast(`Ficha da etapa ${rf.etapa} carregada da planilha`); }
-  else { S.fichaRemota = null; usarFicha(FICHA_EMBUTIDA); }
+  S.fichaFonte = fonteDaFicha(cfg, S.fichaFonte);
+  // perfil "planilha": vale a ficha da planilha, qualquer que seja a etapa; perfil "app": a mais nova entre ela e a do app
+  S.fichaRemota = rf && (S.fichaFonte==="planilha" || cmpFicha(rf, FICHA_EMBUTIDA)>=0) ? rf : null;
+  const f = fichaEscolhida(), trocou = f.etapa!==FICHA.etapa;
+  usarFicha(f); if(S.fichaRemota && trocou) toast(`Ficha da etapa ${f.etapa} carregada da planilha`);
 }
 export function aplicarConfig(chave, valor){
   const m = /^etapa\.(\d+)\.(inicio|faseModo)$/.exec(chave);
@@ -106,7 +109,9 @@ export async function sincronizar(){
     }
     const rf=j.estado.ficha;
     const embutidaMaisNova = !rf || cmpFicha(FICHA_EMBUTIDA, rf)>0;
-    if(!fichaEnviada && embutidaMaisNova && !validarFicha(FICHA_EMBUTIDA)){
+    // a ficha do app só vai para a planilha de quem usa a ficha do app (nunca para a planilha de outra pessoa)
+    const doApp = fonteDaFicha(j.estado.config, S.fichaFonte)==="app";
+    if(doApp && !fichaEnviada && embutidaMaisNova && !validarFicha(FICHA_EMBUTIDA)){
       extra.push({tipo:"setFicha", ficha:FICHA_EMBUTIDA, ativar:true}); fichaEnviada=true;
     }
     // await: a trava "sincronizando" só pode ser liberada depois que a nova rodada terminar

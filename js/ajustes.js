@@ -32,6 +32,7 @@ function marcarFalas(){
   const f=S.pref.falas;
   document.querySelectorAll("[data-tom]").forEach(b=>b.setAttribute("aria-pressed",String(f.tons.includes(b.dataset.tom))));
   document.querySelectorAll("[data-freq]").forEach(b=>b.setAttribute("aria-pressed",String(f.freq===b.dataset.freq)));
+  document.querySelectorAll("[data-genero]").forEach(b=>b.setAttribute("aria-pressed",String(f.genero===b.dataset.genero)));
   const bx=$("#falasBichos"); if(bx) bx.innerHTML=[...Object.entries(PERSONAGENS).map(([k,p])=>[k,p.nome,desenhoBicho("padrao",56,k,"D")]),
     ["sortear","Sortear a cada treino",`<span class="sem">?</span>`],["nenhum","Nenhum (só o balão)",`<span class="sem">—</span>`]]
     .map(([k,n,fig])=>`<button data-bicho="${k}" aria-pressed="${f.bicho===k}">${fig}<span>${n}</span></button>`).join("");
@@ -89,6 +90,7 @@ export function iniciarAjustes(){
   $("#falasTons").onclick=async e=>{ const b=e.target.closest("[data-tom]"); if(!b) return; const t=b.dataset.tom, f=S.pref.falas;
     if(t==="bravo" && !f.tons.includes(t) && !(await confirmar({ titulo:"Ligar o estilo Sem filtro?", texto:"As falas desse estilo têm palavrão, xingamento e sarcasmo. Não são faladas em voz alta.", sim:"Ligar", nao:"Cancelar" }))) return;
     f.tons = f.tons.includes(t) ? f.tons.filter(x=>x!==t) : ["padrao","zoeira","bravo"].filter(x=>x===t || f.tons.includes(x)); save(); marcarFalas(); };
+  $("#falasGenero").onclick=e=>{ const b=e.target.closest("[data-genero]"); if(!b) return; S.pref.falas.genero=b.dataset.genero; save(); marcarFalas(); };
   $("#falasFreq").onclick=e=>{ const b=e.target.closest("[data-freq]"); if(!b) return; S.pref.falas.freq=b.dataset.freq; save(); marcarFalas(); };
   $("#falasBichos").onclick=e=>{ const b=e.target.closest("[data-bicho]"); if(!b) return; S.pref.falas.bicho=b.dataset.bicho; save(); marcarFalas(); };
   $("#verFala").onclick=()=>{ if(!exemploFala()) toast("Marque pelo menos um estilo"); };
