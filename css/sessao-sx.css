@@ -128,18 +128,66 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .sb-acao{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px var(--e3) calc(env(safe-area-inset-bottom,0px) + 10px);
   background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
 .ab{max-width:640px;margin:0 auto;display:flex;align-items:flex-end;gap:var(--e2)}
-.ab-nav{width:56px;min-width:56px;min-height:56px;padding:0;flex:none;border-radius:var(--r-m);display:grid;place-items:center}
-.ab-nav .ic{width:22px;height:22px}
-.ab-nav:disabled{opacity:.35}
-.ab-meio{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
-.ab-meio>.btn,.ab-meio>.mini-fase{flex:1 1 0;min-width:0;min-height:56px;margin:0}
-.ab-meio .btn{font-size:var(--t-corpo);font-weight:700;padding:0 12px}
-.ab-meio .btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ab-meio .link-btn{display:none}
-.sx-sec{margin-top:var(--e2)}
-.ab-meio .linha2{flex:1;margin:0;gap:6px}
-.ab-meio>p,.ab-meio .passos-aq{flex-basis:100%;margin:0}
-.ab-meio .passos-aq{gap:6px}
+/* ---------- Padrão dos botões da sessão (v1.48) ----------
+   Toda ação principal tem o tamanho da barra do descanso (96 px, raio 22). No foco é uma barra única 20/60/20:
+   ‹ anterior · ação · próximo ›; a ação (série feita, pausa, cronômetro, cardio, aproximação…) ocupa o meio. */
+.ab-uni{flex:1;min-width:0;display:grid;grid-template-columns:20% 1fr 20%;height:96px;border-radius:22px;overflow:hidden;background:var(--c);color:var(--on);
+  box-shadow:0 10px 24px -14px color-mix(in srgb,var(--c) 80%,transparent)}
+.ab-uni .ab-lado{background:rgba(0,0,0,.16);color:inherit;text-shadow:none}
+.ab-lado .ic{width:24px;height:24px}
+.ab-lado small{opacity:.8}
+.ab-lado:disabled{opacity:.4;cursor:default}
+.ab-uni .ab-lado+.ab-acao,.ab-acao+.ab-lado{box-shadow:none}
+.ab-acao{min-width:0;display:flex;align-items:stretch;border-left:1px solid rgba(255,255,255,.18);border-right:1px solid rgba(255,255,255,.18)}
+.ab-acao>*{margin:0!important}
+.ab-acao .mini-fase{flex:1 1 0;min-width:0;height:100%;min-height:0;margin:0;border-radius:0}
+.ab-acao .btn{flex:1 1 0;min-width:0;height:100%;min-height:0;margin:0;padding:0 8px;border:0;border-radius:0;background:transparent;background-image:none;box-shadow:none;
+  color:inherit;font:800 19px/1.15 var(--body);letter-spacing:-.01em;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.ab-acao .btn span{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal}
+.ab-acao .btn .ic,.ab-acao .btn svg{width:22px;height:22px;flex:none}
+.ab-acao .btn:active{background:rgba(255,255,255,.14);transform:none}
+.ab-acao .link-btn{display:none}
+.ab-acao .linha2{flex:1;display:flex;margin:0;gap:0}
+.ab-acao .linha2 .btn+.btn{border-left:1px solid rgba(255,255,255,.18)}
+.ab-acao>p{display:none}
+.ab-acao .passos-aq{flex:1;display:flex;margin:0;gap:0}
+.ab-acao .passos-aq .btn:not([data-aq]){display:none}
+/* cronômetro rodando (isometria, pausa do rest-pause) e cardio minimizado: o meio vira o tempo */
+.ab-acao .t-btn #eTxt{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.ab-acao .t-btn .t-fill{background:rgba(255,255,255,.22)}
+.ab-acao .t-btn.prepara{background:var(--ink);color:var(--bg)}
+.ab-acao .t-btn.troca,.ab-acao .t-btn.low{background:var(--warn);color:#fff}
+.ab-acao .mini-fase{padding:0 10px;justify-content:space-between}
+.ab-acao .mini-fase .mf-txt b{font-size:18px}
+.ab-acao .mini-fase .mf-t{font-size:26px}
+.ab-acao .mini-fase .mf-ic{display:none}
+/* barra regressiva (cronômetro rodando: pausa do rest-pause, isometria, cardio minimizado) = a do descanso:
+   trilho escuro na barra inteira e a cor sólida (do treino ou da fase) esvaziando por baixo das três zonas */
+.ab-uni{position:relative}
+.ab-uni>.ab-lado{position:relative;z-index:1}
+.ab-uni .ab-acao,.ab-acao .t-btn,.ab-acao .mini-fase{position:static}
+.ab-uni:has(.t-btn,.mini-fase){background:var(--surface-3);color:#fff;box-shadow:none}
+.ab-uni:has(.t-btn,.mini-fase) .ab-lado{background:transparent;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.ab-acao .t-btn .t-fill{z-index:0;background:var(--c);border-radius:0}
+.ab-acao .t-btn>:not(.t-fill),.ab-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.ab-acao .t-btn.prepara,.ab-acao .t-btn.troca,.ab-acao .t-btn.low{background:transparent;color:#fff}
+.ab-uni:has(.t-btn.low,.t-btn.troca) .t-fill{background:var(--warn)}
+.ab-acao .mini-fase,.ab-acao .mini-fase.t-prep{background:transparent;color:#fff}
+.ab-acao .mf-barra{position:absolute;inset:0;height:auto;background:transparent;z-index:0}
+.ab-acao .mf-barra i{background:var(--fase,var(--c))}
+/* lista: a ação no cartão aberto tem o mesmo tamanho */
+.sx-acao .btn,.sx-acao .mini-fase{min-height:96px;border-radius:22px;font-size:19px;font-weight:800}
+.sx-acao .t-btn #eTxt{font-size:24px;font-weight:800}
+.sx-acao .t-btn{background:var(--surface-3);background-image:none;color:#fff;border:0}
+.sx-acao .t-btn .t-fill{background:var(--c)}
+.sx-acao .t-btn.low .t-fill,.sx-acao .t-btn.troca .t-fill{background:var(--warn)}
+.sx-acao .t-btn.prepara,.sx-acao .t-btn.troca,.sx-acao .t-btn.low{background:var(--surface-3);color:#fff}
+.sx-acao .t-btn>:not(.t-fill),.sx-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1}
+.sx-acao .mini-fase,.sx-acao .mini-fase.t-prep{background:var(--surface-3);color:#fff;margin:0}
+.sx-acao .mf-barra{inset:0;height:auto;background:transparent}
+.sx-acao .mf-barra i{background:var(--fase,var(--c))}
+.sx-acao .linha2 .btn,.sx-acao .passos-aq .btn{min-height:96px}
+.sx-acao .reabrir{min-height:56px;border-radius:16px;font-size:var(--t-sec)}
 /* descanso (v1.43): barra grande na cor sólida do treino, que esvazia; zonas de toque −15 s · pular · +15 s
    (v1.44: 20/60/20, laterais menores; o meio, que é o toque mais usado, fica maior) */
 .ab-col{flex-direction:column;align-items:stretch;gap:6px}
@@ -158,4 +206,4 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .ab-meio-z small{font-size:11.5px}
 .ab-meio-z .ab-t{font-size:48px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 :root:not([data-theme="dark"]) .ab-rest{background:#3A444E}
-@media (max-width:360px){ .ab-nav{width:48px;min-width:48px} .ab-meio-z .ab-t{font-size:40px} .ab-z b{font-size:15px} .ab-z small{font-size:9px;letter-spacing:.02em} }
+@media (max-width:360px){ .ab-acao .btn{font-size:16px;gap:6px} .ab-meio-z .ab-t{font-size:40px} .ab-z b{font-size:15px} .ab-z small{font-size:9px;letter-spacing:.02em} }
