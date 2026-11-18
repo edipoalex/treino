@@ -161,9 +161,31 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .ab-acao .mini-fase .mf-txt b{font-size:18px}
 .ab-acao .mini-fase .mf-t{font-size:26px}
 .ab-acao .mini-fase .mf-ic{display:none}
+/* barra regressiva (cronômetro rodando: pausa do rest-pause, isometria, cardio minimizado) = a do descanso:
+   trilho escuro na barra inteira e a cor sólida (do treino ou da fase) esvaziando por baixo das três zonas */
+.ab-uni{position:relative}
+.ab-uni>.ab-lado{position:relative;z-index:1}
+.ab-uni .ab-acao,.ab-acao .t-btn,.ab-acao .mini-fase{position:static}
+.ab-uni:has(.t-btn,.mini-fase){background:var(--surface-3);color:#fff;box-shadow:none}
+.ab-uni:has(.t-btn,.mini-fase) .ab-lado{background:transparent;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.ab-acao .t-btn .t-fill{z-index:0;background:var(--c);border-radius:0}
+.ab-acao .t-btn>:not(.t-fill),.ab-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.ab-acao .t-btn.prepara,.ab-acao .t-btn.troca,.ab-acao .t-btn.low{background:transparent;color:#fff}
+.ab-uni:has(.t-btn.low,.t-btn.troca) .t-fill{background:var(--warn)}
+.ab-acao .mini-fase,.ab-acao .mini-fase.t-prep{background:transparent;color:#fff}
+.ab-acao .mf-barra{position:absolute;inset:0;height:auto;background:transparent;z-index:0}
+.ab-acao .mf-barra i{background:var(--fase,var(--c))}
 /* lista: a ação no cartão aberto tem o mesmo tamanho */
 .sx-acao .btn,.sx-acao .mini-fase{min-height:96px;border-radius:22px;font-size:19px;font-weight:800}
 .sx-acao .t-btn #eTxt{font-size:24px;font-weight:800}
+.sx-acao .t-btn{background:var(--surface-3);background-image:none;color:#fff;border:0}
+.sx-acao .t-btn .t-fill{background:var(--c)}
+.sx-acao .t-btn.low .t-fill,.sx-acao .t-btn.troca .t-fill{background:var(--warn)}
+.sx-acao .t-btn.prepara,.sx-acao .t-btn.troca,.sx-acao .t-btn.low{background:var(--surface-3);color:#fff}
+.sx-acao .t-btn>:not(.t-fill),.sx-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1}
+.sx-acao .mini-fase,.sx-acao .mini-fase.t-prep{background:var(--surface-3);color:#fff;margin:0}
+.sx-acao .mf-barra{inset:0;height:auto;background:transparent}
+.sx-acao .mf-barra i{background:var(--fase,var(--c))}
 .sx-acao .linha2 .btn,.sx-acao .passos-aq .btn{min-height:96px}
 .sx-acao .reabrir{min-height:56px;border-radius:16px;font-size:var(--t-sec)}
 /* descanso (v1.43): barra grande na cor sólida do treino, que esvazia; zonas de toque −15 s · pular · +15 s
