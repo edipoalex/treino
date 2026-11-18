@@ -19,7 +19,8 @@ export const FREQ = { pouca:{ intervalo:150, limite:6, fator:.5 }, normal:{ inte
 
 /* Sorteio sem repetição: cada evento+tom tem um "saco" embaralhado; só repete depois de usar todas */
 function embaralha(a, rnd){ const b=[...a]; for(let i=b.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
-const preencher = (t, ctx) => t.replace(/\{(\w+)\}/g, (_, k) => ctx[k] ?? "");
+/* {masculino|feminino} pelo tratamento escolhido (v1.49); depois {letra} {ex} {n} {total} {carga} */
+export const preencher = (t, ctx, genero="m") => t.replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (_, m, f) => genero==="f" ? f : m).replace(/\{(\w+)\}/g, (_, k) => ctx[k] ?? "");
 
 /* Grupos de um momento e estilo: { categoria: [frases] }; uma lista simples vira um grupo só ("geral") */
 export const grupos = v => Array.isArray(v) ? (v.length ? { geral:v } : {}) : Object.fromEntries(Object.entries(v||{}).filter(([,l]) => Array.isArray(l) && l.length));
@@ -57,6 +58,6 @@ export function falar(evento, ctx, estado, prefs, agora=Date.now(), rnd=Math.ran
   const i = saco.shift(); estado.recentes = [...estado.recentes, `${chave}.${i}`].slice(-20);
   estado.cats[tom] = [...usadas, cat].slice(-12);
   if(!E.livre){ estado.ultimoEm = agora; estado.noTreino++; }   // fim do descanso troca o "VAI!": não conta no intervalo nem no limite
-  return { texto: preencher(lista[i], ctx), tom, evento, cat };
+  return { texto: preencher(lista[i], ctx, prefs.genero), tom, evento, cat };
 }
 export const total = (tom) => Object.values(FALAS).reduce((t, e) => t + (tom ? qtd(e[tom]) : Object.keys(TONS).reduce((s, k) => s + qtd(e[k]), 0)), 0);

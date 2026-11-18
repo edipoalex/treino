@@ -40,6 +40,12 @@ export function validarFicha(f){
   return /[<>]/.test(JSON.stringify(f)) ? "texto com < ou >" : "";
 }
 /* >0 se a ficha a é mais nova que b (etapa, depois revisão) */
+/* De onde vem a ficha (v1.49, vários perfis):
+   - "app": a ficha embutida no app (a sua); com planilha conectada, ela é enviada à planilha quando for mais nova.
+   - "planilha": só a ficha ativa da planilha conectada (outra pessoa); a ficha do app nunca é usada nem enviada.
+   A planilha decide com Config "ficha" = "planilha" | "app". Sem essa linha, aparelhos que já usavam o app continuam
+   em "app", e um aparelho novo (sem fonte definida) fica em "planilha", por segurança. */
+export const fonteDaFicha = (cfg, atual) => cfg?.ficha==="planilha" || cfg?.ficha==="app" ? cfg.ficha : (atual==="app" ? "app" : "planilha");
 export const cmpFicha = (a,b) => a.etapa!==b.etapa ? a.etapa-b.etapa : (a.versao||0)-(b.versao||0);
 export function limparSessao(x){
   if(!x || typeof x!=="object") return null;

@@ -7,6 +7,13 @@ export function seriesDe(it){
   const repete=(r,tag)=>Array.from({length:n},(_,j)=>({r, tag: typeof tag==="function" ? tag(j) : tag}));
   if((m=p.match(/^(?:[A-Za-zÀ-ú -]+?\s)?(\d+)\s*x\s*\((.+)\)\s*$/)) && +m[1]===n) return repete(m[2].trim(),"");
   if((m=p.match(/^(\d+)\s*voltas?:\s*(.+)$/i)) && +m[1]===n) return repete(m[2].trim(),"");
+  // séries por faixa com "+": "2x12 + 1x20", "2x12 + 2x15 + 2x20" (v1.49; o bi-set "3x10 + 10" não entra aqui)
+  if((m=p.match(/^\s*\d+\s*x\s*\d+(?:\s*\+\s*\d+\s*x\s*\d+)+\s*(?:\(([^)]*)\))?\s*$/))){
+    const fx=[...p.replace(/\(.*\)/,"").matchAll(/(\d+)\s*x\s*(\d+)/g)].flatMap(([,q,r])=>Array.from({length:+q},()=>({r, tag:""})));
+    const nota=(m[1]||"").trim(), ult=/na última/i.test(nota);
+    if(nota) fx.forEach((x,j)=>{ if(!ult || j===n-1) x.tag = ult ? nota.replace(/^na última:?\s*/i,"") : nota; });
+    if(fx.length===n) return fx;
+  }
   const itens=[]; let ok=p.includes("/");
   if(ok) for(const s of p.replace(/^[^:\d]*:\s*/,"").split("/").map(x=>x.trim())){
     const q=s.match(/^(\d+)\s*x\s*(\d+)\s*(.*)$/); if(!q){ ok=false; break; }

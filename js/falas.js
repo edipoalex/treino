@@ -5,6 +5,7 @@
    alterna as categorias para não repetir o mesmo tipo de humor em seguida, e não repete frase até usar todas do grupo.
    Para ampliar: acrescente frases no grupo certo; para criar uma categoria, crie o grupo e registre o nome em CATEGORIAS.
    Uma lista simples (sem grupos) também é aceita. Placeholders: {letra} {ex} {n} {total} {carga}.
+   Tratamento (v1.49): {masculino|feminino} escolhe pela opção de Ajustes › Motivação, ex.: "Bem-vind{o|a}", "{seu|sua} peste".
    Os testes conferem: 5+ frases por momento e estilo, nenhum grupo vazio, categorias registradas e
    frases do fim do descanso com até 60 letras. */
 
@@ -60,13 +61,13 @@ export const FALAS = {
         "Levanta essa bunda e vai treinar, caralho!",
         "Hoje não tem chororô. Treino {letra}, e vai calado.",
         "Deixa de enrolação e começa logo essa merda.",
-        "Chegou! Agora não vem com frescura, arrombado.",
+        "Chegou! Agora não vem com frescura, arrombad{o|a}.",
         "Fecha a cara de derrota e abre o treino, porra!"
       ],
       sarcasmo: [
         "Que cara de sono é essa? Acorda, porra, é treino {letra}!",
         "Tá esperando o quê? Convite impresso? Vai, porra!",
-        "Celular só pra marcar série. Instagram depois, seu peste.",
+        "Celular só pra marcar série. Instagram depois, {seu|sua} peste.",
         "A preguiça não paga mensalidade. Bora trabalhar, caralho!"
       ]
     }
@@ -108,7 +109,7 @@ export const FALAS = {
     bravo: {
       cobranca: [
         "{ex}. Faz direito ou nem começa, caralho.",
-        "{ex} agora. E sem roubar no movimento, malandro.",
+        "{ex} agora. E sem roubar no movimento, malandr{o|a}.",
         "Olha a técnica no {ex}, que eu tô vendo essa porra.",
         "{ex}: amplitude e controle. Não essa meia-boca de bosta.",
         "Ajusta essa postura, porra. O objetivo é treinar, não improvisar.",
@@ -149,7 +150,7 @@ export const FALAS = {
     zoeira: {
       classico: [
         "BIRL! O ferro sentiu a pressão!",
-        "Ajuda o maluco que tá treinando!",
+        "Ajuda {o maluco|a maluca} que tá treinando!",
         "O ferro não mente. E ele disse que você consegue manter a técnica.",
         "O shape está em construção. Favor não tocar na obra."
       ],
@@ -158,7 +159,7 @@ export const FALAS = {
         "A série foi paga. O boleto do descanso vem depois."
       ],
       ironia: [
-        "Ainda tá vivo? Ótimo, próxima.",
+        "Ainda tá viv{o|a}? Ótimo, próxima.",
         "Mais uma e eu paro de te zoar. Mentira.",
         "Respira, que o oxigênio é de graça.",
         "Só isso? Pensei que era treino, não demonstração grátis.",
@@ -168,7 +169,7 @@ export const FALAS = {
     },
     bravo: {
       cobranca: [
-        "Foi. Mas mantém o foco na próxima, seu peste.",
+        "Foi. Mas mantém o foco na próxima, {seu|sua} peste.",
         "Chega de enrolar. A próxima série não vai se fazer sozinha.",
         "Menos teatro e mais consistência, caralho!",
         "Não precisa fazer cena. Só precisa fazer bem feito, porra."
@@ -216,7 +217,7 @@ export const FALAS = {
         "Agora é aquela cena de filme em que toca a música épica."
       ],
       ironia: [
-        "Última série. É agora ou nunca, campeão!",
+        "Última série. É agora ou nunca, campe{ão|ã}!",
         "Bota a alma nessa última. Mas deixa um pouco pra amanhã.",
         "Última. Faz direito, senão começa de novo. Brincadeira. Talvez.",
         "Última! Finge que tem gente olhando.",
@@ -226,12 +227,12 @@ export const FALAS = {
     bravo: {
       cobranca: [
         "Última, caralho! Faz valer!",
-        "É a última. Não me vem com execução meia-boca, arrombado.",
+        "É a última. Não me vem com execução meia-boca, arrombad{o|a}.",
         "Última série, porra! Depois você descansa.",
         "Bota foco nessa última. O resto é conversa fiada.",
         "Chegou na última. Agora termina essa merda direito.",
         "Sem desistir no meio do caminho, porra!",
-        "Fecha essa série com dignidade, seu enrolado!"
+        "Fecha essa série com dignidade, {seu enrolado|sua enrolada}!"
       ],
       sarcasmo: [
         "Última! Treina como se o ex estivesse olhando.",
@@ -292,7 +293,7 @@ export const FALAS = {
       ],
       sarcasmo: [
         "{ex} pago. Nem doeu. Mentira, doeu pra caralho.",
-        "Até que enfim! Próximo exercício, seu enrolado.",
+        "Até que enfim! Próximo exercício, {seu enrolado|sua enrolada}.",
         "Fez o que tinha que fazer. Milagre? Não, obrigação cumprida."
       ],
       comemoracao: [
@@ -329,7 +330,7 @@ export const FALAS = {
       classico: [
         "Aumentou o peso? Agora sim, o ferro ganhou um assunto.",
         "Mais peso! O ferro gostou de você.",
-        "Subiu o peso! O frango tá virando galo.",
+        "Subiu o peso! {O frango tá virando galo|A franguinha tá virando leoa}.",
         "O ferro perguntou quem autorizou esse upgrade."
       ],
       pop: [
@@ -340,7 +341,7 @@ export const FALAS = {
       ],
       ironia: [
         "Agora sim! Esse peso aí não é de enfeite.",
-        "{carga}? Tá ficando metido, hein!",
+        "{carga}? Tá ficando metid{o|a}, hein!",
         "O peso subiu e a autoestima foi junto.",
         "A carga aumentou. O ego também, pelo visto."
       ]
@@ -350,7 +351,7 @@ export const FALAS = {
         "{carga}. Quero ver controlar essa merda direito.",
         "Subiu pra {carga}. Agora não inventa de roubar movimento.",
         "Mais peso, menos conversa fiada. Bora!",
-        "Aumentou? Então honra essa carga, seu peste.",
+        "Aumentou? Então honra essa carga, {seu|sua} peste.",
         "Agora segura a onda e faz direito, caralho!",
         "O peso subiu. A responsabilidade também, porra."
       ],
@@ -359,7 +360,7 @@ export const FALAS = {
       ],
       comemoracao: [
         "{carga}? Agora sim, porra! Mas mantém a técnica.",
-        "Olha o frango virando galo, caralho!",
+        "{Olha o frango virando galo|Olha a franguinha virando leoa}, caralho!",
         "Tá ficando forte, porra. Não deixa a execução virar bagunça."
       ]
     }
@@ -385,7 +386,7 @@ export const FALAS = {
     zoeira: {
       classico: [
         "RECORDE! O monstro saiu da jaula de vez!",
-        "{carga}?! Quem é você e o que fez com o frango?",
+        "{carga}?! Quem é você e o que fez com {o frango|a franguinha}?",
         "Hora do show! Recorde novo!",
         "O shape recebeu uma notificação: temos novidades.",
         "O ferro ficou sem argumento. Próximo assunto!"
@@ -415,7 +416,7 @@ export const FALAS = {
         "{carga}! Quem é esse monstro, porra?",
         "Recorde batido! Tá ficando forte pra caralho.",
         "Aí sim, porra! Trabalho reconhecido.",
-        "Novo recorde. Pode comemorar, seu desgraçado do bem!",
+        "Novo recorde. Pode comemorar, {seu desgraçado|sua desgraçada} do bem!",
         "O ferro tentou te parar e tomou no cu. Recorde!",
         "É isso, porra! Guarda essa marca e continua trabalhando."
       ]
@@ -471,10 +472,10 @@ export const FALAS = {
       sarcasmo: [
         "Cardio. Eu sei que você odeia. Vai assim mesmo, porra.",
         "Hora do cardio. Tira essa cara de enterro.",
-        "Cardio não é pra andar mexendo no celular, seu peste.",
+        "Cardio não é pra andar mexendo no celular, {seu|sua} peste.",
         "Esteira não é passarela. Bora, caralho!",
         "O fôlego não melhora olhando pro painel, porra.",
-        "A caminhada não vai acontecer por telepatia, seu folgado."
+        "A caminhada não vai acontecer por telepatia, {seu folgado|sua folgada}."
       ]
     }
   },
@@ -529,7 +530,7 @@ export const FALAS = {
       sarcasmo: [
         "Isso é forte pra você? Mantém o foco e trabalha!",
         "Forte de verdade, não forte de Instagram!",
-        "Não olha pro relógio a cada dois segundos, seu apressado."
+        "Não olha pro relógio a cada dois segundos, {seu apressado|sua apressada}."
       ]
     }
   },
@@ -571,7 +572,7 @@ export const FALAS = {
     },
     bravo: {
       cobranca: [
-        "Leve. Respira, mas não senta, folgado.",
+        "Leve. Respira, mas não senta, folgad{o|a}.",
         "Recupera aí. Leve não é parado, porra.",
         "Aproveita, que daqui a pouco volta o trabalho.",
         "Descansa o pulmão, que já já tem mais.",
@@ -582,7 +583,7 @@ export const FALAS = {
       sarcasmo: [
         "Diminui o ritmo, mas não transforma isso em férias.",
         "Sem inventar de parar por causa de uma subidinha, porra.",
-        "É leve, seu apressado. Não precisa competir com a esteira."
+        "É leve, {seu apressado|sua apressada}. Não precisa competir com a esteira."
       ]
     }
   },
@@ -636,7 +637,7 @@ export const FALAS = {
         "Metade concluída. Para de reclamar e mantém o ritmo.",
         "Não começa com essa cara de derrota, caralho!",
         "O trabalho está pela metade. Termina essa porra!",
-        "Vai firme, seu apressado. Ainda tem chão."
+        "Vai firme, {seu apressado|sua apressada}. Ainda tem chão."
       ],
       sarcasmo: [
         "Metade. Ainda falta a outra metade, gênio.",
@@ -696,7 +697,7 @@ export const FALAS = {
         "Falta pouco. Não entrega os pontos agora, caralho!",
         "Chegou até aqui. Fecha essa merda direito!",
         "Olha pra frente e mantém o ritmo, porra!",
-        "Mais um trecho, seu teimoso. Bora!",
+        "Mais um trecho, {seu teimoso|sua teimosa}. Bora!",
         "Finaliza essa porra com a mesma disciplina do começo!"
       ],
       sarcasmo: [
@@ -793,7 +794,7 @@ export const FALAS = {
       ],
       cotidiano: [
         "Treino pago! Agora pode comer aquela pizza. Com equilíbrio!",
-        "Missão cumprida, guerreiro! Banho, comida e descanso.",
+        "Missão cumprida, guerreir{o|a}! Banho, comida e descanso.",
         "Fim! Pode voltar pra Netflix com a consciência tranquila.",
         "Agora é alongar conforme o plano e fingir naturalidade na escada."
       ],
@@ -847,7 +848,7 @@ export const FALAS = {
       cotidiano: [
         "Meta batida! Pode se gabar no grupo da família.",
         "Semana completa! O sofá está até com saudade.",
-        "Meta cumprida! Tá mais disciplinado que despertador.",
+        "Meta cumprida! Tá mais disciplinad{o|a} que despertador.",
         "Você prometeu e cumpriu. Print para o grupo!",
         "Constância em dia. O sofá já está procurando outro amigo.",
         "Parabéns! Hoje até o despertador te respeita."
@@ -864,7 +865,7 @@ export const FALAS = {
     },
     bravo: {
       cobranca: [
-        "Bateu a meta! Agora não some no fim de semana, seu peste.",
+        "Bateu a meta! Agora não some no fim de semana, {seu|sua} peste.",
         "Meta batida. Não vai jogar tudo pro alto agora, porra!"
       ],
       sarcasmo: [
@@ -872,12 +873,12 @@ export const FALAS = {
       ],
       comemoracao: [
         "Meta da semana batida, caralho! Respeita!",
-        "Tá ficando disciplinado pra caralho.",
+        "Tá ficando disciplinad{o|a} pra caralho.",
         "Semana paga! Pode até tirar foto no espelho, porra.",
         "Olha só: consistência! Continua nessa merda de caminho certo.",
         "Você fez o que precisava. Sem desculpa, sem novela.",
         "Semana concluída, porra! Descansa e planeja a próxima.",
-        "Parabéns, seu teimoso. A disciplina venceu de novo!"
+        "Parabéns, {seu teimoso|sua teimosa}. A disciplina venceu de novo!"
       ]
     }
   },
@@ -891,9 +892,9 @@ export const FALAS = {
         "Pra cima! Mais uma.",
         "Descansou? Agora execute!",
         "Foco total. Vai!",
-        "Pronto? Então vamos para a próxima!",
+        "Pront{o|a}? Então vamos para a próxima!",
         "Mais uma série bem feita!",
-        "Recuperado? Vamos continuar!"
+        "Recuperad{o|a}? Vamos continuar!"
       ],
       tecnica: [
         "Respire fundo e retome!",
@@ -925,10 +926,10 @@ export const FALAS = {
       cobranca: [
         "Levanta, porra!",
         "Acabou o descanso, caralho!",
-        "Vai, arrombado!",
+        "Vai, arrombad{o|a}!",
         "Larga essa merda de celular!",
         "Tá esperando o quê, porra?",
-        "Bora, seu enrolado!",
+        "Bora, {seu enrolado|sua enrolada}!",
         "Chega de enrolar, caralho!",
         "Volta pro ferro, porra!",
         "Descansou demais. Mexe essa bunda!",
@@ -950,7 +951,7 @@ export const FALAS = {
       constancia: [
         "Que bom te ver de volta! Bora retomar.",
         "Voltou! Recomeçar também é evoluir.",
-        "Bem-vindo de volta! Um treino de cada vez.",
+        "Bem-vind{o|a} de volta! Um treino de cada vez.",
         "Voltou! O importante é retomar.",
         "Que bom! Hoje é dia de reconstruir o ritmo.",
         "Retomar é uma conquista. Vamos com calma e consistência.",
@@ -963,7 +964,7 @@ export const FALAS = {
         "Sumiu, hein? O ferro sentiu sua falta. Eu, nem tanto."
       ],
       cotidiano: [
-        "Voltou! Achei que tinha virado sócio do sofá.",
+        "Voltou! Achei que tinha virado sóci{o|a} do sofá.",
         "A academia não é grupo de WhatsApp, mas pode aparecer mais vezes.",
         "O sofá perdeu a guarda compartilhada. Bora!"
       ],
@@ -986,13 +987,13 @@ export const FALAS = {
         "Chega de sumiço. Vamos recomeçar essa merda com juízo.",
         "Não quero justificativa, quero constância. Bora!",
         "Voltou? Então para de enrolar e começa, caralho!",
-        "O importante é que voltou. Agora não desaparece de novo, seu figura."
+        "O importante é que voltou. Agora não desaparece de novo, {seu|sua} figura."
       ],
       sarcasmo: [
         "Olha quem voltou! Onde você tava, caralho?",
         "Sumiu, né? Achei que tinha aposentado, porra.",
         "Que porra de férias foram essas?",
-        "Ah, lembrou que tem academia? Bora, seu peste.",
+        "Ah, lembrou que tem academia? Bora, {seu|sua} peste.",
         "O ferro estava criando teia. Bora trabalhar, porra!"
       ]
     }

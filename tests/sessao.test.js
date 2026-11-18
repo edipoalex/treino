@@ -2,6 +2,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { metodoDe, separarNotas } from "../js/recursos.js";
+import { seriesDe } from "../js/series.js";
+import { fonteDaFicha } from "../js/validacao.js";
 import { FICHA_EMBUTIDA } from "../js/ficha-atual.js";
 
 const it = (prescricao, extra={}) => ({ nome:"Supino", prescricao, series:3, ...extra });
@@ -33,4 +35,20 @@ test("orientação repetida vira nota do treino; o resto fica no item", () => {
 test("sem repetição, nada vira nota do treino", () => {
   const r = separarNotas(["Pré-exaustão", "Descanso maior", ""]);
   assert.equal(r.comum, ""); assert.equal(r.rotulo, ""); assert.deepEqual(r.proprias, ["Pré-exaustão", "Descanso maior", ""]);
+});
+
+test("séries por faixa com +: 2x12 + 1x20, 2x12 + 2x15 + 2x20 (o bi-set 3x10 + 10 continua igual)", () => {
+  const r = (p, n) => seriesDe({ prescricao:p, series:n }).map(x => x.r + (x.tag ? " " + x.tag : ""));
+  assert.deepEqual(r("2x12 + 1x20", 3), ["12","12","20"]);
+  assert.deepEqual(r("2x12 + 2x15 + 2x20", 6), ["12","12","15","15","20","20"]);
+  assert.deepEqual(r("2x12 + 1x15 (na última: até a falha)", 3), ["12","12","15 até a falha"]);
+  assert.deepEqual(r("3x10 + 10", 3), ["10 + 10","10 + 10","10 + 10"]);
+  assert.deepEqual(r("2x12 + 1x20", 4), ["série","série","série","série"]);   // contagem não bate: não inventa
+});
+test("fonte da ficha: a planilha decide; sem decisão, aparelho antigo fica no app e aparelho novo na planilha", () => {
+  assert.equal(fonteDaFicha({ ficha:"planilha" }, "app"), "planilha");
+  assert.equal(fonteDaFicha({ ficha:"app" }, ""), "app");
+  assert.equal(fonteDaFicha({}, "app"), "app");
+  assert.equal(fonteDaFicha({}, ""), "planilha");
+  assert.equal(fonteDaFicha(undefined, "planilha"), "planilha");
 });

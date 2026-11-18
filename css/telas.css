@@ -151,3 +151,12 @@ h1.page{font-family:var(--display);font-size:var(--t-tela);margin:8px 0 4px}
   :root:not([data-theme="light"]) .hoje-card[aria-expanded="true"] .marca{opacity:.1}
 }
 .delta.neutro{color:var(--muted)}
+
+/* Boas-vindas e espera da primeira ficha (v1.49, js/telas/boas-vindas.js) */
+body.sem-ficha .tabs,body.sem-ficha #weekLbl{display:none}
+.bv{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--e3);padding:var(--e10) var(--e4) var(--e6)}
+.bv-ic{width:72px;height:72px;border-radius:24px;display:grid;place-items:center;background:var(--surface-2);color:var(--ink)}
+.bv-ic .ic{width:34px;height:34px}
+.bv h2{margin:var(--e2) 0 0;font-size:var(--t-titulo);font-weight:800;letter-spacing:-.02em}
+.bv p{margin:0 0 var(--e3);max-width:34ch;font-size:var(--t-corpo);line-height:1.45;color:var(--muted)}
+.bv .btn.grande{min-height:var(--h-g);max-width:420px}

@@ -15,12 +15,14 @@ export function novaEtapa(){ return { inicio:"", faseModo:"auto", historico:[], 
 /* Ajustes › Motivação: estilos marcados (vazio = falas desligadas), frequência e personagem */
 const TONS_OK=["padrao","zoeira","bravo"], BICHOS_OK=["kettle","anilha","halter","bola","treno","sortear","nenhum"];
 export function prefFalas(f){
-  if(!f || typeof f!=="object") return { tons:["padrao","zoeira"], freq:"normal", bicho:"kettle" };
+  if(!f || typeof f!=="object") return { tons:["padrao","zoeira"], freq:"normal", bicho:"kettle", genero:"m" };
   return { tons: Array.isArray(f.tons) ? TONS_OK.filter(t=>f.tons.includes(t)) : ["padrao","zoeira"],
-    freq: ["pouca","normal","muita"].includes(f.freq) ? f.freq : "normal", bicho: BICHOS_OK.includes(f.bicho) ? f.bicho : "kettle" };
+    freq: ["pouca","normal","muita"].includes(f.freq) ? f.freq : "normal", bicho: BICHOS_OK.includes(f.bicho) ? f.bicho : "kettle",
+    genero: f.genero==="f" ? "f" : "m" };   // tratamento nas falas (v1.49): masculino ou feminino
 }
 export function normalizarEstado(S){
   if(!S || typeof S!=="object") S={};
+  const novo = !S.v;   // aparelho que nunca usou o app (o estado salvo sempre tem "v")
   if(!["auto","light","dark"].includes(S.theme)) S.theme="auto";
   if(!S.etapas || typeof S.etapas!=="object") S.etapas={};
   for(const st of Object.values(S.etapas)){
@@ -57,6 +59,8 @@ export function normalizarEstado(S){
   // lembretes no Calendário (fase 4): dias (0 = segunda) e horário
   { const l=S.lembrete, dias=Array.isArray(l?.dias) ? [...new Set(l.dias.filter(d=>Number.isInteger(d) && d>=0 && d<7))].sort() : [];
     S.lembrete = { dias: dias.length ? dias : [0,1,3,4], hora: /^\d{2}:\d{2}$/.test(l?.hora||"") ? l.hora : "18:00" }; }
+  // fonte da ficha (v1.49): "" = ainda não escolhida (aparelho novo: mostra as boas-vindas)
+  S.fichaFonte = ["app","planilha"].includes(S.fichaFonte) ? S.fichaFonte : (novo ? "" : "app");
   S.v = ESTADO_V;
   return S;
 }
@@ -71,5 +75,12 @@ export function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catc
 export function iniciarEstado(){
   S = normalizarEstado(load());
   { const erro=validarFicha(FICHA_EMBUTIDA); if(erro) console.error("FICHA_EMBUTIDA inválida:", erro); }
-  usarFicha(S.fichaRemota && cmpFicha(S.fichaRemota, FICHA_EMBUTIDA)>=0 ? S.fichaRemota : FICHA_EMBUTIDA);
+  usarFicha(fichaEscolhida());
 }
+/* Ficha em uso: da planilha (perfil "planilha") ou a do app, a mais nova entre ela e a da planilha (perfil "app") */
+export function fichaEscolhida(){
+  if(S.fichaFonte==="planilha") return S.fichaRemota || FICHA_EMBUTIDA;   // sem ficha ainda: a tela de espera cobre o app
+  return S.fichaRemota && cmpFicha(S.fichaRemota, FICHA_EMBUTIDA)>=0 ? S.fichaRemota : FICHA_EMBUTIDA;
+}
+/* Sem ficha para mostrar: aparelho novo sem escolha, ou perfil da planilha que ainda não recebeu a primeira ficha */
+export const precisaFicha = () => S.fichaFonte==="" || (S.fichaFonte==="planilha" && !S.fichaRemota);
