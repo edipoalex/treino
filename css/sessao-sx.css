@@ -145,7 +145,9 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
   color:inherit;font:800 19px/1.15 var(--body);letter-spacing:-.01em;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center}
 .ab-acao .btn span{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal}
 .ab-acao .btn .ic,.ab-acao .btn svg{width:22px;height:22px;flex:none}
-.ab-acao .btn:active{background:rgba(255,255,255,.14);transform:none}
+/* toque: só clareia; o "afundar" (transform) de movimento.css prenderia a barra regressiva no meio. Seletor mais forte
+   que o de movimento.css (carregado depois, com o mesmo peso). */
+.ab-uni .ab-acao .btn:active{background:rgba(255,255,255,.14);transform:none}
 .ab-acao .link-btn{display:none}
 .ab-acao .linha2{flex:1;display:flex;margin:0;gap:0}
 .ab-acao .linha2 .btn+.btn{border-left:1px solid rgba(255,255,255,.18)}
@@ -172,6 +174,10 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .ab-acao .t-btn>:not(.t-fill),.ab-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1;text-shadow:0 1px 6px rgba(0,0,0,.4)}
 .ab-acao .t-btn.prepara,.ab-acao .t-btn.troca,.ab-acao .t-btn.low{background:transparent;color:#fff}
 .ab-uni:has(.t-btn.low,.t-btn.troca) .t-fill{background:var(--warn)}
+/* últimos segundos (v1.51): o pulso vai para a barra inteira, como no descanso. No botão do meio, o transform/filter da
+   animação "prendia" a barra regressiva dentro dele (ela pulava para os 60% do meio a 3 s do fim). */
+.ab-acao .t-btn.low{animation:none;filter:none;transform:none}
+.ab-uni:has(.t-btn.low){animation:pulso 1s ease-in-out infinite}
 .ab-acao .mini-fase,.ab-acao .mini-fase.t-prep{background:transparent;color:#fff}
 .ab-acao .mf-barra{position:absolute;inset:0;height:auto;background:transparent;z-index:0}
 .ab-acao .mf-barra i{background:var(--fase,var(--c))}
