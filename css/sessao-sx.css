@@ -172,6 +172,10 @@ body.em-sessao{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 104px)}
 .ab-acao .t-btn>:not(.t-fill),.ab-acao .mini-fase>:not(.mf-barra){position:relative;z-index:1;text-shadow:0 1px 6px rgba(0,0,0,.4)}
 .ab-acao .t-btn.prepara,.ab-acao .t-btn.troca,.ab-acao .t-btn.low{background:transparent;color:#fff}
 .ab-uni:has(.t-btn.low,.t-btn.troca) .t-fill{background:var(--warn)}
+/* últimos segundos (v1.51): o pulso vai para a barra inteira, como no descanso. No botão do meio, o transform/filter da
+   animação "prendia" a barra regressiva dentro dele (ela pulava para os 60% do meio a 3 s do fim). */
+.ab-acao .t-btn.low{animation:none;filter:none;transform:none}
+.ab-uni:has(.t-btn.low){animation:pulso 1s ease-in-out infinite}
 .ab-acao .mini-fase,.ab-acao .mini-fase.t-prep{background:transparent;color:#fff}
 .ab-acao .mf-barra{position:absolute;inset:0;height:auto;background:transparent;z-index:0}
 .ab-acao .mf-barra i{background:var(--fase,var(--c))}
