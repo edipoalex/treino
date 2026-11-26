@@ -78,6 +78,12 @@ function agora(X){
   return null;
 }
 const totalDe = X => X.etapas.reduce((a,e)=>a+e.seg,0);
+/* Para o mini-player (treino minimizado): o que falta do cronômetro de execução em andamento */
+export function execResumo(){
+  const X=S.exec; if(!X) return null; const s=agora(X); if(!s) return null;
+  const dec=((X.pausadoEm ?? Date.now())-X.inicio)/1000, tot=totalDe(X);
+  return { k:X.k, titulo:X.titulo, tipo:X.tipo, fase:s.e.rot, restaFase:s.resta, resta:Math.max(0, tot-dec), total:tot, pausado:!!X.pausadoEm };
+}
 export function pausarExec(){ const X=S.exec; if(!X) return; if(X.pausadoEm){ X.inicio+=Date.now()-X.pausadoEm; X.pausadoEm=null; } else X.pausadoEm=Date.now(); save(); tickExec(); }
 export function pularFase(){ const X=S.exec; if(!X) return; const s=agora(X); if(!s) return; X.inicio-=Math.ceil(s.resta*1000)+5; save(); tickExec(); }
 export function minimizarExec(min=true){ const X=S.exec; if(!X) return; X.min=min; save(); if(min) $("#execTela")?.remove(); else abrirTelaExec(); rerender(); }

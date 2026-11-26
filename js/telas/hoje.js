@@ -1,26 +1,28 @@
 import { E, FICHA, LETRAS, S, save } from "../estado.js";
 import { render } from "../navegacao.js";
 import { DIA, PROG, addPeso, faseAtual, feitoHoje, feitosEtapa, fmtKg, freqAlvo, hojeISO, modoPadrao, parseISO, parseKg, pesoSemanal, porVoltas, proxima, relDia, segundaDe, semanaAtual, temExpress, totalMin, totalTreinos, treino, treinosPorVolta, ultimo, voltaAtual } from "../progresso.js";
-import { rerender, viewSessao } from "./sessao.js";
+import { minDesde, rerender, treinoAtual, viewSessao } from "./sessao.js";
 import { plate, toast } from "../ui.js";
 import { icone } from "../icones.js";
 import { movimentoOk } from "../movimento.js";
 import { limparCronometros } from "../execucao.js";
 import { $, esc } from "../util.js";
 import { cardTreino } from "./card-treino.js";
+import { expandirTreino } from "../minitreino.js";
 import { motivar, zerarTreinoFalas } from "../balao.js";
 import { cartaoRevisao, etapaEncerrada, ligarFechamento, ligarRevisao, painelEtapa, painelSemana, viewFechamento } from "./habito.js";
 
 /* ---------- Views ---------- */
 let escolha = null;
 export function viewHoje(){
-  if(E.atual) return viewSessao();
+  if(E.atual && !E.atual.min) return viewSessao();
+  const andamento = E.atual;   // treino minimizado: o card vira "Continuar treino"
   const encerrada = etapaEncerrada();
   // fim da etapa: a Hoje vira o fechamento até a pessoa escolher continuar treinando
   if(encerrada && !E.fechoDispensado){ $("#view").innerHTML = viewFechamento(); ligarFechamento(); return; }
   const feito = feitoHoje();
-  const letra = escolha || proxima();
-  const t = treino(letra);
+  const letra = andamento ? andamento.letra : (escolha || proxima());
+  const t = andamento ? treinoAtual(andamento) : treino(letra);
   let aviso="";
   if(porVoltas()){
     const n=feitosEtapa(), tot=totalTreinos(), lim=PROG().limite_semanas, sem=semanaAtual();
@@ -34,20 +36,21 @@ export function viewHoje(){
   const n=feitosEtapa(), progresso = porVoltas() ? `${Math.min(n+1, totalTreinos())} de ${totalTreinos()}` : `semana ${Math.min(semanaAtual(), FICHA.semanas)} de ${FICHA.semanas}`;
   /* Card do treino premium: estúdio com a anilha em foto (js/telas/card-treino.js) */
   $("#view").innerHTML = `
-  ${cardTreino({ letra, chamada:`${titulo} · ${progresso}`, titulo:`Treino ${letra}`, descricao:t.foco, minutos:Math.round(totalMin(t)),
+  ${cardTreino({ letra, chamada: andamento ? `Treino em andamento · ${minDesde(andamento.inicio)} min` : `${titulo} · ${progresso}`,
+    continuar: andamento ? `Continuar treino · ${andamento.feitos.length} de ${t.itens.length}` : "", titulo:`Treino ${letra}`, descricao:t.foco, minutos:Math.round(totalMin(t)),
     express: tEx ? Math.round(totalMin(tEx)) : 0, exercicios:t.itens.length, aberto:!!verPrevia,
     itens: t.itens.map(it => [it.nome, it.series ? `${it.series} ${it.series>1?"séries":"série"}` : `${it.bloco} min`]) })}
   ${feito ? `<p class="done-today">Treino ${esc(feito.letra)} concluído hoje. Este é o próximo da sequência.</p>` : ""}
   ${aviso ? `<p class="tx-alerta done-today">${aviso}${encerrada?` <button class="btn-link" id="verFecho">Ver o fechamento</button>`:""}</p>` : ""}
-  <div class="trocar"><p class="rot">Trocar treino <span class="leg"><i></i>próximo</span></p>
-    <div class="fila" role="group" aria-label="Escolher outro treino" style="--n:${LETRAS.length}">${LETRAS.map(l=>`<button class="L-${esc(l)}" aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}${esc(l)}${l===seq?`<span class="prox"></span>`:""}</button>`).join("")}</div></div>
+  ${andamento ? "" : `<div class="trocar"><p class="rot">Trocar treino <span class="leg"><i></i>próximo</span></p>
+    <div class="fila" role="group" aria-label="Escolher outro treino" style="--n:${LETRAS.length}">${LETRAS.map(l=>`<button class="L-${esc(l)}" aria-pressed="${l===letra}" aria-label="Treino ${esc(l)}${l===seq?", próximo da sequência":""}" data-pick="${esc(l)}">${plate(l,"sm")}${esc(l)}${l===seq?`<span class="prox"></span>`:""}</button>`).join("")}</div></div>`}
   ${cartaoRevisao().replace('class="revisao ','class="revisao compacta ')}
   ${painelSemana()}
   ${painelEtapa()}
   ${pesoPanel()}`;
   bindPeso(); ligarRevisao($("#view"));
   $("#verFecho") && ($("#verFecho").onclick = () => { E.fechoDispensado=false; save(); render(); scrollTo(0,0); });
-  $("#startBtn").onclick = () => iniciar(letra);
+  $("#startBtn").onclick = () => andamento ? expandirTreino() : iniciar(letra);
   $("#verPrevia").onclick = () => { verPrevia=!verPrevia; const y=scrollY; render(); scrollTo(0,y); };
   document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{
     const nova = b.dataset.pick===seq ? null : b.dataset.pick; if((nova||seq)===letra) return;

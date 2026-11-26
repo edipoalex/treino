@@ -1,4 +1,5 @@
 import { entrada, trocarTela } from "./movimento.js";
+import { atualizarMini } from "./minitreino.js";
 import { E, precisaFicha } from "./estado.js";
 import { viewBoasVindas } from "./telas/boas-vindas.js";
 import { sincronizar } from "./sync.js";
@@ -17,8 +18,9 @@ export function render(){
   // sem ficha para mostrar (aparelho novo ou perfil da planilha sem ficha ainda): boas-vindas, sem as abas
   const semFicha = precisaFicha();
   document.body.classList.toggle("sem-ficha", semFicha);
-  if(semFicha){ $("#brandTxt").textContent = "Treino"; document.title = "Treino"; document.body.classList.remove("em-sessao"); $("#view").onclick=null; return viewBoasVindas(render, sincronizar); }
-  document.body.classList.toggle("em-sessao", nav.tab==="hoje" && !!E.atual);
+  if(semFicha){ $("#brandTxt").textContent = "Treino"; document.title = "Treino"; document.body.classList.remove("em-sessao"); $("#view").onclick=null; atualizarMini(); return viewBoasVindas(render, sincronizar); }
+  // treino minimizado (v1.59): a Hoje mostra o card e o treino vai para o mini-player
+  document.body.classList.toggle("em-sessao", nav.tab==="hoje" && !!E.atual && !E.atual.min);
   document.body.dataset.tab = nav.tab;
   $("#view").onclick=null; $("#view").onchange=null; $("#view").onpointerdown=null;
   marcarAba(nav.tab);
@@ -26,6 +28,7 @@ export function render(){
   // cor do treino em uso (sessão ou card da Hoje): a aurora do estilo Vidro acompanha (v1.52)
   const L = E.atual?.letra || document.querySelector("#cardHoje")?.className.match(/\bL-([A-Z])\b/)?.[1];
   if(L) document.documentElement.dataset.letra = L;
+  atualizarMini();
 }
 /* ---------- Navegação ---------- */
 

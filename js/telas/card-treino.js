@@ -10,7 +10,7 @@ export const fotoAnilha = l => `img/anilhas/anilha-${l}.webp`;
 // a máscara da luz usa a foto numa variável CSS: url() relativa seria lida a partir de css/ (404), então vai absoluta
 const urlAbs = u => typeof document!=="undefined" ? new URL(u, document.baseURI).href : u;
 
-export function cardTreino({ letra, chamada, titulo, descricao, minutos, express, exercicios, itens = [], aberto = false }){
+export function cardTreino({ letra, chamada, titulo, descricao, minutos, express, exercicios, itens = [], aberto = false, continuar = "" }){
   const L = esc(letra), foto = FOTOS_ANILHA.has(letra) ? fotoAnilha(letra) : "";
   const anilha = foto
     ? `<div class="ct-anilha" aria-hidden="true" style="--img:url('${urlAbs(foto)}')">
@@ -29,6 +29,6 @@ export function cardTreino({ letra, chamada, titulo, descricao, minutos, express
       <button class="ct-pill" id="verPrevia" aria-expanded="${aberto}" aria-controls="previaHoje">${icone("list")}${esc(exercicios)} ${exercicios === 1 ? "exercício" : "exercícios"}${icone("chevron-right")}</button>
     </div>
     ${aberto ? `<ul class="ct-previa" id="previaHoje">${itens.map(([n, d]) => `<li><span>${esc(n)}</span><span>${esc(d)}</span></li>`).join("")}</ul>` : ""}
-    <div class="ct-acao"><button class="ct-btn" id="startBtn">${icone("play")}Iniciar treino</button></div>
+    <div class="ct-acao"><button class="ct-btn${continuar?" continuar":""}" id="startBtn">${continuar ? `${icone("chevron-up")}${esc(continuar)}` : `${icone("play")}Iniciar treino`}</button></div>
   </section>`;
 }
