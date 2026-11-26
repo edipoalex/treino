@@ -53,7 +53,13 @@ test("abas no vidro: pílula da aba ativa e rótulos em span (v1.53)", () => {
   assert.match(css, /\.tab\[aria-current="page"\]\{flex-grow:2\.4/);
   assert.match(css, /left:calc\(5px \+ var\(--i,0\) \* \(100% - 10px\) \/ 6\.4\)/);   // mesma conta do flex-grow
   assert.match(ler("../js/navegacao.js"), /setProperty\("--i", Math\.max\(0, ordem\.indexOf\(tab\)\)\)/);
-  assert.match(ler("../css/movimento.css"), /::view-transition-old\(abas\)\{display:none\}/);
+  // v1.58: troca de aba sem View Transition (não congela a página nem perde toques) e área de toque até a borda
+  assert.doesNotMatch(ler("../js/movimento.js"), /startViewTransition/);
+  assert.match(ler("../css/movimento.css"), /#view\.entra-frente\{animation:tela-entra/);
+  assert.match(ler("../css/base.css"), /\.tab::before\{content:"";position:absolute;inset:-6px -2px calc\(-6px - env\(safe-area-inset-bottom,0px\)\)\}/);
+  assert.match(css, /\.tab::before\{inset:-1px 0 calc\(-11px - env\(safe-area-inset-bottom,0px\)\)\}/);
+  assert.match(ler("../js/navegacao.js"), /b\.onpointerup = e => \{/);   // troca no pointerup da aba tocada
+  assert.doesNotMatch(ler("../css/movimento.css"), /@keyframes tela-entra[^}]*translateX/);   // entrada não alarga a página
 });
 
 test("cronômetros no vidro: trilho de vidro, preenchimento com brilho e aro (v1.54)", () => {

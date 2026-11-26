@@ -57,4 +57,8 @@ button{cursor:pointer}
 .tab svg{width:24px;height:24px}
 .tab[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
 .tabs .ind{display:none}   /* pílula do estilo Vidro (css/vidro.css) */
+/* área de toque das abas (v1.58): cobre a margem em volta de cada aba e desce até a borda da tela (área segura do
+   iPhone), sem mudar o visual. Antes, um toque na borda da barra não acertava nenhuma aba. */
+.tab{position:relative}
+.tab::before{content:"";position:absolute;inset:-6px -2px calc(-6px - env(safe-area-inset-bottom,0px))}
 
