@@ -128,6 +128,14 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   no `render()`), um tom vizinho e violeta; nas outras abas (`body[data-tab]`), luz neutra azul-violeta, para busca e números
   não parecerem alerta quando o treino é vermelho. Treino E (cinza) fica com luz sóbria, de propósito. Tokens `--surface*`/`--line` translúcidos; desfoque só nos contêineres de primeiro nível (painéis, cartões,
   barra da sessão) para não pesar no iPhone. Abas viram pílula flutuante; folhas e Ajustes ficam quase opacos para leitura.
+- Abas no vidro (v1.53): barra flutuante em que a aba ativa vira uma pílula na cor do treino, com ícone e nome; as outras
+  ficam só no ícone (o nome continua no `aria-label`/texto, para leitor de tela). As abas crescem por `flex-grow` (1 → 2.4) e a
+  pílula (`.tabs .ind`) anda junto pela posição `--i` (marcada no toque, antes da troca de tela), com mola; no toque o ícone
+  afunda e volta e a pílula estica. Na troca de aba a View Transition não mostra a imagem antiga da barra (sem "fantasma").
+  Texto da pílula em `--vd-on` (escuro nos treinos C e G). Outras barras estudadas ficam guardadas fora do app
+  (`prototipo-ux/componentes/abas-vidro`).
+- Aro de luz nas bordas (v1.53): contêineres de vidro, card do treino, barra e pílula têm borda em degradê (`::after` com
+  máscara), forte no canto de cima e com reflexo embaixo.
 - Card do treino no vidro: sem o estúdio escuro; vidro com halo na cor, anilha flutuando e brilho passando no "Iniciar treino".
 - Descanso em tela cheia continua sólido (leitura do cronômetro). Títulos de seção ficam presos pela base (`.panel > h3`)
   e cabem em uma linha a 390 px ("Frequência semanal" no Histórico, antes quebrava e encostava no cartão). Com Animações reduzidas, aurora, anilha e brilho ficam parados.

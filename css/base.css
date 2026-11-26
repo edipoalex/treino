@@ -56,4 +56,5 @@ button{cursor:pointer}
   color:var(--muted);font-size:var(--t-legenda);font-weight:600;border-radius:var(--r-p);margin:6px 2px}
 .tab svg{width:24px;height:24px}
 .tab[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
+.tabs .ind{display:none}   /* pílula do estilo Vidro (css/vidro.css) */
 

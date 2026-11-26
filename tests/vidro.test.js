@@ -44,3 +44,14 @@ test("a preferência é normalizada e aplicada no <html>", () => {
   assert.match(ler("../js/ui.js"), /r\.dataset\.visual = S\.pref\?\.visual==="vidro" \? "vidro" : "padrao"/);
   assert.match(ler("../index.html"), /<div id="aurora" aria-hidden="true">/);
 });
+
+test("abas no vidro: pílula da aba ativa e rótulos em span (v1.53)", () => {
+  const html = ler("../index.html");
+  assert.match(html, /<div class="wrap"><span class="ind" aria-hidden="true"><\/span>/);
+  for(const n of ["Hoje","Ficha","Progresso","Histórico","Guia"]) assert.match(html, new RegExp(`<span class="rot">${n}</span></button>`));
+  assert.match(ler("../css/base.css"), /\.tabs \.ind\{display:none\}/);          // no Padrão a pílula não existe
+  assert.match(css, /\.tab\[aria-current="page"\]\{flex-grow:2\.4/);
+  assert.match(css, /left:calc\(5px \+ var\(--i,0\) \* \(100% - 10px\) \/ 6\.4\)/);   // mesma conta do flex-grow
+  assert.match(ler("../js/navegacao.js"), /setProperty\("--i", Math\.max\(0, ordem\.indexOf\(tab\)\)\)/);
+  assert.match(ler("../css/movimento.css"), /::view-transition-old\(abas\)\{display:none\}/);
+});
