@@ -31,14 +31,15 @@ export function entrada(nome="hoje"){
   clearTimeout(tEntrada); tEntrada = setTimeout(() => v.classList.remove("entrando"), 1400);
 }
 
-/* Troca de aba: deslize curto na direção da aba (View Transitions; sem suporte, troca direto) */
+/* Troca de aba (v1.58): a tela nova entra com um deslize curto na direção da aba, sem View Transition. A View Transition
+   congelava a página numa imagem durante a troca (~300 ms, mais no iPhone com o vidro) e engolia os toques nesse tempo;
+   agora a troca é imediata e só o conteúdo novo anima, sem bloquear nada. */
 export function trocarTela(fazer, dir="frente"){
-  if(!movimentoOk() || !document.startViewTransition){ fazer(); return; }
-  const html = document.documentElement; html.dataset.dir = dir; html.classList.add("vt");
-  const vt = document.startViewTransition(fazer);
-  // trocar de aba rápido pula a transição anterior: não é erro, então as promessas não podem rejeitar soltas
-  vt.ready.catch(()=>{}); vt.updateCallbackDone.catch(()=>{});
-  vt.finished.catch(()=>{}).finally(() => html.classList.remove("vt"));
+  fazer();
+  const v = document.getElementById("view"); if(!v || !movimentoOk()) return;
+  v.classList.remove("entra-frente", "entra-tras"); void v.offsetWidth;
+  v.classList.add(dir==="tras" ? "entra-tras" : "entra-frente");
+  v.addEventListener("animationend", () => v.classList.remove("entra-frente", "entra-tras"), { once:true });
 }
 
 /* Números que contam até o valor: <b data-contar="56">56</b>; data-dec="1" e data-suf=" t" opcionais */

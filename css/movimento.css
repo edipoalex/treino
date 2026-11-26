@@ -26,21 +26,14 @@
 @keyframes folha-sobe{from{transform:translateY(100%)}}
 @keyframes folha-desce{to{transform:translateY(100%)}}
 
-/* Troca de aba (View Transitions): conteúdo desliza; topo e barra de abas ficam parados */
-html.vt .top{view-transition-name:topo}
-html.vt .tabs{view-transition-name:abas}
-html.vt #view{view-transition-name:tela}
-::view-transition-group(topo),::view-transition-group(abas),::view-transition-old(topo),::view-transition-new(topo),::view-transition-old(abas),::view-transition-new(abas){animation:none}
-::view-transition-old(root),::view-transition-new(root){animation:none}
-::view-transition-old(abas){display:none}   /* v1.53: só a barra ao vivo, sem "fantasma" da pílula anterior */
-::view-transition-old(tela){animation:tela-sai .16s var(--e-entrada) both}
-::view-transition-new(tela){animation:tela-entra .26s var(--e-saida) both}
-html[data-dir="tras"]::view-transition-old(tela){animation-name:tela-sai-tras}
-html[data-dir="tras"]::view-transition-new(tela){animation-name:tela-entra-tras}
-@keyframes tela-sai{to{opacity:0;transform:translateX(-24px)}}
-@keyframes tela-entra{from{opacity:0;transform:translateX(32px)}}
-@keyframes tela-sai-tras{to{opacity:0;transform:translateX(24px)}}
-@keyframes tela-entra-tras{from{opacity:0;transform:translateX(-32px)}}
+/* Troca de aba (v1.58): só a tela nova anima (js/movimento.js › trocarTela), sem congelar a página nem perder toques */
+/* entrada vertical curta: um deslize horizontal alargava a página (406 px numa tela de 390), o navegador móvel ampliava
+   a área de layout e a barra de abas fixa pulava para baixo durante a entrada (~220 ms): o toque seguinte caía no
+   conteúdo. Na vertical a largura nunca muda. */
+#view.entra-frente{animation:tela-entra .22s var(--e-saida) both}
+#view.entra-tras{animation:tela-entra-tras .22s var(--e-saida) both}
+@keyframes tela-entra{from{opacity:0;transform:translateY(8px)}}
+@keyframes tela-entra-tras{from{opacity:0;transform:translateY(8px)}}
 
 /* Avisos */
 .desfazer{animation:desce-topo var(--d3) var(--e-saida) both}

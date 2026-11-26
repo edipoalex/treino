@@ -134,6 +134,14 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   afunda e volta e a pílula estica. Na troca de aba a View Transition não mostra a imagem antiga da barra (sem "fantasma").
   Texto da pílula em `--vd-on` (escuro nos treinos C e G). Outras barras estudadas ficam guardadas fora do app
   (`prototipo-ux/componentes/abas-vidro`).
+- Toque nas abas (v1.58, todos os estilos):
+  - Troca de aba sem View Transition: a View Transition congelava a página numa imagem (~300 ms) e engolia toques; agora a
+    tela nova entra com fade e 8 px na vertical (`#view.entra-*`). Deslize horizontal é proibido: alargava a página, o
+    navegador móvel ampliava a área de layout e a barra fixa pulava para baixo durante a entrada.
+  - Área de toque: cada aba vale na altura toda da barra e até a borda inferior da tela (`.tab::before`), sem zonas mortas.
+  - Resposta no `pointerdown` (a pílula anda e o ícone pulsa ~100 ms antes) e troca no `pointerup` da aba em que o dedo
+    encostou (captura do ponteiro), porque as abas mudam de largura embaixo do dedo; arrastar > 24 px cancela.
+    Teclado e leitor de tela continuam pelo clique. Pílula assenta em ~0,36 s (antes 0,6 s).
 - Aro de luz nas bordas (v1.53): contêineres de vidro, card do treino, barra e pílula têm borda em degradê (`::after` com
   máscara), forte no canto de cima e com reflexo embaixo.
 - Botões da sessão no vidro (v1.54): o botão único 20/60/20 e os de ação da lista têm a cor do treino com brilho de vidro

@@ -35,14 +35,36 @@ function marcarAba(tab){
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===tab ? "page" : "false"));
   document.querySelector(".tabs")?.style.setProperty("--i", Math.max(0, ordem.indexOf(tab)));
 }
-/* toque na aba: a pílula já começa a andar (antes da troca de tela) e o ícone dá o pulo de mola */
+/* Toque na aba (v1.58): a resposta começa quando o dedo encosta (pointerdown): a pílula anda e o ícone dá o pulo de
+   mola, ~100 ms antes do clique. Como a pílula muda a largura das abas embaixo do dedo, a troca acontece no pointerup
+   da aba em que o dedo encostou (captura do ponteiro), não no clique, que poderia cair na aba vizinha. Se o dedo
+   arrastar para fora (> 24 px) ou o toque for cancelado, a pílula volta para a aba atual. Teclado e leitor de tela
+   continuam pelo clique. */
 function pulo(el){ el.classList.remove("pulo"); void el.offsetWidth; el.classList.add("pulo"); }
+let tocada = null, volta = 0, ini = null, ignorar = { b:null, t:0 };   // ignorar: o clique que o próprio toque gera depois do pointerup
+function anteciparAba(b){
+  if(tocada===b) return;
+  tocada = b; pulo(b);
+  if(b.dataset.tab!==nav.tab){ marcarAba(b.dataset.tab); pulo(document.querySelector(".tabs")); }
+  clearTimeout(volta); volta = setTimeout(desfazerToque, 900);
+}
+function desfazerToque(){ tocada = null; ini = null; marcarAba(nav.tab); }
+function irPara(para){
+  clearTimeout(volta); tocada = null;
+  const de = nav.tab;
+  if(de===para){ if(para==="progresso" && nav.progEx){ nav.progEx=null; render(); } scrollTo({top:0, behavior:"smooth"}); return; }
+  trocarTela(()=>{ nav.tab=para; if(para!=="ficha"){nav.fichaFase=null;nav.fichaLetra=null;} if(para!=="progresso") nav.progEx=null; render(); scrollTo(0,0); entrada(para); },
+    ordem.indexOf(para)>ordem.indexOf(de) ? "frente" : "tras");
+}
 export function iniciarNavegacao(){
-  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
-    const de=nav.tab, para=b.dataset.tab;
-    pulo(b); if(de!==para){ marcarAba(para); pulo(document.querySelector(".tabs")); }
-    if(de===para){ if(para==="progresso" && nav.progEx){ nav.progEx=null; render(); } scrollTo({top:0, behavior:"smooth"}); return; }
-    trocarTela(()=>{ nav.tab=para; if(para!=="ficha"){nav.fichaFase=null;nav.fichaLetra=null;} if(para!=="progresso") nav.progEx=null; render(); scrollTo(0,0); entrada(para); },
-      ordem.indexOf(para)>ordem.indexOf(de) ? "frente" : "tras");
+  document.querySelectorAll(".tab").forEach(b=>{
+    b.onpointerdown = e => { if(e.button!==0) return; try{ b.setPointerCapture(e.pointerId); }catch(_){} ini = { b, x:e.clientX, y:e.clientY }; anteciparAba(b); };
+    b.onpointerup = e => {
+      if(ini?.b!==b) return; const longe = Math.hypot(e.clientX-ini.x, e.clientY-ini.y) > 24; ini = null;
+      if(longe) return desfazerToque();
+      ignorar = { b, t:Date.now() }; irPara(b.dataset.tab);
+    };
+    b.onpointercancel = () => { if(ini?.b===b) desfazerToque(); };
+    b.onclick = () => { if(ignorar.b===b && Date.now()-ignorar.t < 700) return; anteciparAba(b); irPara(b.dataset.tab); };
   });
 }

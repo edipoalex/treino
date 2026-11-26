@@ -60,26 +60,29 @@ html[data-visual="vidro"] .ab-col{align-items:center} html[data-visual="vidro"] 
 /* abas: barra de vidro flutuante; a aba ativa vira uma pílula na cor do treino, com ícone e nome (v1.53).
    As abas crescem por flex-grow (1 → 2.4); a pílula (.ind) anda junto: left = --i × unidade, unidade = largura / 6.4.
    Mola: passa um pouco e assenta; no toque o ícone afunda e volta, e a pílula estica ao sair do lugar. */
-html[data-visual="vidro"]{--vd-mola:cubic-bezier(.34,1.45,.55,1)}
+html[data-visual="vidro"]{--vd-mola:cubic-bezier(.3,1.3,.5,1)}   /* v1.58: mola mais curta, assenta em ~0,36 s */
 html[data-visual="vidro"] .tabs{left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);border:1px solid var(--vd-borda);border-radius:26px;
   background:var(--surface);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho),inset 0 -14px 26px -18px var(--vd-brilho);
   -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);padding:0}
 html[data-visual="vidro"] .tabs .wrap{display:flex;position:relative;padding:0 5px}
-html[data-visual="vidro"] .tab{flex:1 1 0;min-width:0;overflow:hidden;margin:6px 0;flex-direction:row;gap:7px;background:none;color:var(--ink-2);
-  border-radius:20px;transition:flex-grow .6s var(--vd-mola),color .3s}
+html[data-visual="vidro"] .tab{flex:1 1 0;min-width:0;margin:0;flex-direction:row;gap:7px;background:none;color:var(--ink-2);
+  border-radius:20px;transition:flex-grow .36s var(--vd-mola),color .2s}
+/* área de toque (v1.58): a aba ocupa a altura toda da barra e o toque vale até a borda da tela, abaixo da pílula */
+html[data-visual="vidro"] .tab::before{inset:-1px 0 calc(-11px - env(safe-area-inset-bottom,0px))}
+html[data-visual="vidro"] .tab:first-of-type::before{left:-6px} html[data-visual="vidro"] .tab:last-of-type::before{right:-6px}
 html[data-visual="vidro"] .tab .rot{max-width:0;opacity:0;overflow:hidden;white-space:nowrap;font-size:14px;font-weight:700;letter-spacing:-.01em;
-  transition:max-width .6s var(--vd-mola),opacity .25s}
+  transition:max-width .36s var(--vd-mola),opacity .2s}
 html[data-visual="vidro"] .tab svg{width:22px;height:22px;flex:none}
 html[data-visual="vidro"] .tab[aria-current="page"]{flex-grow:2.4;color:var(--vd-on);background:none}
-html[data-visual="vidro"] .tab[aria-current="page"] .rot{max-width:110px;opacity:1;transition-delay:0s,.12s}
+html[data-visual="vidro"] .tab[aria-current="page"] .rot{max-width:110px;opacity:1;transition-delay:0s,.06s}
 html[data-visual="vidro"] .tabs .ind{display:block;position:absolute;z-index:0;top:6px;bottom:6px;pointer-events:none;border-radius:20px;
   width:calc(2.4 * (100% - 10px) / 6.4);left:calc(5px + var(--i,0) * (100% - 10px) / 6.4);
   background:linear-gradient(180deg,color-mix(in srgb,var(--aura1) 84%,#fff),var(--aura1));
   box-shadow:0 10px 24px -8px var(--aura1),0 0 0 1px color-mix(in srgb,var(--aura1) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -8px 14px -8px rgba(0,0,0,.28);
-  transition:left .6s var(--vd-mola)}
+  transition:left .36s var(--vd-mola)}
 html[data-visual="vidro"] .tab{position:relative;z-index:1}
-html[data-visual="vidro"] .tabs.pulo .ind{animation:vd-estica .6s var(--vd-mola)}
-html[data-visual="vidro"] .tab.pulo .ic{animation:vd-toque .5s var(--vd-mola)}
+html[data-visual="vidro"] .tabs.pulo .ind{animation:vd-estica .36s var(--vd-mola)}
+html[data-visual="vidro"] .tab.pulo .ic{animation:vd-toque .32s var(--vd-mola)}
 @keyframes vd-estica{30%{transform:scale(1.14,.86)}65%{transform:scale(.97,1.04)}}
 @keyframes vd-toque{30%{transform:scale(.74)}70%{transform:scale(1.12)}}
 html[data-visual="vidro"] body:not(.em-sessao){padding-bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab-h) + 28px)}
