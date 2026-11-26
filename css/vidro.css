@@ -13,6 +13,12 @@ html[data-visual="vidro"][data-letra="C"]{--aura1:var(--pC)} html[data-visual="v
 html[data-visual="vidro"][data-letra="E"]{--aura1:var(--pE)} html[data-visual="vidro"][data-letra="F"]{--aura1:var(--pF)}
 html[data-visual="vidro"][data-letra="G"]{--aura1:var(--pG)} html[data-visual="vidro"][data-letra="H"]{--aura1:var(--pH)}
 html[data-visual="vidro"]{--aura2:color-mix(in srgb,var(--aura1) 55%,#FF9F45)}
+/* texto sobre a cor do treino (pílula das abas) */
+html[data-visual="vidro"]{--vd-on:#fff}
+html[data-visual="vidro"][data-letra="A"]{--vd-on:var(--onA)} html[data-visual="vidro"][data-letra="B"]{--vd-on:var(--onB)}
+html[data-visual="vidro"][data-letra="C"]{--vd-on:var(--onC)} html[data-visual="vidro"][data-letra="D"]{--vd-on:var(--onD)}
+html[data-visual="vidro"][data-letra="E"]{--vd-on:var(--onE)} html[data-visual="vidro"][data-letra="F"]{--vd-on:var(--onF)}
+html[data-visual="vidro"][data-letra="G"]{--vd-on:var(--onG)} html[data-visual="vidro"][data-letra="H"]{--vd-on:var(--onH)}
 /* cor do treino só na Hoje e na sessão; nas outras abas a luz é neutra (azul-violeta), para campos e números
    não ganharem cara de alerta quando o treino é vermelho */
 html[data-visual="vidro"] body:not([data-tab="hoje"]) #aurora{--aura1:#3E63DD;--aura2:#8E4EC6}
@@ -45,12 +51,31 @@ html[data-visual="vidro"] .sx-cd.aberto{border-color:transparent}
 html[data-visual="vidro"] .top,html[data-visual="vidro"] body::before{background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
 html[data-visual="vidro"] .sb{background:color-mix(in srgb,var(--bg) 45%,transparent)}
 html[data-visual="vidro"] .sb-acao{background:color-mix(in srgb,var(--bg) 55%,transparent);border-top-color:var(--vd-borda)}
-/* abas: pílula de vidro flutuante */
-html[data-visual="vidro"] .tabs{left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);border:1px solid var(--vd-borda);border-radius:24px;
-  background:var(--surface-2);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);padding:0 2px}
-html[data-visual="vidro"] .tab{border-radius:18px;margin:6px 2px}
-html[data-visual="vidro"] .tab[aria-current="page"]{background:var(--surface-2);box-shadow:inset 0 1px 0 var(--vd-brilho)}
-html[data-visual="vidro"][data-esquema="claro"] .tab[aria-current="page"]{background:rgba(20,30,50,.07)}
+/* abas: barra de vidro flutuante; a aba ativa vira uma pílula na cor do treino, com ícone e nome (v1.53).
+   As abas crescem por flex-grow (1 → 2.4); a pílula (.ind) anda junto: left = --i × unidade, unidade = largura / 6.4.
+   Mola: passa um pouco e assenta; no toque o ícone afunda e volta, e a pílula estica ao sair do lugar. */
+html[data-visual="vidro"]{--vd-mola:cubic-bezier(.34,1.45,.55,1)}
+html[data-visual="vidro"] .tabs{left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);border:1px solid var(--vd-borda);border-radius:26px;
+  background:var(--surface);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho),inset 0 -14px 26px -18px var(--vd-brilho);
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);padding:0}
+html[data-visual="vidro"] .tabs .wrap{display:flex;position:relative;padding:0 5px}
+html[data-visual="vidro"] .tab{flex:1 1 0;min-width:0;overflow:hidden;margin:6px 0;flex-direction:row;gap:7px;background:none;color:var(--ink-2);
+  border-radius:20px;transition:flex-grow .6s var(--vd-mola),color .3s}
+html[data-visual="vidro"] .tab .rot{max-width:0;opacity:0;overflow:hidden;white-space:nowrap;font-size:14px;font-weight:700;letter-spacing:-.01em;
+  transition:max-width .6s var(--vd-mola),opacity .25s}
+html[data-visual="vidro"] .tab svg{width:22px;height:22px;flex:none}
+html[data-visual="vidro"] .tab[aria-current="page"]{flex-grow:2.4;color:var(--vd-on);background:none}
+html[data-visual="vidro"] .tab[aria-current="page"] .rot{max-width:110px;opacity:1;transition-delay:0s,.12s}
+html[data-visual="vidro"] .tabs .ind{display:block;position:absolute;z-index:0;top:6px;bottom:6px;pointer-events:none;border-radius:20px;
+  width:calc(2.4 * (100% - 10px) / 6.4);left:calc(5px + var(--i,0) * (100% - 10px) / 6.4);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--aura1) 84%,#fff),var(--aura1));
+  box-shadow:0 10px 24px -8px var(--aura1),0 0 0 1px color-mix(in srgb,var(--aura1) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -8px 14px -8px rgba(0,0,0,.28);
+  transition:left .6s var(--vd-mola)}
+html[data-visual="vidro"] .tab{position:relative;z-index:1}
+html[data-visual="vidro"] .tabs.pulo .ind{animation:vd-estica .6s var(--vd-mola)}
+html[data-visual="vidro"] .tab.pulo .ic{animation:vd-toque .5s var(--vd-mola)}
+@keyframes vd-estica{30%{transform:scale(1.14,.86)}65%{transform:scale(.97,1.04)}}
+@keyframes vd-toque{30%{transform:scale(.74)}70%{transform:scale(1.12)}}
 html[data-visual="vidro"] body:not(.em-sessao){padding-bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab-h) + 28px)}
 /* folhas, Ajustes e telas de leitura: quase opacas, com desfoque forte */
 html[data-visual="vidro"] :is(.sheet,.folha .corpo){background:var(--vd-folha);-webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);border:1px solid var(--vd-borda);border-bottom:0}
@@ -86,5 +111,18 @@ html[data-visual="vidro"][data-esquema="claro"] .ct-anilha.sem-foto .plate{filte
 .am-padrao i{background:#212931}
 .am-vidro{background:radial-gradient(circle at 20% 20%,#E5484D,transparent 55%),radial-gradient(circle at 85% 40%,#FF9F45,transparent 50%),radial-gradient(circle at 40% 100%,#6E56CF,transparent 60%),#07090C}
 .am-vidro i{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-/* telas estreitas (320 px): a pílula encosta mais nas bordas para os rótulos caberem */
-@media (max-width:360px){html[data-visual="vidro"] .tabs{left:6px;right:6px}html[data-visual="vidro"] .tab{margin:6px 0}}
+/* telas estreitas (320 px): a barra encosta mais nas bordas para o nome da aba caber na pílula */
+@media (max-width:360px){html[data-visual="vidro"] .tabs{left:6px;right:6px}html[data-visual="vidro"] .tab .rot{font-size:13px}}
+
+/* aro de luz nas bordas (v1.53): borda em degradê, forte no canto de cima e com reflexo embaixo, nos contêineres de vidro,
+   no card do treino, na barra de abas e na pílula. Fica por cima do conteúdo (1,2 px) e não recebe toques. */
+html[data-visual="vidro"][data-esquema="escuro"]{--aro1:rgba(255,255,255,.62);--aro2:rgba(255,255,255,.10);--aro3:rgba(255,255,255,.03);--aro4:rgba(255,255,255,.30)}
+html[data-visual="vidro"][data-esquema="claro"]{--aro1:#fff;--aro2:rgba(255,255,255,.55);--aro3:rgba(20,30,50,.04);--aro4:rgba(20,30,50,.14)}
+html[data-visual="vidro"] :is(.hoje-card,.revisao,.item,.stat,.table,.previa,.busca,.sx-cd,.sx-crd,.sx-ban,.sx-ori,.trocar button,.prog-lista button,.guia-ex details,.hist li,.sync-box){position:relative}
+html[data-visual="vidro"] :is(.panel,.hoje-card,.revisao,.item,.stat,.table,.previa,.busca,.sx-cd,.sx-crd,.sx-ban,.sx-ori,.trocar button,.prog-lista button,.guia-ex details,.hist li,.sync-box,.ct,.tabs)::after,
+html[data-visual="vidro"] .tabs .ind::after{
+  content:"";display:block;position:absolute;inset:-1px;z-index:3;border-radius:inherit;padding:1.2px;pointer-events:none;
+  background:linear-gradient(150deg,var(--aro1),var(--aro2) 26%,var(--aro3) 55%,var(--aro4));opacity:1;mix-blend-mode:normal;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+html[data-visual="vidro"] .tabs .ind::after{inset:0;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(255,255,255,.15) 35%,rgba(255,255,255,0) 60%,rgba(255,255,255,.45))}
+html[data-visual="vidro"] :is(.panel,.hoje-card,.revisao,.item,.stat,.table,.previa,.busca,.sx-cd,.sx-crd,.sx-ban,.sx-ori,.trocar button,.prog-lista button,.guia-ex details,.hist li,.sync-box,.ct,.tabs){border-color:transparent}

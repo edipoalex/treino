@@ -21,7 +21,7 @@ export function render(){
   document.body.classList.toggle("em-sessao", nav.tab==="hoje" && !!E.atual);
   document.body.dataset.tab = nav.tab;
   $("#view").onclick=null; $("#view").onchange=null; $("#view").onpointerdown=null;
-  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===nav.tab ? "page" : "false"));
+  marcarAba(nav.tab);
   ({hoje:viewHoje, ficha:viewFicha, progresso:viewProgresso, historico:viewHistorico, guia:viewGuia})[nav.tab]();
   // cor do treino em uso (sessão ou card da Hoje): a aurora do estilo Vidro acompanha (v1.52)
   const L = E.atual?.letra || document.querySelector("#cardHoje")?.className.match(/\bL-([A-Z])\b/)?.[1];
@@ -29,10 +29,18 @@ export function render(){
 }
 /* ---------- Navegação ---------- */
 
+const ordem=["hoje","ficha","progresso","historico","guia"];
+/* aba atual: aria-current e a posição (--i) da pílula do estilo Vidro */
+function marcarAba(tab){
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===tab ? "page" : "false"));
+  document.querySelector(".tabs")?.style.setProperty("--i", Math.max(0, ordem.indexOf(tab)));
+}
+/* toque na aba: a pílula já começa a andar (antes da troca de tela) e o ícone dá o pulo de mola */
+function pulo(el){ el.classList.remove("pulo"); void el.offsetWidth; el.classList.add("pulo"); }
 export function iniciarNavegacao(){
-  const ordem=["hoje","ficha","progresso","historico","guia"];
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
     const de=nav.tab, para=b.dataset.tab;
+    pulo(b); if(de!==para){ marcarAba(para); pulo(document.querySelector(".tabs")); }
     if(de===para){ if(para==="progresso" && nav.progEx){ nav.progEx=null; render(); } scrollTo({top:0, behavior:"smooth"}); return; }
     trocarTela(()=>{ nav.tab=para; if(para!=="ficha"){nav.fichaFase=null;nav.fichaLetra=null;} if(para!=="progresso") nav.progEx=null; render(); scrollTo(0,0); entrada(para); },
       ordem.indexOf(para)>ordem.indexOf(de) ? "frente" : "tras");
