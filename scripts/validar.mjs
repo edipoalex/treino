@@ -94,6 +94,8 @@ const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
 const r1 = v => Math.round(v*10)/10;
 
 export function checarFicha(f, erros, avisos){
+  // ficha normalizada (contrato v1, /normalize): o app ainda não lê os campos novos (fase 2). Até lá, publique a original.
+  if(f?.normalizacao){ erros.push("ficha normalizada (contrato v1): o app só passa a ler esse formato na fase 2 da normalização; por enquanto publique a ficha original"); return null; }
   const validadores = [["app", validadorDoApp], ["planilha", validadorDaPlanilha()]];
   for(const [nome, v] of validadores){ const e = v(f); if(e) erros.push(`ficha recusada pelo ${nome}: ${e}`); }
   if(erros.length) return null;
