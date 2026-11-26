@@ -1,0 +1,90 @@
+/* ---------- Estilo Vidro (v1.52): Ajustes › Aparência › Estilo ----------
+   Ativo com html[data-visual="vidro"]; html[data-esquema] diz se o tema em uso é escuro ou claro.
+   - Aurora: luzes desfocadas na cor do treino em uso (html[data-letra]) atrás de tudo, movendo devagar.
+   - Superfícies translúcidas: os tokens --surface/--surface-2/--surface-3/--line ficam transparentes, e os contêineres
+     principais ganham desfoque (backdrop-filter), borda clara e reflexo. Itens internos só herdam a transparência,
+     para não empilhar desfoques (desempenho no iPhone).
+   - Folhas, Ajustes e telas cheias continuam quase opacas para leitura.
+   Com Animações reduzidas (html[data-mov="reduzido"]), a aurora e a anilha ficam paradas. */
+#aurora{display:none}
+html[data-visual="vidro"]{--aura1:var(--pD);--aura3:#6E56CF}
+html[data-visual="vidro"][data-letra="A"]{--aura1:var(--pA)} html[data-visual="vidro"][data-letra="B"]{--aura1:var(--pB)}
+html[data-visual="vidro"][data-letra="C"]{--aura1:var(--pC)} html[data-visual="vidro"][data-letra="D"]{--aura1:var(--pD)}
+html[data-visual="vidro"][data-letra="E"]{--aura1:var(--pE)} html[data-visual="vidro"][data-letra="F"]{--aura1:var(--pF)}
+html[data-visual="vidro"][data-letra="G"]{--aura1:var(--pG)} html[data-visual="vidro"][data-letra="H"]{--aura1:var(--pH)}
+html[data-visual="vidro"]{--aura2:color-mix(in srgb,var(--aura1) 55%,#FF9F45)}
+/* cor do treino só na Hoje e na sessão; nas outras abas a luz é neutra (azul-violeta), para campos e números
+   não ganharem cara de alerta quando o treino é vermelho */
+html[data-visual="vidro"] body:not([data-tab="hoje"]) #aurora{--aura1:#3E63DD;--aura2:#8E4EC6}
+
+/* tokens do vidro */
+html[data-visual="vidro"][data-esquema="escuro"]{--bg:#07090C;--surface:rgba(255,255,255,.065);--surface-2:rgba(255,255,255,.10);--surface-3:rgba(255,255,255,.16);
+  --line:rgba(255,255,255,.13);--vd-borda:rgba(255,255,255,.14);--vd-brilho:rgba(255,255,255,.18);--vd-reflexo:rgba(255,255,255,.12);
+  --vd-folha:rgba(18,22,28,.82);--vd-sombra:0 18px 44px -22px rgba(0,0,0,.8)}
+html[data-visual="vidro"][data-esquema="claro"]{--bg:#EEF1F6;--surface:rgba(255,255,255,.58);--surface-2:rgba(255,255,255,.7);--surface-3:rgba(20,30,50,.08);
+  --line:rgba(20,30,50,.09);--vd-borda:rgba(255,255,255,.9);--vd-brilho:rgba(255,255,255,.95);--vd-reflexo:rgba(255,255,255,.6);
+  --vd-folha:rgba(246,248,251,.86);--vd-sombra:0 18px 40px -26px rgba(30,40,70,.45)}
+
+/* aurora */
+html[data-visual="vidro"] #aurora{display:block;position:fixed;inset:-20%;z-index:-1;pointer-events:none;filter:blur(70px)}
+#aurora i{position:absolute;border-radius:50%;will-change:transform}
+#aurora i:nth-child(1){width:70%;height:40%;left:-8%;top:0;background:var(--aura1);opacity:.5;animation:au1 24s ease-in-out infinite alternate}
+#aurora i:nth-child(2){width:58%;height:38%;right:-12%;top:18%;background:var(--aura2);opacity:.45;animation:au2 28s ease-in-out infinite alternate}
+#aurora i:nth-child(3){width:80%;height:44%;left:8%;bottom:-4%;background:var(--aura3);opacity:.38;animation:au3 32s ease-in-out infinite alternate}
+html[data-esquema="claro"] #aurora i{opacity:.42} html[data-esquema="claro"] #aurora i:nth-child(3){opacity:.26}
+@keyframes au1{to{transform:translate(16%,12%) scale(1.12)}} @keyframes au2{to{transform:translate(-18%,16%) scale(.9)}} @keyframes au3{to{transform:translate(10%,-14%) scale(1.08)}}
+html[data-visual="vidro"] body{background:var(--bg)}
+html[data-visual="vidro"] #aurora{transition:none}
+
+/* contêineres de vidro (desfoque só aqui) */
+html[data-visual="vidro"] :is(.panel,.hoje-card,.revisao,.item,.stat,.table,.previa,.busca,.sx-cd,.sx-crd,.sx-ban,.sx-ori,.trocar button,.prog-lista button,.guia-ex details,.hist li,.sync-box,.aj-lista){
+  background:var(--surface);border:1px solid var(--vd-borda);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho);
+  -webkit-backdrop-filter:blur(22px) saturate(130%);backdrop-filter:blur(22px) saturate(130%)}
+html[data-visual="vidro"] .sx-cd.aberto{border-color:transparent}
+/* cabeçalho e barra do topo da sessão: vidro sobre o conteúdo que rola */
+html[data-visual="vidro"] .top,html[data-visual="vidro"] body::before{background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+html[data-visual="vidro"] .sb{background:color-mix(in srgb,var(--bg) 45%,transparent)}
+html[data-visual="vidro"] .sb-acao{background:color-mix(in srgb,var(--bg) 55%,transparent);border-top-color:var(--vd-borda)}
+/* abas: pílula de vidro flutuante */
+html[data-visual="vidro"] .tabs{left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);border:1px solid var(--vd-borda);border-radius:24px;
+  background:var(--surface-2);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);padding:0 2px}
+html[data-visual="vidro"] .tab{border-radius:18px;margin:6px 2px}
+html[data-visual="vidro"] .tab[aria-current="page"]{background:var(--surface-2);box-shadow:inset 0 1px 0 var(--vd-brilho)}
+html[data-visual="vidro"][data-esquema="claro"] .tab[aria-current="page"]{background:rgba(20,30,50,.07)}
+html[data-visual="vidro"] body:not(.em-sessao){padding-bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab-h) + 28px)}
+/* folhas, Ajustes e telas de leitura: quase opacas, com desfoque forte */
+html[data-visual="vidro"] :is(.sheet,.folha .corpo){background:var(--vd-folha);-webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);border:1px solid var(--vd-borda);border-bottom:0}
+html[data-visual="vidro"] .aj-lista{padding:0}
+
+/* card do treino na Hoje: vidro com a anilha flutuando (no lugar do estúdio escuro) */
+html[data-visual="vidro"] .ct{background:var(--surface);border:1px solid var(--vd-borda);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho);
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);color:var(--ink)}
+html[data-visual="vidro"] .ct::before{background:radial-gradient(circle at 78% 30%,color-mix(in srgb,var(--c1) 55%,transparent),transparent 42%),linear-gradient(160deg,var(--vd-reflexo),transparent 40%)}
+html[data-visual="vidro"] .ct::after,html[data-visual="vidro"] .ct-anilha .reflexo,html[data-visual="vidro"] .ct-anilha .brilho-chao,
+html[data-visual="vidro"] .ct-anilha::before,html[data-visual="vidro"] .ct-anilha::after{display:none}
+html[data-visual="vidro"] .ct-anilha{animation:vd-flutua 6s ease-in-out infinite}
+html[data-visual="vidro"] .ct-anilha .foto{filter:drop-shadow(0 4cqw 5cqw rgba(0,0,0,.45)) contrast(1.05) saturate(1.05)}
+@keyframes vd-flutua{50%{transform:translateY(-2.2cqw) rotate(1.5deg)}}
+html[data-visual="vidro"] .ct-titulo{color:var(--ink)}
+html[data-visual="vidro"] .ct-eyebrow,html[data-visual="vidro"] .ct-sub{color:var(--ink-2)}
+html[data-visual="vidro"] .ct-pill{background:var(--surface-2);border-color:var(--vd-borda);color:var(--ink)}
+html[data-visual="vidro"] .ct-pill .ic{color:var(--ink)}
+html[data-visual="vidro"] .ct-previa{border-top-color:var(--line)} html[data-visual="vidro"] .ct-previa li{border-bottom-color:var(--line);color:var(--ink)}
+html[data-visual="vidro"] .ct-btn{background:linear-gradient(135deg,var(--c1),color-mix(in srgb,var(--c1) 55%,#FF9F45));position:relative;overflow:hidden}
+html[data-visual="vidro"] .ct-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-120%);animation:vd-brilho 4s ease-in-out 1.5s infinite;pointer-events:none}
+@keyframes vd-brilho{60%,100%{transform:translateX(120%)}}
+html[data-visual="vidro"][data-esquema="claro"] .ct-anilha.sem-foto .plate{filter:drop-shadow(0 10px 14px rgba(0,0,0,.25))}
+
+/* Ajustes › Aparência › Estilo: as duas opções com miniatura */
+.aj-estilos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.aj-estilos button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px;border-radius:var(--r-m);border:1px solid var(--line);background:var(--surface);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.aj-estilos button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.aj-estilos b{font-size:var(--t-corpo)} .aj-estilos small{font-size:var(--t-legenda);color:var(--muted);line-height:1.3}
+.am{position:relative;width:100%;height:84px;border-radius:12px;overflow:hidden;margin-bottom:4px;background:#0F1317}
+.am i{position:absolute;left:10%;right:10%;height:24px;border-radius:8px}
+.am i:first-child{top:16px}.am i:last-child{top:46px}
+.am-padrao i{background:#212931}
+.am-vidro{background:radial-gradient(circle at 20% 20%,#E5484D,transparent 55%),radial-gradient(circle at 85% 40%,#FF9F45,transparent 50%),radial-gradient(circle at 40% 100%,#6E56CF,transparent 60%),#07090C}
+.am-vidro i{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+/* telas estreitas (320 px): a pílula encosta mais nas bordas para os rótulos caberem */
+@media (max-width:360px){html[data-visual="vidro"] .tabs{left:6px;right:6px}html[data-visual="vidro"] .tab{margin:6px 0}}

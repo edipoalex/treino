@@ -29,9 +29,11 @@
 <link rel="stylesheet" href="css/acabamento.css">
 <link rel="stylesheet" href="css/sessao-sx.css">
 <link rel="stylesheet" href="css/balao.css">
+<link rel="stylesheet" href="css/vidro.css">
 <link rel="stylesheet" href="css/movimento.css">
 </head>
 <body>
+<div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <!-- gradientes das anilhas (js/anilha.js) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <radialGradient id="an-luz" cx="30%" cy="22%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></radialGradient>
@@ -112,6 +114,14 @@
       <h3>Tema</h3>
       <div class="seg" id="themeSeg"><button data-theme-opt="auto">Automático</button><button data-theme-opt="light">Claro</button><button data-theme-opt="dark">Escuro</button></div>
       <p class="ajuda">Automático segue o tema do iPhone.</p>
+    </section>
+    <section class="aj-sub" data-pag="visual" hidden>
+      <h3>Estilo</h3><p class="ajuda">A aparência do app todo. Vale nos temas claro e escuro.</p>
+      <div class="aj-estilos" id="visualSeg">
+        <button data-visual-opt="padrao"><span class="am am-padrao"><i></i><i></i></span><b>Padrão</b><small>Cartões sólidos, mais simples e leves.</small></button>
+        <button data-visual-opt="vidro"><span class="am am-vidro"><i></i><i></i></span><b>Vidro</b><small>Cartões translúcidos sobre luzes na cor do treino.</small></button>
+      </div>
+      <p class="ajuda">No vidro, as luzes do fundo se movem devagar; com Animações reduzidas, ficam paradas.</p>
     </section>
     <section class="aj-sub" data-pag="anim" hidden>
       <h3>Animações</h3>

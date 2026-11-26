@@ -150,7 +150,7 @@ export function viewHistorico(){
     <div class="stat"><b>${media??"—"}</b><span>min em média</span></div>
   </div>
 
-  <section class="panel" aria-labelledby="hFreq"><h3 id="hFreq">Frequência por semana <span class="sub2">meta ${alvo.min}–${alvo.max}</span></h3>
+  <section class="panel" aria-labelledby="hFreq"><h3 id="hFreq">Frequência semanal <span class="sub2">meta ${alvo.min}–${alvo.max}</span></h3>
     ${E.historico.length||E.inicio ? chartFreq() + semanasRevisao() : vazio("calendar-days","A frequência aparece aqui","Conclua o primeiro treino na aba Hoje.")}
   </section>
 

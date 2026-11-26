@@ -11,6 +11,10 @@ export function applyTheme(){
   if(S.theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",S.theme);
   document.querySelectorAll("[data-theme-opt]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.themeOpt===S.theme)));
   const dark = S.theme==="dark" || (S.theme==="auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  // v1.52: esquema resolvido (para o CSS do vidro) e aparência escolhida em Ajustes › Aparência › Estilo
+  r.dataset.esquema = dark ? "escuro" : "claro";
+  r.dataset.visual = S.pref?.visual==="vidro" ? "vidro" : "padrao";
+  document.querySelectorAll("[data-visual-opt]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.visualOpt===r.dataset.visual)));
   document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.content = dark ? "#0F1317" : "#EDEFF2");
 }
 /* ---------- UI helpers ---------- */

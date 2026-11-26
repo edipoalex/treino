@@ -48,7 +48,7 @@ export function normalizarEstado(S){
   if(S.livre && !(num(S.livre.k) && num(S.livre.acum ?? 0))) delete S.livre;
   if(!S.variar || typeof S.variar!=="object" || Array.isArray(S.variar)) S.variar = {};
   if(!RX.data.test(S.revisaoVista||"")) delete S.revisaoVista; // última revisão da semana vista (segunda-feira)
-  S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas",
+  S.pref = { modo: S.pref?.modo==="foco" ? "foco" : "lista", descanso: S.pref?.descanso==="tela" ? "tela" : "botao", animacoes: S.pref?.animacoes==="reduzidas" ? "reduzidas" : "completas", visual: S.pref?.visual==="vidro" ? "vidro" : "padrao",
     voz: ["off","cardio","tudo"].includes(S.pref?.voz) ? S.pref.voz : "cardio", falas: prefFalas(S.pref?.falas) };
   // falas do treinador (v1.41): sorteio sem repetição e contadores do treino em andamento
   { const m=S.mot && typeof S.mot==="object" ? S.mot : {};
