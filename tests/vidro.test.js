@@ -55,3 +55,17 @@ test("abas no vidro: pílula da aba ativa e rótulos em span (v1.53)", () => {
   assert.match(ler("../js/navegacao.js"), /setProperty\("--i", Math\.max\(0, ordem\.indexOf\(tab\)\)\)/);
   assert.match(ler("../css/movimento.css"), /::view-transition-old\(abas\)\{display:none\}/);
 });
+
+test("cronômetros no vidro: trilho de vidro, preenchimento com brilho e aro (v1.54)", () => {
+  for(const sel of [".ab-uni:has(.t-btn,.mini-fase)", ".ab-rest", ".sx-acao .t-btn", ".sx-acao .mini-fase"])
+    assert.ok(css.includes(`html[data-visual="vidro"][data-esquema] ${sel}`), sel);
+  assert.match(css, /\.t-fill\{background:var\(--vd-gloss\),var\(--c\)\}/);
+  assert.match(css, /\.mf-barra i\{background:var\(--vd-gloss\),var\(--fase,var\(--c\)\)\}/);
+  assert.match(css, /:is\(\.ab-uni,\.ab-rest,\.sx-acao \.t-btn,\.sx-acao \.mini-fase,\.sx-acao \.btn\.cor\)::after/);
+});
+
+test("treino no vidro: faixa da ação transparente e telas cheias com a aurora (v1.54)", () => {
+  assert.match(css, /html\[data-visual="vidro"\] \.sb-acao\{background:linear-gradient\(to top,[^}]*backdrop-filter:none\}/);
+  assert.match(css, /html\[data-visual="vidro"\] \.descanso\{background:color-mix\(in srgb,var\(--bg\) 50%,transparent\);/);
+  assert.match(css, /html\[data-visual="vidro"\] \.fases\{-webkit-backdrop-filter:blur\(40px\)/);
+});

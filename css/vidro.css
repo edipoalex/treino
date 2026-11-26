@@ -50,7 +50,13 @@ html[data-visual="vidro"] .sx-cd.aberto{border-color:transparent}
 /* cabeçalho e barra do topo da sessão: vidro sobre o conteúdo que rola */
 html[data-visual="vidro"] .top,html[data-visual="vidro"] body::before{background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
 html[data-visual="vidro"] .sb{background:color-mix(in srgb,var(--bg) 45%,transparent)}
-html[data-visual="vidro"] .sb-acao{background:color-mix(in srgb,var(--bg) 55%,transparent);border-top-color:var(--vd-borda)}
+/* faixa da ação no treino (v1.54): transparente, como a barra de abas da Hoje; quem desfoca é o próprio botão/cronômetro,
+   que assim mostra a aurora e o conteúdo atrás dele em vidro. Um leve degradê embaixo separa do conteúdo que rola. */
+html[data-visual="vidro"] .sb-acao{background:linear-gradient(to top,color-mix(in srgb,var(--bg) 55%,transparent),transparent);border-top:0;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-visual="vidro"] .ab-prox{justify-self:center;align-self:center;max-width:100%;padding:4px 14px;border-radius:99px;background:var(--surface-2);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);box-shadow:inset 0 1px 0 var(--vd-brilho)}
+html[data-visual="vidro"] .ab-col{align-items:center} html[data-visual="vidro"] .ab-col>.ab-rest{align-self:stretch}
 /* abas: barra de vidro flutuante; a aba ativa vira uma pílula na cor do treino, com ícone e nome (v1.53).
    As abas crescem por flex-grow (1 → 2.4); a pílula (.ind) anda junto: left = --i × unidade, unidade = largura / 6.4.
    Mola: passa um pouco e assenta; no toque o ícone afunda e volta, e a pílula estica ao sair do lugar. */
@@ -126,3 +132,57 @@ html[data-visual="vidro"] .tabs .ind::after{
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 html[data-visual="vidro"] .tabs .ind::after{inset:0;background:linear-gradient(150deg,rgba(255,255,255,.9),rgba(255,255,255,.15) 35%,rgba(255,255,255,0) 60%,rgba(255,255,255,.45))}
 html[data-visual="vidro"] :is(.panel,.hoje-card,.revisao,.item,.stat,.table,.previa,.busca,.sx-cd,.sx-crd,.sx-ban,.sx-ori,.trocar button,.prog-lista button,.guia-ex details,.hist li,.sync-box,.ct,.tabs){border-color:transparent}
+
+/* ---------- botões da sessão no vidro (v1.54) ----------
+   Mesmo acabamento da pílula das abas: cor do treino com brilho de vidro (degradê de luz por cima, reflexo no topo,
+   sombra embaixo) e aro de luz. Nos cronômetros (descanso, pausa do rest-pause, isometria/prancha, cardio e
+   aproximação minimizados), a parte que já esvaziou é vidro fumê: translúcido, com desfoque e aro, e o texto
+   branco continua legível nos dois temas. A cor que esvazia (.t-fill / .mf-barra i) leva o mesmo brilho. */
+html[data-visual="vidro"]{--vd-gloss:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.07) 46%,rgba(0,0,0,.12));
+  --vd-gloss-sombra:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -10px 18px -10px rgba(0,0,0,.3)}
+html[data-visual="vidro"][data-esquema="escuro"]{--vd-trilho:rgba(255,255,255,.07);--vd-tinta:24%}
+html[data-visual="vidro"][data-esquema="claro"]{--vd-trilho:rgba(22,30,44,.62);--vd-tinta:30%}
+html[data-visual="vidro"]{--vd-fosco:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.05) 50%,rgba(255,255,255,.02))}
+/* botão único 20/60/20 (série feita, próximo, aproximação…) */
+html[data-visual="vidro"] .ab-uni{background:var(--vd-gloss),var(--c);box-shadow:0 12px 26px -12px var(--c),var(--vd-gloss-sombra)}
+html[data-visual="vidro"] .ab-uni .ab-lado{background:rgba(0,0,0,.12)}
+/* trilho de vidro fumê quando há cronômetro */
+html[data-visual="vidro"][data-esquema] .ab-uni:has(.t-btn,.mini-fase),
+html[data-visual="vidro"][data-esquema] .ab-rest,
+html[data-visual="vidro"][data-esquema] .sx-acao .t-btn,
+html[data-visual="vidro"][data-esquema] .sx-acao .mini-fase{background:var(--vd-fosco),color-mix(in srgb,var(--c) var(--vd-tinta),var(--vd-trilho));
+  -webkit-backdrop-filter:blur(18px) saturate(150%);backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho),inset 0 -12px 22px -16px var(--vd-brilho)}
+html[data-visual="vidro"][data-esquema] .ab-uni:has(.t-btn,.mini-fase) .ab-lado{background:transparent}
+/* a cor que esvazia, com o mesmo brilho */
+html[data-visual="vidro"] :is(.ab-acao,.sx-acao,.ab-rest) .t-fill,html[data-visual="vidro"] .ab-rest .t-fill{background:var(--vd-gloss),var(--c)}
+html[data-visual="vidro"] :is(.ab-uni:has(.t-btn.low,.t-btn.troca),.sx-acao .t-btn.low,.sx-acao .t-btn.troca,.ab-rest.low) .t-fill{background:var(--vd-gloss),var(--warn)}
+html[data-visual="vidro"] :is(.ab-acao,.sx-acao) .mf-barra i{background:var(--vd-gloss),var(--fase,var(--c))}
+/* botões de ação da lista (cartão aberto) */
+html[data-visual="vidro"] .sx-acao .btn.cor:not(.t-btn){background:var(--vd-gloss),var(--c);box-shadow:0 12px 26px -12px var(--c),var(--vd-gloss-sombra)}
+/* aro de luz em todos */
+html[data-visual="vidro"] .sx-acao .mini-fase{position:relative;overflow:hidden}
+html[data-visual="vidro"] :is(.ab-uni,.ab-rest,.sx-acao .t-btn,.sx-acao .mini-fase,.sx-acao .btn.cor)::after{
+  content:"";position:absolute;inset:0;z-index:3;border-radius:inherit;padding:1.2px;pointer-events:none;
+  background:linear-gradient(150deg,rgba(255,255,255,.85),rgba(255,255,255,.14) 30%,rgba(255,255,255,.03) 58%,rgba(255,255,255,.4));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* últimos segundos: o vidro do vazio também puxa para o laranja do aviso */
+html[data-visual="vidro"][data-esquema] :is(.ab-uni:has(.t-btn.low,.t-btn.troca),.ab-rest.low,.sx-acao .t-btn.low,.sx-acao .t-btn.troca){
+  background:var(--vd-fosco),color-mix(in srgb,var(--warn) var(--vd-tinta),var(--vd-trilho))}
+
+/* ---------- telas cheias no vidro (v1.54): descanso e fases com a aurora atrás ----------
+   Fundo translúcido com desfoque forte: a aurora (e o treino, bem borrado) aparece por trás, como nos cartões da Hoje.
+   Nas fases, a cor da fase vira um véu sobre a aurora, forte o bastante para o tempo e o nome continuarem legíveis. */
+html[data-visual="vidro"] .descanso{background:color-mix(in srgb,var(--bg) 50%,transparent);
+  -webkit-backdrop-filter:blur(40px) saturate(150%);backdrop-filter:blur(40px) saturate(150%)}
+html[data-visual="vidro"] .descanso::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(60% 40% at 50% 30%,color-mix(in srgb,var(--c) 35%,transparent),transparent 70%)}
+html[data-visual="vidro"] .descanso .btn{background:var(--surface-2);border:1px solid var(--vd-borda);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 var(--vd-brilho)}
+html[data-visual="vidro"][data-esquema="escuro"] .fases:not(.t-prep){
+  background:linear-gradient(170deg,color-mix(in srgb,var(--fase) 62%,transparent),color-mix(in srgb,color-mix(in srgb,var(--fase) 60%,#000) 72%,transparent))}
+html[data-visual="vidro"][data-esquema="claro"] .fases:not(.t-prep){
+  background:linear-gradient(170deg,color-mix(in srgb,var(--fase) 78%,transparent),color-mix(in srgb,color-mix(in srgb,var(--fase) 70%,#000) 85%,transparent))}
+html[data-visual="vidro"] .fases.t-prep{background:color-mix(in srgb,var(--bg) 50%,transparent)}
+html[data-visual="vidro"] .fases{-webkit-backdrop-filter:blur(40px) saturate(160%);backdrop-filter:blur(40px) saturate(160%)}
+html[data-visual="vidro"] .fases .f-acoes .btn{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}

@@ -136,8 +136,17 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   (`prototipo-ux/componentes/abas-vidro`).
 - Aro de luz nas bordas (v1.53): contêineres de vidro, card do treino, barra e pílula têm borda em degradê (`::after` com
   máscara), forte no canto de cima e com reflexo embaixo.
+- Botões da sessão no vidro (v1.54): o botão único 20/60/20 e os de ação da lista têm a cor do treino com brilho de vidro
+  e aro de luz (mesmo acabamento da pílula). Nos cronômetros (descanso no botão, pausa do rest-pause, isometria/prancha,
+  aquecimento e cardio minimizados) a cor que esvazia leva o mesmo brilho e a parte vazia é vidro fosco tingido com a cor
+  do treino (escuro) ou vidro fumê (claro), com texto branco legível; nos últimos segundos o tingido vira laranja.
+  A faixa da ação fica transparente (como a barra de abas da Hoje): a aurora segue por trás do treino e o próprio
+  botão/cronômetro desfoca o que está atrás; "A seguir" vira uma pílula de vidro.
+- Telas cheias no vidro (v1.54): descanso e fases com fundo translúcido e desfoque forte, mostrando a aurora; no
+  descanso, um halo na cor do treino atrás do anel; nas fases, a cor da fase vira um véu sobre a aurora (mais forte no
+  claro, para o texto branco). Substitui a decisão da v1.52 de deixá-las sólidas.
 - Card do treino no vidro: sem o estúdio escuro; vidro com halo na cor, anilha flutuando e brilho passando no "Iniciar treino".
-- Descanso em tela cheia continua sólido (leitura do cronômetro). Títulos de seção ficam presos pela base (`.panel > h3`)
+- Títulos de seção ficam presos pela base (`.panel > h3`)
   e cabem em uma linha a 390 px ("Frequência semanal" no Histórico, antes quebrava e encostava no cartão). Com Animações reduzidas, aurora, anilha e brilho ficam parados.
 
 ## Vários perfis (v1.49)
