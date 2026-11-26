@@ -55,3 +55,11 @@ test("abas no vidro: pílula da aba ativa e rótulos em span (v1.53)", () => {
   assert.match(ler("../js/navegacao.js"), /setProperty\("--i", Math\.max\(0, ordem\.indexOf\(tab\)\)\)/);
   assert.match(ler("../css/movimento.css"), /::view-transition-old\(abas\)\{display:none\}/);
 });
+
+test("cronômetros no vidro: trilho de vidro, preenchimento com brilho e aro (v1.54)", () => {
+  for(const sel of [".ab-uni:has(.t-btn,.mini-fase)", ".ab-rest", ".sx-acao .t-btn", ".sx-acao .mini-fase"])
+    assert.ok(css.includes(`html[data-visual="vidro"][data-esquema] ${sel}`), sel);
+  assert.match(css, /\.t-fill\{background:var\(--vd-gloss\),var\(--c\)\}/);
+  assert.match(css, /\.mf-barra i\{background:var\(--vd-gloss\),var\(--fase,var\(--c\)\)\}/);
+  assert.match(css, /:is\(\.ab-uni,\.ab-rest,\.sx-acao \.t-btn,\.sx-acao \.mini-fase,\.sx-acao \.btn\.cor\)::after/);
+});
