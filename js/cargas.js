@@ -6,12 +6,13 @@ import { PASSO, rerender } from "./telas/sessao.js";
 import { fecharFolha, folha } from "./ui.js";
 import { esc, fmtNum, numCarga } from "./util.js";
 import { seriesDe } from "./series.js";
-import { temCarga as temCargaFicha } from "./recursos.js";
+import { temCarga as temCargaFicha, normalizado } from "./recursos.js";
 
 /* Cargas: kg (passo 2,5), placas (passo 1) ou texto livre. Exercícios combinados ("A + B")
    têm uma carga por parte, salva como "A + B › A". */
 export function partesDe(it){
-  const nomes=it.nome.split(" + ").map(x=>x.trim()).filter(Boolean);
+  // ficha normalizada: só "cargas-combinada" separa a carga por exercício do nome "A + B"
+  const nomes = normalizado(it) && !it.componentes.includes("cargas-combinada") ? [it.nome] : it.nome.split(" + ").map(x=>x.trim()).filter(Boolean);
   const cap = n => n.charAt(0).toUpperCase()+n.slice(1);
   return nomes.length>1 ? nomes.map(n=>({n:cap(n), key:`${it.nome} › ${n}`})) : [{n:it.nome, key:it.nome}];
 }

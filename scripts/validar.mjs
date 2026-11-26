@@ -11,6 +11,7 @@ import vm from "node:vm";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { validarNormalizada } from "../js/tecnicas.js";
 
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ler = arq => fs.readFileSync(path.join(RAIZ, arq), "utf8");
@@ -94,8 +95,14 @@ const minutos = it => it.series*(it.exec+it.descanso)/60 + it.bloco;
 const r1 = v => Math.round(v*10)/10;
 
 export function checarFicha(f, erros, avisos){
-  // ficha normalizada (contrato v1, /normalize): o app ainda não lê os campos novos (fase 2). Até lá, publique a original.
-  if(f?.normalizacao){ erros.push("ficha normalizada (contrato v1): o app só passa a ler esse formato na fase 2 da normalização; por enquanto publique a ficha original"); return null; }
+  // ficha normalizada (contrato v1, /normalize; o app lê esse formato desde a fase 2): só passa sem erro no catálogo
+  if(f?.normalizacao){
+    if(f.normalizacao.rascunho) erros.push("ficha normalizada ainda marcada como rascunho: revise cada exercício (/normalize)");
+    const r = validarNormalizada(f);
+    for(const e of r.erros) erros.push(`normalização · ${e}`);
+    for(const a of r.avisos) avisos.push(`normalização · ${a}`);
+    if(erros.length) return null;
+  }
   const validadores = [["app", validadorDoApp], ["planilha", validadorDaPlanilha()]];
   for(const [nome, v] of validadores){ const e = v(f); if(e) erros.push(`ficha recusada pelo ${nome}: ${e}`); }
   if(erros.length) return null;

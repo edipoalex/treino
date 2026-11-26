@@ -35,6 +35,7 @@ export const TECNICAS = {
   "rest-pause":   { nome:"Rest-pause", aplica:["todas","ultima"], params:{ pausa_s:P("int",{min:5,max:60,padrao:10}), blocos:P("int",{min:2,max:6,padrao:3}) },
                     componentes:{ todas:["cronometro-partes"], ultima:["cronometro-partes-ultima"] } },
   "micro-pausas": { nome:"Micro-pausas", aplica:["todas","ultima"], params:{ blocos:P("blocos") }, componentes:{ todas:["cronometro-partes"], ultima:["cronometro-partes-ultima"] } },
+  "isometria-no-meio": { nome:"Isometria no meio da série", aplica:["todas"], params:{ blocos:P("blocos") }, componentes:{ todas:["cronometro-partes"] } },
   "bi-set":       { nome:"Bi-set", aplica:["todas"], params:{}, carga:"cargas-combinada", componentes:{} },
   "tri-set":      { nome:"Tri-set", aplica:["todas"], params:{}, carga:"cargas-combinada", componentes:{} },
   "circuito":     { nome:"Circuito", aplica:["todas"], params:{}, carga:"cargas-combinada", componentes:{} },
@@ -62,7 +63,8 @@ const okParam = (d, v) => d.tipo==="int" ? Number.isInteger(v) && (d.min==null |
   : d.tipo==="bool" ? typeof v==="boolean"
   : d.tipo==="texto" ? typeof v==="string" && v.trim().length>0 && v.length<=200
   : d.tipo==="blocos" ? Array.isArray(v) && v.length>=2 && v.every(b => b && typeof b==="object" && typeof b.reps==="string" && b.reps.trim()
-      && (b.pausa_s==null || (Number.isInteger(b.pausa_s) && b.pausa_s>=3 && b.pausa_s<=120)))
+      && (b.pausa_s==null || (Number.isInteger(b.pausa_s) && b.pausa_s>=3 && b.pausa_s<=120))
+      && (b.pausa_rot==null || (typeof b.pausa_rot==="string" && b.pausa_rot.trim() && b.pausa_s!=null)))
   : false;
 
 /* Confere um exercício normalizado. Devolve { erros, avisos, componentes, esperados } (textos sem o nome do item). */

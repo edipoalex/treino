@@ -149,7 +149,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Títulos de seção ficam presos pela base (`.panel > h3`)
   e cabem em uma linha a 390 px ("Frequência semanal" no Histórico, antes quebrava e encostava no cartão). Com Animações reduzidas, aurora, anilha e brilho ficam parados.
 
-## Normalização de fichas (v1.55, fase 1)
+## Normalização de fichas (v1.55 fase 1, v1.56 fase 2)
 - Toda ficha nova passa pelo comando `/normalize` (skill em `.claude/skills/normalize`): o Claude lê a ficha como chegou,
   corrige grafia e variações, pergunta o que for ambíguo e escreve o **contrato v1** (`agente/normalizacao.md`): em cada
   exercício, `tipo`, `series_detalhe`, `tecnicas` (com parâmetros e "todas"/"última") e `componentes` do app.
@@ -157,10 +157,14 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   `scripts/normalizacao.mjs validar` confere a ficha normalizada contra o catálogo, compara com o que o app faz hoje
   lendo o texto e escreve a tabela no relatório. Técnica fora do catálogo ou componente inexistente = ✖ (não publicar).
 - Auditoria fora do repositório: `AI-Personal/fichas-normalizadas/<perfil>/etapa-NN/` com original, normalizada e relatório.
-- Fase 1: o app ainda lê o texto; `aplicar-ficha` e `publicar-ficha` recusam ficha normalizada (o `series_detalhe`
-  normalizado mudaria a leitura atual, ex.: contraste). Fase 2: o app lê `tecnicas`/`componentes`. Fase 3: componentes
-  apontados pelo relatório (ex.: `cronometro-partes-ultima`).
-- Testes: `tests/normalizacao.test.js` (catálogo coerente, regras do validador, ficha de exemplo normalizada = app atual).
+- Fase 2 (v1.56): quando o exercício tem `tecnicas` e `componentes`, o app lê esses campos e não interpreta o texto:
+  `tempoDe` (cronômetro), `seriesDe` (`series_detalhe` no formato "repetições · etiqueta"), `temCarga`, `contraste`,
+  `metodoDe`, `recursosDe` e `partesDe` (só `cargas-combinada` separa a carga pelo nome "A + B"). Fichas sem esses
+  campos continuam pela leitura do texto. `aplicar-ficha` e `publicar-ficha` aceitam ficha normalizada só sem erros do
+  validador (e sem a marca de rascunho). Técnica cujo componente ainda não existe não liga cronômetro.
+- Fase 3: componentes apontados pelo relatório (ex.: `cronometro-partes-ultima`).
+- Testes: `tests/normalizacao.test.js` (catálogo coerente, regras do validador, publicação) e
+  `tests/normalizacao-app.test.js` (ficha de exemplo e etapa 19: lida pelo texto = normalizada, exercício a exercício).
 
 ## Vários perfis (v1.49)
 - Fonte da ficha por planilha (`fonteDaFicha`, js/validacao.js): Config `ficha` = `planilha` → só a ficha ativa da

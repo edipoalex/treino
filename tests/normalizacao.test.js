@@ -60,7 +60,14 @@ test("ficha de exemplo: rascunho valida e reproduz o comportamento atual do app"
   assert.deepEqual(linhas.filter(l => l.muda && semSeries(l)).map(l => l.nome), []);
 });
 
-test("ficha normalizada não pode ser publicada na fase 1", () => {
-  const erros = []; checarFicha({ normalizacao:{ versao:1 } }, erros, []);
-  assert.match(erros.join(), /fase 2/);
+test("publicação: ficha normalizada só passa sem erros do validador (fase 2)", () => {
+  const ruim = []; checarFicha({ normalizacao:{ versao:1 } }, ruim, []);
+  assert.match(ruim.join(), /normalização ·/);
+  const rasc = []; checarFicha({ normalizacao:{ versao:1, rascunho:true } }, rasc, []);
+  assert.match(rasc.join(), /rascunho/);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "norm-pub-")), saida = path.join(dir, "n.json");
+  execFileSync(process.execPath, [new URL("../scripts/normalizacao.mjs", import.meta.url).pathname, "rascunho", new URL("../fichas/etapa-19.json", import.meta.url).pathname, saida]);
+  const f = JSON.parse(fs.readFileSync(saida, "utf8")); delete f.normalizacao.rascunho;
+  const erros = [], avisos = []; checarFicha(f, erros, avisos);
+  assert.deepEqual(erros.filter(e => /normaliza/.test(e)), []);
 });
