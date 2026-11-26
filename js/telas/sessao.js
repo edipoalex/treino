@@ -6,6 +6,7 @@ import { copiarTexto, guiaDe, linkClaude, metodosDe, notaExpress, perguntaClaude
 import { nav, render } from "../navegacao.js";
 import { hojeISO, isoDe, minutos, proxima, relDia, semTxt, semanaAtual, temExpress, totalMin, treino, voltasDo } from "../progresso.js";
 import { notaPrescricao, rotSerie, seriesDe, tempoDe } from "../series.js";
+import { minimizarTreino } from "../minitreino.js";
 import { fmtRec, fmtVolume, recordesDaSessao, resumoCargas, temCargas, volumeSessao } from "../metricas.js";
 import { enfileirar, hora } from "../sync.js";
 import { confirmar, desfazer, fecharFolha, fmtMin, fmtSeg, folha, ico, manterTela, plate, toast } from "../ui.js";
@@ -49,11 +50,12 @@ const recem = i => { const s=recente("serie"), f=recente("feito"); return (s && 
 const alvoSerie = (it,i,a) => cargaPorSerie(it) && variaPorSerie(it) && !a.feitos.includes(i) ? { i, j:serieSelecionada(it,i,a) } : {};
 const notas = t => separarNotas(t.itens.map(x=>x.obs||""));
 export function topoSessao(a,t){
-  const n=t.itens.length, nt=notas(t), foco=S.pref.modo==="foco";
-  return `<div class="sb"><div class="sb-l"><button class="icon-btn s-ic" id="sMenu" aria-label="Opções do treino">${ICO.mais}</button>
+  const n=t.itens.length, nt=notas(t);
+  // ⌄ minimiza o treino (v1.59: o treino segue no mini-player); ⋯ abre as opções (lista/foco, express, ajustes…)
+  return `<div class="sb"><div class="sb-l"><button class="icon-btn s-ic" id="sMin" aria-label="Minimizar o treino e usar o app">${icone("chevron-down")}</button>
     <div class="sb-t"><b>Treino ${esc(a.letra)}${a.modo==="express"?" · express":""}</b>
       <span>${a.feitos.length} de ${n} · ${minDesde(a.inicio)} min${nt.comum?` <button class="sb-nota" data-nota aria-label="${esc(nt.rotulo)}: ver a orientação">${icone("lightbulb")}${esc(nt.rotulo)}</button>`:""}</span></div>
-    <button class="icon-btn s-ic" id="sModo" aria-label="${foco?"Ver a lista de exercícios":"Ver um exercício por vez"}">${icone(foco?"list":"rectangle-vertical")}</button></div>
+    <button class="icon-btn s-ic" id="sMenu" aria-label="Opções do treino">${ICO.mais}</button></div>
     <div class="s-prog">${t.itens.map((_,i)=>`<span class="${a.feitos.includes(i)?"ok":i===a.ativo?"at":""}"></span>`).join("")}</div></div>`;
 }
 const cap1 = s => s.charAt(0).toUpperCase()+s.slice(1);
@@ -200,6 +202,7 @@ export function cliqueSessao(e){
     if(a.plan?.[i]){ const u=cargaDe(chaveCarga(partesDe(it)[pi], gruposDe(it)[gi]||"")).u; for(const k in a.plan[i]) a.plan[i][k].u=u; save(); rerender(); }
     return; }
   if(d.navega){ const nv=a.ativo+(+d.navega); if(nv>=t.itens.length) return concluir(); if(nv<0) return; a.ativo=nv; save(); rerender(true); return comecoExercicio(a, nv); }
+  if(el.id==="sMin") return minimizarTreino();
   if(el.id==="sMenu") return menuSessao();
   if(el.id==="sModo"){ S.pref.modo = S.pref.modo==="foco" ? "lista" : "foco"; save(); return rerender(true); }
   if(d.ori!=null){ const i=+d.ori; oriAberta.has(i) ? oriAberta.delete(i) : oriAberta.add(i); return rerender(); }

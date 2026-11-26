@@ -218,6 +218,20 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Balão: um por vez, topo (abaixo do "Desfazer" quando ele aparece), por cima da tela cheia do descanso e do cardio,
   letra de 19 px e personagem de 66 px (v1.43), some em 6–10 s, fecha no X ou ao tocar, anunciado sem roubar o foco, sem movimento com animações reduzidas.
 
+## Treino minimizado (v1.59)
+- Na sessão, o botão ⌄ (canto superior esquerdo) encolhe o treino até um mini-player acima da barra de abas; o treino
+  continua (séries, descanso, cronômetros, alertas) enquanto o usuário usa Ficha, Progresso, Histórico, Guia e Ajustes.
+  O ⋯ (canto direito) abre as opções (lista/foco, express, ficha, guia, ajustes, cancelar). Estado em `E.atual.min`
+  (sobrevive a recarregar o app). Concluir e cancelar continuam só dentro do treino.
+- Mini-player (`js/minitreino.js`, `css/minitreino.css`): anel de progresso (feitos/total), exercício, série e tempo de
+  treino; no descanso, contagem com a cor do treino esvaziando e botão de pular; cronômetro de execução (aquecimento,
+  prancha, pausa, cardio) ao vivo; no fim do descanso, pulso de luz e "Hora da série N!" por 6 s. Tocar expande o treino.
+  Padrão: cartão sólido; Vidro: vidro com aro de luz. Encolher/expandir: camada do fundo recortada até o mini-player.
+- Hoje com treino em andamento: o card mostra "Treino em andamento" e "Continuar treino · X de N"; "Trocar treino" some
+  (não dá para começar outro sem concluir ou cancelar). O descanso em tela cheia e o aviso de fim não abrem por cima de
+  outra aba (`body:not(.em-sessao)`).
+- Testes: `tests/minitreino.test.js`.
+
 ## Sessão de treino redesenhada (v1.42)
 - Modo imersivo: durante o treino saem o cabeçalho do app (data, etapa, Ajustes) e as abas; Ajustes fica no menu "···".
 - Barra da sessão fixa no topo (`topoSessao`): "···", "Treino X · N de M · min", selo da orientação comum e o ícone

@@ -65,7 +65,7 @@ html[data-visual="vidro"] .tabs{left:12px;right:12px;bottom:calc(env(safe-area-i
   background:var(--surface);box-shadow:var(--vd-sombra),inset 0 1px 0 var(--vd-brilho),inset 0 -14px 26px -18px var(--vd-brilho);
   -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);padding:0}
 html[data-visual="vidro"] .tabs .wrap{display:flex;position:relative;padding:0 5px}
-html[data-visual="vidro"] .tab{flex:1 1 0;min-width:0;margin:0;flex-direction:row;gap:7px;background:none;color:var(--ink-2);
+html[data-visual="vidro"] .tab{flex:1 1 0;min-width:0;margin:0;padding:0 2px;flex-direction:row;gap:7px;background:none;color:var(--ink-2);
   border-radius:20px;transition:flex-grow .36s var(--vd-mola),color .2s}
 /* área de toque (v1.58): a aba ocupa a altura toda da barra e o toque vale até a borda da tela, abaixo da pílula */
 html[data-visual="vidro"] .tab::before{inset:-1px 0 calc(-11px - env(safe-area-inset-bottom,0px))}
@@ -121,7 +121,7 @@ html[data-visual="vidro"][data-esquema="claro"] .ct-anilha.sem-foto .plate{filte
 .am-vidro{background:radial-gradient(circle at 20% 20%,#E5484D,transparent 55%),radial-gradient(circle at 85% 40%,#FF9F45,transparent 50%),radial-gradient(circle at 40% 100%,#6E56CF,transparent 60%),#07090C}
 .am-vidro i{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 /* telas estreitas (320 px): a barra encosta mais nas bordas para o nome da aba caber na pílula */
-@media (max-width:360px){html[data-visual="vidro"] .tabs{left:6px;right:6px}html[data-visual="vidro"] .tab .rot{font-size:13px}}
+@media (max-width:360px){html[data-visual="vidro"] .tabs{left:6px;right:6px}html[data-visual="vidro"] .tab{gap:5px}html[data-visual="vidro"] .tab .rot{font-size:13px}}
 
 /* aro de luz nas bordas (v1.53): borda em degradê, forte no canto de cima e com reflexo embaixo, nos contêineres de vidro,
    no card do treino, na barra de abas e na pílula. Fica por cima do conteúdo (1,2 px) e não recebe toques. */
