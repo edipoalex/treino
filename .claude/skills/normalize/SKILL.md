@@ -13,7 +13,7 @@ Leia `treino/agente/normalizacao.md` (contrato, regras de interpretação, exemp
 Os caminhos são relativos a `/Users/ediposilva/Documents/AI-Personal`.
 
 ## 2. Identificar a ficha
-- Perfil: de quem é a ficha (o usuário, "edipo"; a esposa, "thay"; outro nome). Se não estiver claro, pergunte.
+- Perfil: de quem é a ficha ("edipo" para o próprio usuário, ou o nome do perfil em `~/.config/treino/perfis.json`). Se não estiver claro, pergunte.
 - Etapa (e revisão, se houver). Se vier em texto, monte o JSON no formato do app (veja uma ficha em
   `treino/fichas/etapa-*.json`) antes de normalizar.
 - Pasta: `fichas-normalizadas/<perfil>/etapa-NN/` (fora do repositório). Se a pasta já existir, confirme antes de
@@ -52,5 +52,5 @@ Na fase 1 (atual), a ficha normalizada **não é publicada**: `aplicar-ficha`/`p
 Publicar continua sendo com a ficha original, como sempre, e só com o pedido do usuário.
 
 ## Cuidados
-- Dados da Thay e conteúdo de PDFs licenciados nunca vão para o repositório (só para `fichas-normalizadas/`).
+- Fichas e dados de outros perfis e conteúdo de PDFs licenciados nunca vão para o repositório (só para `fichas-normalizadas/`).
 - Não altere o catálogo (`js/tecnicas.js`) sem aprovação: mudança no catálogo é mudança no app (branch e PR).
