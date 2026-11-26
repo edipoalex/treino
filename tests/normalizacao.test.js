@@ -23,11 +23,20 @@ test("técnica fora do catálogo e componente que falta são erros", () => {
   assert.match(checarItem(com({ componentes:["cargas-unica","cronometro-partes","fases-intervalo"] })).erros.join(), /sem técnica que o justifique/);
 });
 
-test("componente que ainda não existe no app bloqueia; parâmetro assumido vira aviso", () => {
+test("rest-pause só na última usa cronometro-partes-ultima (v1.57); parâmetro assumido vira aviso", () => {
   const r = checarItem(com({ tecnicas:[{ id:"rest-pause", aplica:"ultima", pausa_s:10, blocos:3, assumido:["pausa_s","blocos"] }],
     componentes:["cargas-unica","cronometro-partes-ultima"] }));
-  assert.match(r.erros.join(), /ainda não existe no app/);
+  assert.deepEqual(r.erros, []);
   assert.match(r.avisos.join(), /assumido/);
+});
+
+test("componente que ainda não existe no app bloqueia a ficha", () => {
+  COMPONENTES["teste-inexistente"] = { existe:false, nome:"Componente de teste" };
+  TECNICAS["teste"] = { nome:"Teste", aplica:["todas"], params:{}, componentes:{ todas:["teste-inexistente"] } };
+  try{
+    const r = checarItem(com({ tecnicas:[{ id:"teste" }], componentes:["cargas-unica","teste-inexistente"] }));
+    assert.match(r.erros.join(), /ainda não existe no app/);
+  } finally { delete COMPONENTES["teste-inexistente"]; delete TECNICAS["teste"]; }
 });
 
 test("parâmetros: tipo, faixa e nomes conferidos", () => {

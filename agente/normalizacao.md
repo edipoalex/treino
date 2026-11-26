@@ -11,10 +11,11 @@ escrever. O app só muda quando aparece uma técnica ou combinação que o catá
 
 ## Fases
 - **Fase 1 (v1.55):** contrato, catálogo, validador, `/normalize` e relatórios.
-- **Fase 2 (v1.56, atual):** o app lê `tecnicas`, `componentes` e `series_detalhe` quando o exercício os tem; o texto
+- **Fase 2 (v1.56):** o app lê `tecnicas`, `componentes` e `series_detalhe` quando o exercício os tem; o texto
   fica como reserva para fichas antigas. `aplicar-ficha` e `publicar-ficha` aceitam ficha normalizada **só se o
   validador não apontar erro**.
-- **Fase 3:** componentes que o relatório apontar como inexistentes (ex.: `cronometro-partes-ultima`).
+- **Fase 3 (v1.57):** `cronometro-partes-ultima` (rest-pause / micro-pausas só na última série). Daqui em diante, todo
+  componente novo segue o mesmo caminho: o relatório aponta ✖, o componente é criado no app e marcado `existe: true`.
 
 ## Contrato v1
 Na raiz da ficha:
@@ -92,7 +93,7 @@ Rest-pause em todas as séries:
   "tecnicas": [{ "id": "rest-pause", "aplica": "todas", "pausa_s": 10, "blocos": 3 }],
   "componentes": ["cargas-unica", "cronometro-partes"] }
 ```
-Rest-pause só na última, sem pausa escrita (parâmetros assumidos; componente ainda inexistente → bloqueia):
+Rest-pause só na última, sem pausa escrita (parâmetros assumidos → ⚠ para confirmar):
 ```json
 { "nome": "Cadeira abdutora", "prescricao": "3x15–20, tronco inclinado à frente; última série em rest-pause", "series": 3,
   "tipo": "forca", "series_detalhe": ["15–20", "15–20", "15–20 · rest-pause"],

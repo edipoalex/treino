@@ -114,7 +114,7 @@ function segurar(s, lado, nome, p){
   return { tipo:"segurar", rotulo:`${dur} ${rot.toLowerCase()}`, botao:`${rot} ${dur}`, etapas:[{ seg:s, rot, tipo:"exec" }] };
 }
 /* Ficha normalizada (contrato v1, fase 2): o cronômetro vem das técnicas, não do texto. Mesmas estruturas que a
-   leitura do texto devolve. Técnica cujo componente ainda não existe (ex.: rest-pause só na última) = sem cronômetro. */
+   leitura do texto devolve. Rest-pause / micro-pausas só na última série: { …partes, so:"ultima" } (use tempoDaSerie). */
 function tempoNormalizado(it){
   const p = String(it.prescricao ?? ""), nome = String(it.nome ?? ""), tecs = it.tecnicas.filter(t => (t.aplica ?? "todas")==="todas");
   const t = id => tecs.find(x => x.id===id);
@@ -126,5 +126,10 @@ function tempoNormalizado(it){
   if((x = t("rest-pause"))){ const partes = []; for(let k=0; k<x.blocos; k++){ if(k) partes.push({ pausa:x.pausa_s }); partes.push({ rot:"falha" }); } return { tipo:"partes", partes }; }
   if((x = t("micro-pausas") || t("isometria-no-meio"))) return { tipo:"partes", partes: x.blocos.flatMap(b => b.pausa_s ? [{ rot:b.reps }, b.pausa_rot ? { pausa:b.pausa_s, rot:b.pausa_rot } : { pausa:b.pausa_s }] : [{ rot:b.reps }]) };
   if((x = t("isometria"))) return segurar(x.segundos, !!x.por_lado, nome, p);
+  // só na última série (v1.57, fase 3): o mesmo cronômetro de partes, marcado com so:"ultima"
+  const ult = it.tecnicas.find(t => (t.aplica ?? "todas")==="ultima" && ["rest-pause","micro-pausas"].includes(t.id));
+  if(ult){ const r = tempoNormalizado({ ...it, tecnicas:[{ ...ult, aplica:"todas" }] }); return r && { ...r, so:"ultima" }; }
   return null;
 }
+/* Cronômetro da série f (0 = primeira): o "só na última" não vale para as séries anteriores */
+export const tempoDaSerie = (it, f) => { const t = tempoDe(it); return t?.so==="ultima" && f < it.series-1 ? null : t; };

@@ -4,7 +4,7 @@
    decorrido: recarregar o app no meio não perde a contagem. */
 import { E, S, save } from "./estado.js";
 import { actx, prepararSom } from "./descanso.js";
-import { tempoDe } from "./series.js";
+import { tempoDe, tempoDaSerie } from "./series.js";
 import { alternarFeito, registrarSerie, rerender, treinoAtual } from "./telas/sessao.js";
 import { icone } from "./icones.js";
 import { fmtSeg } from "./ui.js";
@@ -184,12 +184,12 @@ export function previaFases(it){
 }
 /* Partes do rest-pause / micro-pausas como etapas (feita, agora, próximas): na sessão v1.42 ficam dentro da série */
 export function partesHtml(it, i, a){
-  const t=tempoDe(it); if(t?.tipo!=="partes") return "";
+  const t=tempoDaSerie(it, (a.series||{})[i]||0); if(t?.tipo!=="partes") return "";
   const k=Math.min((a.rp||{})[i]||0, t.partes.length-1);
   return `<div class="microp" aria-label="Partes da série">${t.partes.map((x,j)=>`<span class="${j<k?"feito":j===k?"agora":""}">${x.pausa?`${fmtDur(x.pausa)}${x.rot?` ${esc(x.rot)}`:""}`:esc(x.rot)}</span>`).join("")}</div>`;
 }
 export function acaoTempo(it, i, a, cls, { chips=true } = {}){
-  const t=tempoDe(it); if(!t) return "";
+  const t = it.series>0 ? tempoDaSerie(it, (a.series||{})[i]||0) : tempoDe(it); if(!t) return "";
   const chipsPartes = () => chips ? partesHtml(it, i, a) : "";
   if(S.exec?.k===i) return (t.tipo==="partes" ? chipsPartes() : "") + (CARDIO.has(S.exec.tipo) || telaCheia(S.exec) ? miniHtml() : btnRodando());
   if(!it.series){

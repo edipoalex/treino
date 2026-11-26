@@ -4,7 +4,7 @@
    versão (CACHE novo) baixa todas de novo na instalação; assim a anilha do card Hoje aparece na hora, mesmo com rede lenta.
    Fontes do Google: cache primeiro (não mudam).
    A planilha (script.google.com) e qualquer POST passam direto, sem cache. */
-const CACHE = "treino-v30";
+const CACHE = "treino-v31";
 // scripts/validar.mjs confere que todo arquivo de css/ e js/ está nesta lista
 const ARQUIVOS = [
   "./", "manifest.json", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png",

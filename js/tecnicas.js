@@ -17,7 +17,7 @@ export const COMPONENTES = {
   "cargas-combinada":        { existe:true,  nome:"Uma carga por exercício do bi-set / tri-set / circuito", grupo:"carga" },
   "sem-carga":               { existe:true,  nome:"Sem campo de carga (peso do corpo, core)", grupo:"carga" },
   "cronometro-partes":       { existe:true,  nome:"Cronômetro de partes com pausas (rest-pause, micro-pausas) em todas as séries" },
-  "cronometro-partes-ultima":{ existe:false, nome:"Cronômetro de partes só na última série" },
+  "cronometro-partes-ultima":{ existe:true,  nome:"Cronômetro de partes (rest-pause, micro-pausas) só na última série" },
   "cronometro-segurar":      { existe:true,  nome:"Cronômetro de isometria (prancha, por lado)" },
   "fases-intervalo":         { existe:true,  nome:"Tela de fases: intervalado / HIIT" },
   "fases-continuo":          { existe:true,  nome:"Tela de fases: cardio contínuo / zona 2" },
@@ -51,7 +51,7 @@ export const TECNICAS = {
 
 /* O que o app faz hoje com o item lendo só o texto (recursos.js), na mesma linguagem de componentes:
    serve para comparar a normalização com o comportamento atual (fase 1) e achar diferenças. */
-const DO_CRONOMETRO = { partes:"cronometro-partes", segurar:"cronometro-segurar", intervalo:"fases-intervalo", continuo:"fases-continuo", aquecimento:"fases-aquecimento" };
+const DO_CRONOMETRO = { partes:"cronometro-partes", "partes-ultima":"cronometro-partes-ultima", segurar:"cronometro-segurar", intervalo:"fases-intervalo", continuo:"fases-continuo", aquecimento:"fases-aquecimento" };
 const DA_CARGA = { unica:"cargas-unica", "pesado-leve":"cargas-pesado-leve", combinada:"cargas-combinada", sem:"sem-carga" };
 export function componentesDoApp(it){
   const r = recursosDe(it);

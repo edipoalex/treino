@@ -149,7 +149,7 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Títulos de seção ficam presos pela base (`.panel > h3`)
   e cabem em uma linha a 390 px ("Frequência semanal" no Histórico, antes quebrava e encostava no cartão). Com Animações reduzidas, aurora, anilha e brilho ficam parados.
 
-## Normalização de fichas (v1.55 fase 1, v1.56 fase 2)
+## Normalização de fichas (v1.55 fase 1, v1.56 fase 2, v1.57 fase 3)
 - Toda ficha nova passa pelo comando `/normalize` (skill em `.claude/skills/normalize`): o Claude lê a ficha como chegou,
   corrige grafia e variações, pergunta o que for ambíguo e escreve o **contrato v1** (`agente/normalizacao.md`): em cada
   exercício, `tipo`, `series_detalhe`, `tecnicas` (com parâmetros e "todas"/"última") e `componentes` do app.
@@ -162,7 +162,11 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
   `metodoDe`, `recursosDe` e `partesDe` (só `cargas-combinada` separa a carga pelo nome "A + B"). Fichas sem esses
   campos continuam pela leitura do texto. `aplicar-ficha` e `publicar-ficha` aceitam ficha normalizada só sem erros do
   validador (e sem a marca de rascunho). Técnica cujo componente ainda não existe não liga cronômetro.
-- Fase 3: componentes apontados pelo relatório (ex.: `cronometro-partes-ultima`).
+- Fase 3 (v1.57): `cronometro-partes-ultima`, rest-pause ou micro-pausas só na última série. `tempoDe` devolve o
+  cronômetro de partes com `so: "ultima"` e `tempoDaSerie(it, f)` o desliga nas séries anteriores: nelas o botão é
+  "Série X de Y feita"; na última aparecem as partes (falha · 10 s · falha…) e "Cheguei na falha", com a pausa
+  cronometrada, nos modos foco e lista. Novos componentes seguem o mesmo caminho: relatório aponta ✖ → componente no
+  app + `existe: true` no catálogo.
 - Testes: `tests/normalizacao.test.js` (catálogo coerente, regras do validador, publicação) e
   `tests/normalizacao-app.test.js` (ficha de exemplo e etapa 19: lida pelo texto = normalizada, exercício a exercício).
 
