@@ -48,8 +48,9 @@ hoje). Se houver ✖, corrija a ficha ou explique ao usuário o que precisa ser 
 
 ## 7. Entregar
 Mostre ao usuário o resumo do validador, os ⚠ para confirmar, os ✖ e o que muda em relação ao app de hoje.
-Na fase 1 (atual), a ficha normalizada **não é publicada**: `aplicar-ficha`/`publicar-ficha` recusam o contrato v1.
-Publicar continua sendo com a ficha original, como sempre, e só com o pedido do usuário.
+Desde a fase 2 (v1.56) o app lê a ficha normalizada: publique a `normalizada.json` (não a original), só com o
+pedido do usuário. `aplicar-ficha` (ficha do próprio usuário, embutida no app: copie para `treino/fichas/etapa-NN.json`)
+e `publicar-ficha --perfil <nome>` (planilha de outro perfil) recusam a ficha se o validador apontar erro.
 
 ## Cuidados
 - Fichas e dados de outros perfis e conteúdo de PDFs licenciados nunca vão para o repositório (só para `fichas-normalizadas/`).

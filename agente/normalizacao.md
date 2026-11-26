@@ -10,9 +10,10 @@ Objetivo: o mesmo tipo de exercício usa sempre os mesmos componentes do app, qu
 escrever. O app só muda quando aparece uma técnica ou combinação que o catálogo não prevê, ou quando falta o componente.
 
 ## Fases
-- **Fase 1 (atual):** contrato, catálogo, validador, `/normalize` e relatórios. O app ainda lê o texto da prescrição.
-  Ficha normalizada **não pode ser publicada**: `aplicar-ficha` e `publicar-ficha` recusam. Publique a original.
-- **Fase 2:** o app lê `tecnicas` e `componentes`; o texto fica como reserva para fichas antigas.
+- **Fase 1 (v1.55):** contrato, catálogo, validador, `/normalize` e relatórios.
+- **Fase 2 (v1.56, atual):** o app lê `tecnicas`, `componentes` e `series_detalhe` quando o exercício os tem; o texto
+  fica como reserva para fichas antigas. `aplicar-ficha` e `publicar-ficha` aceitam ficha normalizada **só se o
+  validador não apontar erro**.
 - **Fase 3:** componentes que o relatório apontar como inexistentes (ex.: `cronometro-partes-ultima`).
 
 ## Contrato v1
@@ -26,7 +27,7 @@ Em **cada** exercício (itens e express), além dos campos de sempre (`nome`, `p
 | Campo | Regra |
 |---|---|
 | `tipo` | `forca`, `core`, `cardio`, `aquecimento` ou `mobilidade` |
-| `series_detalhe` | obrigatório quando `series` > 0: uma descrição curta por série, na ordem ("8–10", "6 pesado", "12–15 por perna até a falha") |
+| `series_detalhe` | obrigatório quando `series` > 0: uma entrada por série, na ordem, no formato `"repetições · etiqueta"` ("8–10", "6 · pesado", "12–15 por perna · até a falha", "15–20 · rest-pause"). A etiqueta vira a pílula da série no app; contraste usa `pesado` e `leve`. |
 | `tecnicas` | lista (vazia = séries normais). Cada técnica: `{ "id", "aplica": "todas" \| "ultima", …parâmetros, "assumido": [] }` |
 | `componentes` | lista dos componentes do app que o exercício usa, conforme o catálogo |
 
@@ -43,6 +44,7 @@ Fonte única: `js/tecnicas.js` (`node scripts/normalizacao.mjs catalogo` lista t
 | `drop` | drop-set, drop duplo | `quedas` (1–3), `reducao_pct` | — |
 | `rest-pause` | falha, pausa curta, falha… | `pausa_s` (padrão 10), `blocos` (esforços, padrão 3) | todas → `cronometro-partes`; última → `cronometro-partes-ultima` |
 | `micro-pausas` | blocos de reps com pausas diferentes | `blocos`: `[{ "reps", "pausa_s" }]` | idem rest-pause |
+| `isometria-no-meio` | "20 reps / 20 s isometria / 20 reps" | `blocos`: `[{ "reps", "pausa_s", "pausa_rot" }]` | `cronometro-partes` |
 | `bi-set` / `tri-set` / `circuito` | 2 / 3 / 4+ exercícios em sequência (nome com " + ") | — | carga `cargas-combinada` (ou `sem-carga` em core) |
 | `isometria` | prancha, segurar X s, "por lado" | `segundos`, `por_lado` | `cronometro-segurar` |
 | `parciais` | "+ 4–6 parciais" | `reps`, `descricao` | — |
@@ -93,7 +95,7 @@ Rest-pause em todas as séries:
 Rest-pause só na última, sem pausa escrita (parâmetros assumidos; componente ainda inexistente → bloqueia):
 ```json
 { "nome": "Cadeira abdutora", "prescricao": "3x15–20, tronco inclinado à frente; última série em rest-pause", "series": 3,
-  "tipo": "forca", "series_detalhe": ["15–20", "15–20", "15–20 rest-pause"],
+  "tipo": "forca", "series_detalhe": ["15–20", "15–20", "15–20 · rest-pause"],
   "tecnicas": [{ "id": "rest-pause", "aplica": "ultima", "pausa_s": 10, "blocos": 3, "assumido": ["pausa_s", "blocos"] }],
   "componentes": ["cargas-unica", "cronometro-partes-ultima"] }
 ```

@@ -6,9 +6,11 @@
 import { seriesDe, tempoDe } from "./series.js";
 
 /* Carga: exercícios com séries têm campo de carga, exceto "carga": false ou nomes de core/abdômen */
-export const temCarga = it => it.series>0 && (it.carga ?? !/abdômen|core/i.test(it.nome));
+/* Ficha normalizada (contrato v1, fase 2): os campos "componentes" e "tecnicas" mandam; o texto só vale para fichas antigas. */
+export const normalizado = it => Array.isArray(it?.componentes) && Array.isArray(it?.tecnicas);
+export const temCarga = it => normalizado(it) ? it.series>0 && !it.componentes.includes("sem-carga") : it.series>0 && (it.carga ?? !/abdômen|core/i.test(it.nome));
 /* Contraste: séries "pesado" e "leve" têm cargas separadas */
-export const contraste = it => { const tags=new Set(seriesDe(it).map(s=>s.tag)); return tags.has("pesado") && tags.has("leve"); };
+export const contraste = it => { if(normalizado(it)) return it.tecnicas.some(t=>t.id==="contraste"); const tags=new Set(seriesDe(it).map(s=>s.tag)); return tags.has("pesado") && tags.has("leve"); };
 
 const TEMPO = /\d+\s*(s|seg|segundos?|min|minutos?)(?![a-zà-ú])/i;
 /* Tira do texto o tempo que é só descanso ("30 s de descanso", "(descanso de 45 s …)") */
@@ -24,7 +26,9 @@ export function recursosDe(it){
     const ser = seriesDe(it);
     r.series = Array.isArray(it.series_detalhe) ? "detalhe" : ser.every(s=>s.r==="série") ? "genericas" : "lidas";
     if(r.series==="genericas") r.avisos.push("as séries não foram lidas da prescrição (o app mostra só \"série 1, 2…\"); use series_detalhe");
-    r.cargas = !temCarga(it) ? "sem" : String(it.nome).includes(" + ") ? "combinada" : contraste(it) ? "pesado-leve" : "unica";
+    const DECL = { "cargas-unica":"unica", "cargas-pesado-leve":"pesado-leve", "cargas-combinada":"combinada", "sem-carga":"sem" };
+    r.cargas = normalizado(it) ? DECL[it.componentes.find(c=>DECL[c])] ?? "unica"
+      : !temCarga(it) ? "sem" : String(it.nome).includes(" + ") ? "combinada" : contraste(it) ? "pesado-leve" : "unica";
   } else if(/cardio|hiit|intervalad|zona\s*2/i.test(p+" "+(it?.nome??"")) && !t){
     r.avisos.push("cardio sem cronômetro por fases: escreva como \"3x (4 min forte / 3 min leve)\" ou \"Zona 2 contínuo\"");
   }
@@ -57,6 +61,7 @@ const capt = s => s.charAt(0).toUpperCase() + s.slice(1);
 export function metodoDe(it){
   const p = String(it?.prescricao ?? "").trim(), nome = String(it?.nome ?? ""), t = tempoDe(it);
   if(typeof it?.metodo==="string" && it.metodo.trim() && it.metodo.length<=20) return it.metodo.trim();   // informado na ficha (v1.50)
+  if(normalizado(it)) return metodoNormalizado(it);
   if(t?.tipo==="intervalo") return t.rotulo;
   if(t?.tipo==="continuo") return t.zona2 ? "Zona 2" : "Contínuo";
   if(t?.tipo==="aquecimento") return "";
@@ -69,6 +74,19 @@ export function metodoDe(it){
   if(/bi-?set/i.test(nome) || (it?.series>0 && partes===2)) return "Bi-set";
   if(t?.tipo==="segurar") return "Isometria";
   if(/até (o |a )?(próximo da )?falha/i.test(p)) return "Até a falha";
+  return "";
+}
+/* etiqueta pela técnica principal da ficha normalizada (mesmos nomes da leitura do texto) */
+function metodoNormalizado(it){
+  const tem = id => it.tecnicas.find(t=>t.id===id), x = it.tecnicas;
+  if(tem("intervalado")) return tem("intervalado").rotulo || "Intervalado";
+  if(tem("continuo")) return tem("continuo").zona2 ? "Zona 2" : "Contínuo";
+  if(tem("aquecimento") || tem("isometria-no-meio")) return "";
+  // mesma ordem da leitura do texto: método nomeado, drop, combinação, micro-pausas, isometria, até a falha
+  for(const [id, rot] of [["rest-pause","Rest-pause"],["contraste","Contraste"],["piramide","Pirâmide"]]) if(tem(id) && (tem(id).aplica ?? "todas")==="todas") return rot;
+  const d = tem("drop"); if(d) return d.aplica!=="ultima" && d.quedas===2 ? "Drop duplo" : d.aplica!=="ultima" && d.quedas===3 ? "Drop triplo" : "Drop";
+  for(const [id, rot] of [["circuito","Circuito"],["tri-set","Tri-set"],["bi-set","Bi-set"],["micro-pausas","Micro-pausas"],["isometria","Isometria"]]) if(tem(id) && (tem(id).aplica ?? "todas")==="todas") return rot;
+  if(x.some(t=>t.id==="ate-falha" && (t.aplica ?? "todas")==="todas")) return "Até a falha";
   return "";
 }
 /* separarNotas: a frase de orientação que se repete em vários itens do treino ("Volta de calibração: …") vale para o

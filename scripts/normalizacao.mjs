@@ -32,8 +32,9 @@ function rascunhoItem(it){
   else if(t?.tipo==="segurar") tecs.push({ id:"isometria", segundos:t.etapas[0].seg, por_lado:t.etapas.length>1 });
   else if(t?.tipo==="partes"){
     if(/rest.?pause/i.test(p)){ const pausa = t.partes.find(x=>x.pausa)?.pausa ?? 10; tecs.push({ id:"rest-pause", aplica:"todas", pausa_s:pausa, blocos:t.partes.filter(x=>!x.pausa).length }); }
-    else { const blocos = []; for(const x of t.partes){ if(x.pausa && blocos.length) blocos[blocos.length-1].pausa_s = x.pausa; else if(!x.pausa) blocos.push({ reps:x.rot }); }
-      tecs.push({ id:"micro-pausas", aplica:"todas", blocos }); }
+    else { const blocos = []; for(const x of t.partes){ if(x.pausa && blocos.length){ blocos[blocos.length-1].pausa_s = x.pausa; if(x.rot) blocos[blocos.length-1].pausa_rot = x.rot; } else if(!x.pausa) blocos.push({ reps:x.rot }); }
+      // pausa com nome ("20 s isometria") = isometria no meio da série; sem nome = micro-pausas
+      tecs.push(blocos.some(b=>b.pausa_rot) ? { id:"isometria-no-meio", blocos } : { id:"micro-pausas", aplica:"todas", blocos }); }
   }
   if(it.series>0){
     const partes = nome.split(" + ").length;
@@ -51,7 +52,7 @@ function rascunhoItem(it){
     const cad = p.match(/(\d+\s*s\s+de\s+pausa[^,;.()]*|descida em \d+\s*s[^,;.()]*|\d+\s*s na descida[^,;.()]*)/i);
     if(cad) tecs.push({ id:"cadencia", aplica:"todas", descricao:cad[1].trim() });
   }
-  const sd = it.series>0 ? seriesDe(it).map(s=>[s.r, s.tag].filter(Boolean).join(" ")) : undefined;
+  const sd = it.series>0 ? seriesDe(it).map(s=>s.tag ? `${s.r} · ${s.tag}` : s.r) : undefined;   // "repetições · etiqueta"
   if(sd && sd.every(x=>x==="série")) revisar.push("séries não lidas da prescrição: escreva series_detalhe");
   revisar.push(...r.avisos.filter(a=>!/séries não foram lidas/.test(a)));
   const comps = new Set();

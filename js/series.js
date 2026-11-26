@@ -2,7 +2,8 @@
    ou são lidas da prescrição; se não der para ler, cada série aparece só numerada. */
 export function seriesDe(it){
   const n=it.series, lista=it.series_detalhe;
-  if(Array.isArray(lista) && lista.length===n) return lista.map(r=>({r:String(r), tag:""}));
+  // ficha normalizada (contrato v1): "6 · pesado", "15–20 · rest-pause" = repetições · etiqueta
+  if(Array.isArray(lista) && lista.length===n) return lista.map(x=>{ const [r, ...tag]=String(x).split(" · "); return { r:r.trim(), tag:tag.join(" · ").trim() }; });
   const p=String(it.prescricao).trim(); let m;
   const repete=(r,tag)=>Array.from({length:n},(_,j)=>({r, tag: typeof tag==="function" ? tag(j) : tag}));
   if((m=p.match(/^(?:[A-Za-zÀ-ú -]+?\s)?(\d+)\s*x\s*\((.+)\)\s*$/)) && +m[1]===n) return repete(m[2].trim(),"");
@@ -63,6 +64,7 @@ const CARDIO_RX = /cardio|caminhada|corrida|esteira|bike|bicicleta|el[ií]ptico|
 const emSeg = (n, u) => /min/i.test(u) ? +n*60 : +n;
 const ehForte = rot => /forte|r[aá]pid|intens|sprint|acelera/i.test(rot);
 export function tempoDe(it){
+  if(Array.isArray(it?.tecnicas)) return tempoNormalizado(it);
   const p = String(it?.prescricao ?? ""), nome = String(it?.nome ?? "");
   // intervalos: "6x (30s forte / 30s leve)" ou "3x (4 min forte / 3 min leve)"
   let m = p.match(/(\d+)\s*x\s*\(\s*(\d+)\s*(s|seg|min)\w*\s+([^/()]+?)\s*\/\s*(\d+)\s*(s|seg|min)\w*\s+([^()]+?)\s*\)/i);
@@ -99,12 +101,30 @@ export function tempoDe(it){
     if(/^\s*(de\s+)?(descanso|pausa|intervalo)/i.test(p.slice(mm.index+mm[0].length))) continue;
     const abre=p.lastIndexOf("(", mm.index), fecha=p.indexOf(")", mm.index);   // dentro de "(descanso de 45 s …, 90 s entre …)"
     if(abre>=0 && abre>p.lastIndexOf(")", mm.index) && /descanso|pausa|intervalo/i.test(p.slice(abre, fecha<0?undefined:fecha))) continue;
-    const s = /min/i.test(mm[2]) ? +mm[1]*60 : +mm[1], nome = String(it.nome), lado = mm[3];
-    const rot = /prancha lateral/i.test(nome) && lado ? "Prancha lateral" : /prancha/i.test(nome) || /prancha/i.test(p) ? "Prancha" : /isometr/i.test(nome+" "+p) ? "Isometria" : "Tempo";
-    const dur = s>=60 && s%60===0 ? `${s/60} min` : `${s} s`;
-    if(lado) return { tipo:"segurar", rotulo:`${dur} por lado`, botao:`${rot} ${dur} × 2`,
-      etapas:[{ seg:s, rot:"Lado esquerdo", tipo:"exec" }, { seg:5, rot:"Troque de lado", tipo:"troca" }, { seg:s, rot:"Lado direito", tipo:"exec" }] };
-    return { tipo:"segurar", rotulo:`${dur} ${rot.toLowerCase()}`, botao:`${rot} ${dur}`, etapas:[{ seg:s, rot, tipo:"exec" }] };
+    return segurar(/min/i.test(mm[2]) ? +mm[1]*60 : +mm[1], !!mm[3], String(it.nome), p);
   }
+  return null;
+}
+/* isometria: "45 s prancha", "30 s por lado" (troca de lado no meio) */
+function segurar(s, lado, nome, p){
+  const rot = /prancha lateral/i.test(nome) && lado ? "Prancha lateral" : /prancha/i.test(nome) || /prancha/i.test(p) ? "Prancha" : /isometr/i.test(nome+" "+p) ? "Isometria" : "Tempo";
+  const dur = s>=60 && s%60===0 ? `${s/60} min` : `${s} s`;
+  if(lado) return { tipo:"segurar", rotulo:`${dur} por lado`, botao:`${rot} ${dur} × 2`,
+    etapas:[{ seg:s, rot:"Lado esquerdo", tipo:"exec" }, { seg:5, rot:"Troque de lado", tipo:"troca" }, { seg:s, rot:"Lado direito", tipo:"exec" }] };
+  return { tipo:"segurar", rotulo:`${dur} ${rot.toLowerCase()}`, botao:`${rot} ${dur}`, etapas:[{ seg:s, rot, tipo:"exec" }] };
+}
+/* Ficha normalizada (contrato v1, fase 2): o cronômetro vem das técnicas, não do texto. Mesmas estruturas que a
+   leitura do texto devolve. Técnica cujo componente ainda não existe (ex.: rest-pause só na última) = sem cronômetro. */
+function tempoNormalizado(it){
+  const p = String(it.prescricao ?? ""), nome = String(it.nome ?? ""), tecs = it.tecnicas.filter(t => (t.aplica ?? "todas")==="todas");
+  const t = id => tecs.find(x => x.id===id);
+  let x;
+  if((x = t("intervalado"))) return { tipo:"intervalo", rodadas:x.rodadas, a:{ seg:x.forte_s, rot:"forte", tipo:"forte" }, b:{ seg:x.leve_s, rot:"leve", tipo:"leve" },
+    desaquecer:x.desaquecer_s || 0, rotulo:x.rotulo || "Intervalado" };
+  if((x = t("aquecimento"))) return { tipo:"aquecimento", seg:x.minutos*60, rot:x.atividade, passos:x.series_aproximacao || 0, passoRot:x.exercicio_aproximacao || "" };
+  if((x = t("continuo"))) return { tipo:"continuo", seg:x.minutos*60, zona2:!!x.zona2, rot: x.zona2 ? "Zona 2" : /aquec/i.test(nome) ? "Aquecimento" : "Cardio contínuo" };
+  if((x = t("rest-pause"))){ const partes = []; for(let k=0; k<x.blocos; k++){ if(k) partes.push({ pausa:x.pausa_s }); partes.push({ rot:"falha" }); } return { tipo:"partes", partes }; }
+  if((x = t("micro-pausas") || t("isometria-no-meio"))) return { tipo:"partes", partes: x.blocos.flatMap(b => b.pausa_s ? [{ rot:b.reps }, b.pausa_rot ? { pausa:b.pausa_s, rot:b.pausa_rot } : { pausa:b.pausa_s }] : [{ rot:b.reps }]) };
+  if((x = t("isometria"))) return segurar(x.segundos, !!x.por_lado, nome, p);
   return null;
 }
