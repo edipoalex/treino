@@ -21,7 +21,7 @@ const semDescanso = p => p.replace(/(descida|subida|exc[êe]ntrica?|conc[êe]ntr
 export function recursosDe(it){
   const r = { cronometro:null, series:null, cargas:null, avisos:[] };
   const p = String(it?.prescricao ?? ""), t = tempoDe(it);
-  r.cronometro = t?.tipo ?? null;
+  r.cronometro = t?.so==="ultima" ? "partes-ultima" : t?.tipo ?? null;
   if(it?.series > 0){
     const ser = seriesDe(it);
     r.series = Array.isArray(it.series_detalhe) ? "detalhe" : ser.every(s=>s.r==="série") ? "genericas" : "lidas";

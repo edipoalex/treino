@@ -7,7 +7,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { seriesDe, tempoDe } from "../js/series.js";
+import { seriesDe, tempoDe, tempoDaSerie } from "../js/series.js";
 import { recursosDe, temCarga, contraste, metodoDe } from "../js/recursos.js";
 import { validarNormalizada } from "../js/tecnicas.js";
 
@@ -38,11 +38,20 @@ for(const [nome, arq] of [["ficha de exemplo", new URL("./ficha-exemplo.json", i
   });
 }
 
-test("contrato v1: rest-pause só na última série não liga cronômetro (componente ainda não existe)", () => {
+test("fase 3: rest-pause só na última série liga o cronômetro de partes apenas na última", () => {
   const it = { nome:"Cadeira abdutora", prescricao:"3x15–20; última série em rest-pause", series:3, tipo:"forca",
     series_detalhe:["15–20","15–20","15–20 · rest-pause"], tecnicas:[{ id:"rest-pause", aplica:"ultima", pausa_s:10, blocos:3 }], componentes:["cargas-unica","cronometro-partes-ultima"] };
-  assert.equal(tempoDe(it), null);
+  assert.equal(tempoDe(it).so, "ultima");
+  assert.equal(tempoDaSerie(it, 0), null);
+  assert.equal(tempoDaSerie(it, 1), null);
+  assert.deepEqual(tempoDaSerie(it, 2).partes, [{ rot:"falha" }, { pausa:10 }, { rot:"falha" }, { pausa:10 }, { rot:"falha" }]);
   assert.deepEqual(seriesDe(it)[2], { r:"15–20", tag:"rest-pause" });
+  assert.equal(recursosDe(it).cronometro, "partes-ultima");
+  assert.equal(metodoDe(it), "");
+  // micro-pausas na última também
+  const mp = { ...it, tecnicas:[{ id:"micro-pausas", aplica:"ultima", blocos:[{ reps:"12", pausa_s:15 }, { reps:"8", pausa_s:15 }, { reps:"falha" }] }] };
+  assert.deepEqual(tempoDaSerie(mp, 2).partes, [{ rot:"12" }, { pausa:15 }, { rot:"8" }, { pausa:15 }, { rot:"falha" }]);
+  assert.equal(tempoDaSerie(mp, 1), null);
 });
 
 test("contrato v1: campos normalizados vencem o texto", () => {

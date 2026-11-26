@@ -58,7 +58,7 @@ export function topoSessao(a,t){
 }
 const cap1 = s => s.charAt(0).toUpperCase()+s.slice(1);
 /* Rest-pause e afins: "falha / 10s / falha / 10s / falha" vira "3× falha" (as etapas aparecem como pílulas na série) */
-function repsDe(it, s){ const t=tempoDe(it); if(t?.tipo!=="partes") return s.r; const r=t.partes.filter(p=>!p.pausa).map(p=>p.rot); return r.length>1 && r.every(x=>x===r[0]) ? `${r.length}× ${r[0]}` : s.r; }
+function repsDe(it, s){ const t=tempoDe(it); if(t?.tipo!=="partes" || t.so==="ultima") return s.r; const r=t.partes.filter(p=>!p.pausa).map(p=>p.rot); return r.length>1 && r.every(x=>x===r[0]) ? `${r.length}× ${r[0]}` : s.r; }
 const metaDe = it => (it.series>0 ? [`${it.series} ${it.series>1?"séries":"série"}`, `${it.descanso} s`].concat(voltasDo(it)?.length?[semTxt(voltasDo(it))]:[]) : [`${it.bloco} min`]);
 function cabExercicio(it,i,a,t,{ titulo=true } = {}){
   const met=metodoDe(it), prop=notas(t).proprias[i], semSeries = it.series>0 && seriesDe(it).every(s=>s.r==="série");
