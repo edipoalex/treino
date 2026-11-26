@@ -120,6 +120,18 @@ Regras em `js/inteligente.js` (testadas em `tests/inteligente.test.js`); na sess
 - Cores das letras A–H; animações respeitam Ajustes › Animações e "reduzir movimento".
 - Sincronização com a planilha, catálogo de fichas e validação: ver README.
 
+## Estilo Vidro (v1.52)
+- Ajustes › Aparência › Estilo: "Padrão" (cartões sólidos) ou "Vidro" (cartões translúcidos sobre luzes na cor do treino).
+  Vale para o app todo e nos dois temas; fica em `S.pref.visual` ("padrao" | "vidro") e vai para `html[data-visual]`.
+- `css/vidro.css`: só regras presas a `html[data-visual="vidro"]` (o teste `tests/vidro.test.js` garante que o Padrão não muda).
+  Aurora (`#aurora`) com três luzes desfocadas: na Hoje e na sessão, cor do treino em uso (`html[data-letra]`, atualizado
+  no `render()`), um tom vizinho e violeta; nas outras abas (`body[data-tab]`), luz neutra azul-violeta, para busca e números
+  não parecerem alerta quando o treino é vermelho. Treino E (cinza) fica com luz sóbria, de propósito. Tokens `--surface*`/`--line` translúcidos; desfoque só nos contêineres de primeiro nível (painéis, cartões,
+  barra da sessão) para não pesar no iPhone. Abas viram pílula flutuante; folhas e Ajustes ficam quase opacos para leitura.
+- Card do treino no vidro: sem o estúdio escuro; vidro com halo na cor, anilha flutuando e brilho passando no "Iniciar treino".
+- Descanso em tela cheia continua sólido (leitura do cronômetro). Títulos de seção ficam presos pela base (`.panel > h3`)
+  e cabem em uma linha a 390 px ("Frequência semanal" no Histórico, antes quebrava e encostava no cartão). Com Animações reduzidas, aurora, anilha e brilho ficam parados.
+
 ## Vários perfis (v1.49)
 - Fonte da ficha por planilha (`fonteDaFicha`, js/validacao.js): Config `ficha` = `planilha` → só a ficha ativa da
   planilha, em qualquer etapa, e a ficha do app nunca é enviada; `app` (ou aparelho que já usava o app) → como antes.

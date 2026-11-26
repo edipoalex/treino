@@ -51,6 +51,7 @@ function grupos(){
       ["falas","message-circle","--pA","Motivação", resumoFalas()],
       ["voz","volume-2","--pA","Voz", {off:"Desligada",cardio:"Cardio",tudo:"Cardio e descanso"}[S.pref.voz]]]],
     ["Aparência", [["tema","palette","--pB","Tema", {auto:"Automático",light:"Claro",dark:"Escuro"}[S.theme]||"Automático"],
+      ["visual","layers","--pB","Estilo", S.pref.visual==="vidro"?"Vidro":"Padrão"],
       ["anim","wind","--pB","Animações", S.pref.animacoes==="reduzidas"?"Reduzidas":"Completas"]]],
     ["Lembretes", [["lemb","bell","--pC","Calendário", `${l.dias.map(d=>DIAS[d]).join(", ")} · ${l.hora}`]]],
     ["Etapa e metas", [["etapa","flag","--pD",`Etapa ${FICHA.etapa}`, E.inicio ? `início ${dm(E.inicio)} · ${E.faseModo==="auto"?"fase automática":`fase ${E.faseModo}`}` : "sem data de início"],
@@ -84,6 +85,7 @@ export function iniciarAjustes(){
   dlg.addEventListener("click",e=>{ if(e.target===dlg) dlg.close(); });
   document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>{ S.theme=b.dataset.themeOpt; save(); applyTheme(); atualizarMenu(); });
   document.querySelectorAll("[data-pref-modo]").forEach(b=>b.onclick=()=>{ S.pref.modo=b.dataset.prefModo; save(); marcarPref(); render(); });
+  document.querySelectorAll("[data-visual-opt]").forEach(b=>b.onclick=()=>{ S.pref.visual=b.dataset.visualOpt; save(); applyTheme(); atualizarMenu(); render(); });
   document.querySelectorAll("[data-pref-anim]").forEach(b=>b.onclick=()=>{ S.pref.animacoes=b.dataset.prefAnim; save(); marcarPref(); aplicarMovimento(); });
   document.querySelectorAll("[data-pref-desc]").forEach(b=>b.onclick=()=>{ S.pref.descanso=b.dataset.prefDesc; save(); marcarPref(); $("#descanso")?.remove(); render(); });
   document.querySelectorAll("[data-pref-voz]").forEach(b=>b.onclick=()=>{ S.pref.voz=b.dataset.prefVoz; save(); marcarPref(); });

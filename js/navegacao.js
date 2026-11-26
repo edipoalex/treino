@@ -23,6 +23,9 @@ export function render(){
   $("#view").onclick=null; $("#view").onchange=null; $("#view").onpointerdown=null;
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===nav.tab ? "page" : "false"));
   ({hoje:viewHoje, ficha:viewFicha, progresso:viewProgresso, historico:viewHistorico, guia:viewGuia})[nav.tab]();
+  // cor do treino em uso (sessão ou card da Hoje): a aurora do estilo Vidro acompanha (v1.52)
+  const L = E.atual?.letra || document.querySelector("#cardHoje")?.className.match(/\bL-([A-Z])\b/)?.[1];
+  if(L) document.documentElement.dataset.letra = L;
 }
 /* ---------- Navegação ---------- */
 

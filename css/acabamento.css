@@ -54,9 +54,11 @@
 .item.done{border:0}
 /* seção: o título fica acima do cartão, forte; o complemento (meta, contagem) à direita */
 .panel{position:relative;margin-top:calc(var(--e8) + var(--e6))}
-.panel > h3:first-child{position:absolute;left:var(--e1);right:var(--e1);top:calc(-1 * (var(--e6) + var(--e3)));margin:0;display:flex;align-items:baseline;justify-content:space-between;gap:var(--e3);
+/* preso pela base (v1.52): título que quebra em duas linhas cresce para cima, sem encostar no cartão */
+.panel > h3:first-child{position:absolute;left:var(--e1);right:var(--e1);bottom:calc(100% + var(--e3));margin:0;display:flex;align-items:baseline;justify-content:space-between;gap:var(--e3);
   font:700 var(--t-titulo)/1 var(--display);color:var(--ink)}
 .panel > h3:first-child .sub2{float:none;font:500 var(--t-sec) var(--body);color:var(--muted);white-space:nowrap}
+@media (max-width:360px){.panel > h3:first-child{font-size:20px}}
 .panel.fim-treino{margin-top:var(--e6)}
 /* campos: superfície 2, sem borda, foco na cor do treino */
 .inline-form input,.field input,.field select,.sync-box input{border:0;background:var(--surface-2);border-radius:var(--r-m);min-height:var(--h-m)}
